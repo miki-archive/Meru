@@ -18,8 +18,17 @@ namespace IA.Events
         public bool developerOnly;
         public bool enabled;
         
-
         public UseCommand processCommand;
+
+        public EventInformation()
+        {
+
+        }
+
+        public EventInformation(EventInformation info)
+        {
+            
+        }
 
         public EventInformation(string name, UseCommand command)
         {

@@ -55,6 +55,35 @@ namespace IA
             c.SendMessage(":white_check_mark: " + c_id + ".js successfully ended.");
         }
 
+        void RunProcessRealtime(ProcessStartInfo p)
+        {
+            Log.Notice("Running RunProcessRealtime");
+            try
+            {
+                if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
+                {
+                    Process process = Process.Start(p);
+                    process.EnableRaisingEvents = true;
+                    process.OutputDataReceived += (s, e) =>
+                    {
+                        Log.Message("OutputDataRecieved");
+                        c.SendMessage("[" + c_id + "] " + e.Data);
+                    };
+                    process.BeginOutputReadLine();
+                    process.WaitForExit();
+                    process.Start();
+                }
+                else
+                {
+                    Log.ErrorAt("RunProcessRealtime", "Node '" + p.Arguments.Split(' ')[0] + ".js'not found.");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.ErrorAt("RunProcessRealtime", e.Message);
+            }
+        }
+
         public static async Task<string> Run(string id, string args = "", Channel outputChannel = null)
         {
             Log.Notice("Entering Run");
@@ -69,38 +98,6 @@ namespace IA
             string output = await Task.Run(() => new Node().RunProcessAsync(start));
             return output;
         }
-
-        void RunProcessRealtime(ProcessStartInfo p)
-        {
-            Log.Notice("Running RunProcessRealtime");
-            try
-            {
-                if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
-                {
-                    Process process = Process.Start(p);
-                    process.EnableRaisingEvents = true;
-                    process.OutputDataReceived += (s, e) =>
-                    {
-                        c.SendMessage("[" + c_id + "] " + e.Data);
-                    };
-                    process.Exited += (s,e) =>
-                    {
-                        c.SendMessage(c_id + " has sucessfully closed!");
-                        c = null;
-                    };
-                    process.Start();
-                }
-                else
-                {
-                    Log.ErrorAt("RunProcessRealtime", "Node '" + p.Arguments.Split(' ')[0] + ".js'not found.");
-                }
-            }
-            catch (Exception e)
-            {
-                Log.ErrorAt("RunProcessRealtime", e.Message);
-            }
-        }
-
         string RunProcessAsync(ProcessStartInfo p)
         {
             try

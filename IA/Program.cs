@@ -8,13 +8,14 @@ using System.Diagnostics;
 using IA.Events;
 using IA.Data;
 using System.Threading;
+using IA.Utils;
 
 namespace IA
 {
     class Program
     {
-        public static EventListener events;
         public static DiscordClient client;
+        public static ModuleController modules;
 
         #region Forms
 
@@ -28,6 +29,8 @@ namespace IA
         void Start()
         {
             userPanel = new IA_Userpanel();
+            StatusChecker.AddMember("developer", 121919449996460033);
+
             new Thread(userPanel.Show).Start();
             Load();
             client = new DiscordClient(x =>
@@ -48,23 +51,23 @@ namespace IA
 
         private void Client_JoinedServer(object sender, ServerEventArgs e)
         {
-            e.Server.DefaultChannel.SendMessage("Hello! I am IA :notes:\nuse '" + events.Identifier + "help' to see my commands!");
+            e.Server.DefaultChannel.SendMessage(":notes: **Hello! I am IA**\n\n::question: use '" + Global.Identifier + "help' to see my commands!\n:star: Have a nice day!");
         }
 
         void Load()
         {
-            events = new EventListener();
+            modules = new ModuleController();
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General", x =>
             {
                 x.name = "help";
                 x.processCommand = async e =>
                 {
-                    await e.Channel.SendMessage(events.List());
+                    await e.Channel.SendMessage(modules.List(e));
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General",x =>
             {
                 x.name = "info";
                 x.processCommand = async e =>
@@ -73,17 +76,17 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General", x =>
             {
                 x.name = "prefix";
                 x.processCommand = async e =>
                 {
-                    events.Identifier = e.Message.RawText.Split(' ')[1];
-                    await e.Channel.SendMessage("Prefix changed to `" + events.Identifier + "`!");
+                   Global.Identifier = e.Message.RawText.Split(' ')[1];
+                    await e.Channel.SendMessage("Prefix changed to `" + Global.Identifier + "`!");
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("Node-js", x =>
             {
                 x.name = "node";
                 x.developerOnly = true;
@@ -106,13 +109,12 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("Node-js", x =>
             {
                 x.name = "node-realtime";
                 x.developerOnly = true;
                 x.processCommand = async e =>
                 {
-
                     Log.Message("entered 'node-realtime'");
                     string args = "";
                     string id = e.Message.Text.Split(' ')[1];
@@ -127,7 +129,7 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General", x =>
             {
                 x.name = "say";
                 x.developerOnly = true;
@@ -138,7 +140,17 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General", x =>
+            {
+                x.name = "get";
+                x.developerOnly = true;
+                x.processCommand = async e =>
+                {
+                    await e.Channel.SendMessage(":desktop:[SQL] " + SQL.GetQuery(e.Message.RawText.Substring(5)));
+                };
+            });
+
+            modules.AddCommand("General", x =>
             {
                 x.name = "sql";
                 x.developerOnly = true;
@@ -148,7 +160,7 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General", x =>
             {
                 x.name = "ping";
                 x.processCommand = async e =>
@@ -159,7 +171,7 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("Node-js", x =>
             {
                 x.name = "cnode";
                 x.processCommand = async e =>
@@ -171,7 +183,7 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General", x =>
             {
                 x.name = "stats";
                 x.processCommand = async e =>
@@ -180,39 +192,46 @@ namespace IA
                 };
             });
 
-            events.AddCommandEvent(x =>
+            modules.AddCommand("General", x =>
             {
                 x.name = "roll";
                 x.processCommand = async (e) =>
                 {
+                    Random r = new Random();
+                    string rollCalc = "";
                     string amount = "";
                     int rollAmount = 0;
+
                     if (e.Message.Text.Length > 1)
                     {
+
                         amount = e.Message.Text.Split(' ')[1];
                         if (amount.Split('d').Length > 1)
                         {
                             for (int i = 0; i < int.Parse(amount.Split('d')[0]); i++)
                             {
-                                rollAmount += new Random().Next(0, int.Parse(amount.Split('d')[1]));
+                                int num = r.Next(0, int.Parse(amount.Split('d')[1]));
+                                rollAmount += num;
+                                rollCalc += num + " + ";
                             }
+                            rollCalc = rollCalc.Remove(rollCalc.Length - 2);
                         }
                         else
                         {
-                            rollAmount = new Random().Next(0, int.Parse(amount));
+                            rollAmount = r.Next(0, int.Parse(amount));
                         }
                     }
                     else
                     {
-                        rollAmount = new Random().Next(0, 100);
+                        rollAmount = r.Next(0, 100);
                     }
 
-                    await e.Channel.SendMessage(":game_die: You rolled a **" + rollAmount + "**");
+                    await e.Channel.SendMessage(":game_die: You rolled a **" + rollAmount + "**" + (rollCalc!=""?" (" + rollCalc + ")":""));
 
                 };
             });
 
-            events.AddMentionEvent(x =>
+            modules.AddMention("General", x =>
             {
                 x.name = "cleverbot";
                 x.processCommand = async (e) =>
@@ -224,11 +243,13 @@ namespace IA
                     }
                 };
             });
+
+            modules.FinishLoading();
         }
 
         private async void Client_MessageReceived(object sender, MessageEventArgs e)
-        {    
-           await events.OnMessageEvent(e);
+        {
+            await modules.Check(e);
         }
 
         private void Client_Ready(object sender, EventArgs e)

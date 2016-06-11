@@ -10,7 +10,7 @@ namespace IA.Data
 {
     public class SQL
     {
-        public static async Task<string> Query(string SQLCode, Channel c, bool sendFeedBack = false)
+        public static async Task<string> Query(string SQLCode, Channel c = null, bool sendFeedBack = false)
         {
             try
             {
@@ -37,6 +37,20 @@ namespace IA.Data
                 Log.ErrorAt("mysql",ex.Message);
                 return "";
             }
+        }
+
+        public static string GetQuery(string SQLCode)
+        {
+            string myConnection = "datasource=localhost;port=3306;Initial Catalog='ia';username=root;password=laikaxx1";
+            MySqlConnection connection = new MySqlConnection(myConnection);
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = SQLCode;
+            connection.Open();
+            MySqlDataReader r = command.ExecuteReader();
+            r.Read();
+            string output = r.GetString(0);
+            connection.Close();
+            return output;
         }
     }
 }

@@ -48,6 +48,7 @@
             this.Console_Inputfield.Name = "Console_Inputfield";
             this.Console_Inputfield.Size = new System.Drawing.Size(416, 20);
             this.Console_Inputfield.TabIndex = 1;
+            this.Console_Inputfield.TextChanged += new System.EventHandler(this.Console_Inputfield_TextChanged);
             // 
             // IA_Userpanel
             // 
