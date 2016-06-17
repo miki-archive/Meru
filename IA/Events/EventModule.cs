@@ -11,9 +11,6 @@ namespace IA.Events
 {
     class EventModule
     {
-        public Dictionary<string, CommandEvent> commandEvents = new Dictionary<string, CommandEvent>();
-        public Dictionary<string, MentionEvent> mentionEvents = new Dictionary<string, MentionEvent>();
-
         public EventModuleInformation moduleInformation { get; private set; }
 
         public EventModule(Action<EventModuleInformation> moduleInfo)
@@ -22,6 +19,7 @@ namespace IA.Events
             moduleInfo.Invoke(moduleInformation);
         }
 
+<<<<<<< .merge_file_a68844
         public void OnCommand(MessageEventArgs e)
         {
             if (e.Message.Text.StartsWith(Global.Identifier))
@@ -99,6 +97,8 @@ namespace IA.Events
             return output;
         }
 
+=======
+>>>>>>> .merge_file_a68888
         public void SetActive(bool value)
         {
             moduleInformation.enabled = value;

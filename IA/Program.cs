@@ -15,7 +15,7 @@ namespace IA
     class Program
     {
         public static DiscordClient client;
-        public static ModuleController modules;
+        public static CommandListener modules;
 
         #region Forms
 
@@ -56,7 +56,7 @@ namespace IA
 
         void Load()
         {
-            modules = new ModuleController();
+            modules = new CommandListener();
 
             modules.AddCommand("General", x =>
             {

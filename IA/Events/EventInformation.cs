@@ -13,13 +13,14 @@ namespace IA.Events
     {
         public string name;
         public string description;
+        public string moduleName;
 
         public bool deleteTrigger;
 
         public bool adminOnly;
         public bool developerOnly;
         public bool enabled;
-        
+
         public UseCommand processCommand;
 
         public EventInformation()

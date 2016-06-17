@@ -8,25 +8,29 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    class ModuleController
+    class CommandListener
     {
         Dictionary<string, EventModule> modules = new Dictionary<string, EventModule>();
-
+        Dictionary<string, Ev18w8ent> commandEvents = new Dictionary<string, Event>();
+        Dictionary<string, Event> mentionEvents = new Dictionary<string, Event>();
+        mbox                                                                                                                                                  /// </summary>
+        /// <param name="module"></param>
+        /// <param name="info"></param>
         public void AddCommand(string module, Action<EventInformation> info)
         {
             EventInformation eInfo = new EventInformation("not_set", null);
             info.Invoke(eInfo);
-            if(!modules.ContainsKey(module))
+            if (!modules.ContainsKey(eInfo.moduleName))
             {
-                Log.DoneAt("ModuleController", "module " + module + " exists!");
+                Log.DoneAt("CommandListener", "module " + eInfo.moduleName + " exists!");
                 AddModule(x =>
                 {
-                    x.name = module;
+                    x.name = eInfo.moduleName;
                     x.enabled = true;
                 });
             }
-            modules[module].commandEvents.Add(eInfo.name, new CommandEvent(eInfo));
-            Log.DoneAt("ModuleController", "Command " + eInfo.name + " loaded!");
+            commandEvents.Add(eInfo.name, new CommandEvent(eInfo));
+            Log.DoneAt("CommandListener", "Command " + eInfo.name + " loaded!");
         }
 
         public void AddMention(string module, Action<EventInformation> info)
@@ -61,11 +65,14 @@ namespace IA.Events
 
         public async Task Check(MessageEventArgs e)
         {
+            string commandId = e.Message.RawText.Substring(Global.Identifier.Length).Split(' ')[0];
+
             if(e.Message.IsMentioningMe())
             {
-                foreach (KeyValuePair<string, EventModule> item in modules)
+                if (mentionEvents.ContainsKey(commandId))
                 {
-                    item.Value.OnMention(e);
+                    if(modules[mentionEvents[commandId].info[e.Channel.Id].moduleName].z)
+                    mentionEvents[commandId].Trigger(e);
                 }
             }
 
