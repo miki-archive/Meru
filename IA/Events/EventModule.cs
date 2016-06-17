@@ -1,4 +1,6 @@
 ﻿using Discord;
+using IA.Data;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,10 +31,7 @@ namespace IA.Events
                 {
                     if (item.Key == command)
                     {
-                        if (item.Value.info[e.User.Id].enabled)
-                        {
-                            item.Value.Trigger(e);
-                        }
+                        item.Value.Trigger(e);
                     }
                 }
             }
@@ -46,6 +45,24 @@ namespace IA.Events
             }
         }
 
+        public Event FindEventWithName(string name)
+        {
+            foreach(CommandEvent item in commandEvents.Values)
+            {
+                if(item.baseEventInformation.name == name)
+                {
+                    return item;
+                }
+            }
+            foreach (MentionEvent item in mentionEvents.Values)
+            {
+                if (item.baseEventInformation.name == name)
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
 
         public string List(MessageEventArgs e)
         {
@@ -55,18 +72,31 @@ namespace IA.Events
                 output += "\n`Commands:` ";
                 foreach (KeyValuePair<string, CommandEvent> command in commandEvents)
                 {
-                    output += command.Value.info[e.Channel.Id].name + ", ";
+                    if (!command.Value.info.ContainsKey(e.Channel.Id))
+                    { 
+                        command.Value.Load(e.Channel.Id);
+                    }
+                    if (!command.Value.info[e.Channel.Id].enabled)
+                    {
+                        output += command.Value.baseEventInformation.name + ", ";
+                    }
                 }
+                output = output.Remove(output.Length - 2);
             }
             if (mentionEvents.Count > 0)
             {
                 output += "\n`Mention Events:` ";
                 foreach (KeyValuePair<string, MentionEvent> mention in mentionEvents)
                 {
-                    output += mention.Value.info[e.Channel.Id].name + ", ";
+                    if (!mention.Value.info.ContainsKey(e.Channel.Id))
+                    {
+                        mention.Value.Load(e.Channel.Id);
+                    }
+                    output += mention.Value.baseEventInformation.name + ", ";
                 }
+                output = output.Remove(output.Length - 2);
             }
-            return output.Remove(output.Length - 2);
+            return output;
         }
 
         public void SetActive(bool value)

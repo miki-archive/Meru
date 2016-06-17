@@ -86,6 +86,23 @@ namespace IA
                 };
             });
 
+            modules.AddCommand("General", x =>
+            {
+                x.name = "toggle";
+                x.processCommand = async e =>
+                {
+                    string[] args = e.Message.RawText.Split(' ');
+                    if(args.Length > 1)
+                    {
+                        modules.ToggleCommand(e, args[1]);
+                    }
+                    else
+                    {
+                        await e.Channel.SendMessage(":no_entry_sign: please specify which command you want to enable!");
+                    }
+                };
+            });
+
             modules.AddCommand("Node-js", x =>
             {
                 x.name = "node";
@@ -111,7 +128,7 @@ namespace IA
 
             modules.AddCommand("Node-js", x =>
             {
-                x.name = "node-realtime";
+                x.name = "noderealtime";
                 x.developerOnly = true;
                 x.processCommand = async e =>
                 {
@@ -156,7 +173,8 @@ namespace IA
                 x.developerOnly = true;
                 x.processCommand = async e =>
                 {
-                    await SQL.Query(e.Message.RawText.Substring(5), e.Channel);
+                    SQL.Query(e.Message.RawText.Substring(5), e.Channel);
+                    await e.Channel.SendMessage("Sent SQL code!");
                 };
             });
 
@@ -255,6 +273,7 @@ namespace IA
         private void Client_Ready(object sender, EventArgs e)
         {
             Log.Done("Connected, user: " + client.CurrentUser.Name);
+            client.SetGame("`help | running IA v0.1.3");
         }
     }
 }

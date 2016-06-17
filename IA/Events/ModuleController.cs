@@ -1,4 +1,5 @@
 ﻿using Discord;
+using IA.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,6 +84,43 @@ namespace IA.Events
                 output += item.Value.List(e) + "\n\n";
             }
             return output;
+        }
+
+        internal void ToggleCommand(MessageEventArgs e, string v)
+        {
+            Event ev = null;
+            foreach (KeyValuePair<string, EventModule> item in modules)
+            {
+                ev = item.Value.FindEventWithName(v);
+                if(ev != null)
+                {
+                    if (!ev.info.ContainsKey(e.Channel.Id))
+                    {
+                        ev.Load(e.Channel.Id);
+                    }
+                    ev.SetActive(e.Channel.Id, !ev.info[e.Channel.Id].enabled);
+                    SQL.Query("UPDATE event_information_" + ev.baseEventInformation.name + " SET enabled=" + ev.info[e.Channel.Id].enabled + " WHERE id=" + e.Channel.Id);
+                }
+            }
+            if(ev != null)
+            {
+                e.Channel.SendMessage(v + " does not exist.");
+            }
+            else
+            {
+                e.Channel.SendMessage(":ok_hand:");
+            }
+        }
+
+        public void ToggleModule(MessageEventArgs e, string v)
+        {
+            foreach (KeyValuePair<string, EventModule> item in modules)
+            {
+                if (item.Key == v)
+                {
+                }
+            }
+
         }
 
         public void FinishLoading()

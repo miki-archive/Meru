@@ -14,6 +14,8 @@ namespace IA.Events
         public string name;
         public string description;
 
+        public bool deleteTrigger;
+
         public bool adminOnly;
         public bool developerOnly;
         public bool enabled;

@@ -10,19 +10,20 @@ namespace IA.Data
 {
     public class SQL
     {
-        public static async Task<string> Query(string SQLCode, Channel c = null, bool sendFeedBack = false)
+        public static string myConnection = "datasource=localhost;port=3306;Initial Catalog='ia';username=root;password=laikaxx1";
+        public static MySqlConnection connection = new MySqlConnection(myConnection);
+
+        public static string Query(string SQLCode, Channel c = null, bool sendFeedBack = false)
         {
             try
             {
-                string myConnection = "datasource=localhost;port=3306;Initial Catalog='ia';username=root;password=laikaxx1";
-                MySqlConnection connection = new MySqlConnection(myConnection);
                 MySqlCommand command = connection.CreateCommand();
                 command.CommandText = SQLCode;
                 connection.Open();
                 command.ExecuteNonQuery();
                 if (c != null)
                 {
-                    await c.SendMessage(":white_check_mark: Sent `" + command.CommandText + "` to DB!");
+                    c.SendMessage(":white_check_mark: Sent `" + command.CommandText + "` to DB!");
                 }
                 Log.DoneAt("mysql", "Connected!");
                 connection.Close();
@@ -32,17 +33,16 @@ namespace IA.Data
             {
                 if (c != null)
                 {
-                    await c.SendMessage(":no_entry_sign: " + ex.Message);
+                    c.SendMessage(":no_entry_sign: " + ex.Message);
                 }
-                Log.ErrorAt("mysql",ex.Message);
+                Log.ErrorAt("mysql", ex.Message);
+                connection.Close();
                 return "";
             }
         }
 
         public static string GetQuery(string SQLCode)
         {
-            string myConnection = "datasource=localhost;port=3306;Initial Catalog='ia';username=root;password=laikaxx1";
-            MySqlConnection connection = new MySqlConnection(myConnection);
             MySqlCommand command = connection.CreateCommand();
             command.CommandText = SQLCode;
             connection.Open();

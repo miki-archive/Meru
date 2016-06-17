@@ -14,13 +14,14 @@ namespace IA.Events
     class Event
     {
         public Dictionary<ulong, EventInformation> info = new Dictionary<ulong, EventInformation>();
+        public EventInformation baseEventInformation;
 
         public Event(EventInformation info)
         {
-            this.info.Add(0, info);
+            baseEventInformation = info;
             try
             {
-                SQL.Query("CREATE TABLE event_information_" + info.name + " VALUES(id BIGINT name TEXT enabled BOOLEAN)");
+                SQL.Query("CREATE TABLE event_information_" + info.name + "(id BIGINT, name VARCHAR(256), enabled BOOLEAN)");
             }
             catch
             {
@@ -37,43 +38,75 @@ namespace IA.Events
         {
             if (!info.ContainsKey(e.Channel.Id))
             {
-                EventInformation ev = GetInfoFromSQL(info[0].name, e.Channel.Id);
-                if (ev.name != "")
+                Load(e.Channel.Id);
+            }
+            try
+            {
+                if (info[e.Channel.Id].enabled)
                 {
-                    info.Add(e.Channel.Id, ev);
+                    if (baseEventInformation.developerOnly && e.User.Id != Global.DeveloperId) return;
+                    if ((baseEventInformation.adminOnly && !e.User.ServerPermissions.Administrator)) return;
+                    await Task.Run(() => baseEventInformation.processCommand(e));
+                    Log.Message("command executed!");
+                }
+                else
+
+                {
+                    await e.Channel.SendMessage(":no_entry_sign: This command is not enabled on this server!");
                 }
             }
-
-            if (info[e.Channel.Id].enabled)
+            catch (Exception ex)
             {
-                try
+                Log.ErrorAt(info[e.Channel.Id].name + "@Event", ex.Message);
+            }
+        }
+
+        public void Load(ulong id)
+        {
+            EventInformation eventInfo = GetInfoFromSQL(baseEventInformation.name, id);
+            if (eventInfo != null)
+            {
+                info.Add(id, eventInfo);
+            }
+            else
+            {
+                SQL.Query(string.Format("INSERT INTO event_information_{0} (id, enabled) VALUES ({1}, {2})", baseEventInformation.name, id, true));
+                eventInfo = GetInfoFromSQL(baseEventInformation.name, id);
+                Log.Notice("enabled: " + eventInfo.enabled);
+                info.Add(id, eventInfo);
+                if(eventInfo == null)
                 {
-                    if (info[e.Channel.Id].developerOnly && e.User.Id != Global.DeveloperId) return;
-                    if ((info[e.Channel.Id].adminOnly && !e.User.ServerPermissions.Administrator)) return;
-                    await Task.Run(() => info[e.Channel.Id].processCommand(e));
-                }
-                catch (Exception ex)
-                {
-                   Log.ErrorAt(info[e.Channel.Id].name + "@Event", ex.Message);
+                    throw new Exception("cannot load sql data");
                 }
             }
         }
 
-        public EventInformation GetInfoFromSQL(string name, ulong id)
+        public bool IsLoaded(ulong id)
         {
-            string myConnection = "datasource=localhost;port=3306;Initial Catalog='ia';username=root;password=laikaxx1";
-            MySqlConnection connection = new MySqlConnection(myConnection);
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = string.Format("SELECT * FROM event_information_" + name +" WHERE id = " + id);
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-            r.Read();
+            return info.ContainsKey(id);
+        }
 
-            EventInformation eventOutput = new EventInformation();
-            eventOutput.name = r.GetString(1);
-            eventOutput.enabled = r.GetBoolean(2);
-            connection.Close();
-            return new EventInformation(null);
+        public Task<EventInformation> GetInfoFromSQL(string name, ulong id)
+        {
+
+            MySqlCommand command = SQL.connection.CreateCommand();
+            command.CommandText = string.Format("SELECT enabled FROM event_information_{0} WHERE id={1} ", name, id);
+            SQL.connection.Open();
+            MySqlDataReader r = command.ExecuteReader();
+            Task<EventInformation> eventOutput;
+            eventOutput.name = "ERROR";
+            while (r.Read())
+            {
+                eventOutput.enabled = r.GetBoolean("enabled");
+                eventOutput.name = name;
+                break;
+            }
+            SQL.connection.Close();
+            if(eventOutput.name != "ERROR")
+            {
+                return eventOutput;
+            }
+            return null;
         }
     }
 }
