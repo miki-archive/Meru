@@ -1,6 +1,6 @@
 ﻿namespace IA.Events
 {
-    public class EventModuleInformation
+    public class ModuleInformation
     {
         public string name;
         public bool enabled;

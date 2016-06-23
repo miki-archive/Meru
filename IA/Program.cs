@@ -6,37 +6,24 @@ using System.Threading.Tasks;
 using Discord;
 using System.Diagnostics;
 using IA.Events;
-using IA.Data;
 using System.Threading;
-using IA.Utils;
 
 namespace IA
 {
     class Program
     {
         public static DiscordClient client;
-        public static CommandListener modules;
-
-        #region Forms
-
-        public static IA_Userpanel userPanel;
-
-        #endregion
+        public static EventSystem events;
 
         static void Main(string[] args) => new Program().Start();
 
-
         void Start()
         {
-            userPanel = new IA_Userpanel();
-            StatusChecker.AddMember("developer", 121919449996460033);
-
-            new Thread(userPanel.Show).Start();
-            Load();
+            LoadEvents();
             client = new DiscordClient(x =>
             {
-                x.AppName = "IA";
-                x.AppVersion = "0.1";
+                x.AppName = "Miki";
+                x.AppVersion = "0.1.6";
             });
 
             client.Ready += Client_Ready;
@@ -49,52 +36,72 @@ namespace IA
             });
         }
 
-        private void Client_JoinedServer(object sender, ServerEventArgs e)
+        private async void Client_JoinedServer(object sender, ServerEventArgs e)
         {
-            e.Server.DefaultChannel.SendMessage(":notes: **Hello! I am IA**\n\n::question: use '" + Global.Identifier + "help' to see my commands!\n:star: Have a nice day!");
+            await e.Server.DefaultChannel.SendMessage(":notes: **Hello! I am Miki**\n\n::question: use '" + events.GetPrefix(e.Server.Id) + "help' to see my commands!\n:star: Have a nice day!");
         }
 
-        void Load()
+        void LoadEvents()
         {
-            modules = new CommandListener();
+            events = new EventSystem(bot =>
+            {
+                bot.Name = "Miki";
+                bot.SqlInformation = new SQLInformation(sql =>
+                {
+                    sql.dataSource = "localhost";
+                    sql.database = "ia";
+                    sql.port = 3306;
+                    sql.username = "root";
+                    sql.password = "laikaxx1";
+                });
+            });
+            EventSystem.developers.Add(121919449996460033);
 
-            modules.AddCommand("General", x =>
+            //Help
+            events.AddEvent(x =>
             {
                 x.name = "help";
-                x.processCommand = async e =>
+                x.processCommand = async (e, args) =>
                 {
-                    await e.Channel.SendMessage(modules.List(e));
+                    string output = await events.ListCommands(e.Channel.Id);
+                    await e.Channel.SendMessage(output);
                 };
             });
 
-            modules.AddCommand("General",x =>
+            //Info
+            events.AddEvent(x =>
             {
                 x.name = "info";
-                x.processCommand = async e =>
+                x.processCommand = async (e, args) =>
                 {
                     await e.Channel.SendMessage(client.Config.AppName + " v" + client.Config.AppVersion + "\n :desktop: Created by `Veld#5128`");
                 };
             });
 
-            modules.AddCommand("General", x =>
+            //Prefix
+            events.AddEvent(x =>
             {
                 x.name = "prefix";
-                x.processCommand = async e =>
+                x.processCommand = async (e, args) =>
                 {
-                   Global.Identifier = e.Message.RawText.Split(' ')[1];
-                    await e.Channel.SendMessage("Prefix changed to `" + Global.Identifier + "`!");
+                    if (e.Message.RawText.Split(' ').Length > 1)
+                    {
+                        events.SetPrefix(e, e.Message.RawText.Split(' ')[1]);
+                        await e.Channel.SendMessage("Prefix changed to `" + events.GetPrefix(e.Server.Id) + "`!");
+                    }
                 };
             });
 
-            modules.AddCommand("General", x =>
+            //Toggle
+            events.AddEvent(x =>
             {
                 x.name = "toggle";
-                x.processCommand = async e =>
+                x.processCommand = async (e, args) =>
                 {
-                    string[] args = e.Message.RawText.Split(' ');
-                    if(args.Length > 1)
+                    if (args.Length > 1)
                     {
-                        modules.ToggleCommand(e, args[1]);
+                        events.Toggle(e);
+                        await e.Channel.SendMessage(":white_check_mark: toggled `" + args + "`");
                     }
                     else
                     {
@@ -103,19 +110,15 @@ namespace IA
                 };
             });
 
-            modules.AddCommand("Node-js", x =>
+            //Node
+            events.AddEvent(x =>
             {
                 x.name = "node";
-                x.developerOnly = true;
-                x.processCommand = async e =>
+                x.accessibility = EventAccessibility.DEVELOPERONLY;
+                x.processCommand = async (e, args) =>
                 {
                     Log.Message("entered 'node'");
-                    string args = "";
                     string id = e.Message.Text.Split(' ')[1];
-                    if (e.Message.Text.Split(' ').Length > 2)
-                    {
-                        args = e.Message.Text.Substring(7 + id.Length);
-                    }
                     Log.Message("entering Node.Run");
                     string output = await Node.Run(id, args);
                     Log.Message("finished Node.Run");
@@ -126,19 +129,15 @@ namespace IA
                 };
             });
 
-            modules.AddCommand("Node-js", x =>
+            //NodeRealtime
+            events.AddEvent(x =>
             {
                 x.name = "noderealtime";
-                x.developerOnly = true;
-                x.processCommand = async e =>
+                x.accessibility = EventAccessibility.DEVELOPERONLY;
+                x.processCommand = async (e, args) =>
                 {
                     Log.Message("entered 'node-realtime'");
-                    string args = "";
                     string id = e.Message.Text.Split(' ')[1];
-                    if (e.Message.Text.Split(' ').Length > 2)
-                    {
-                        args = e.Message.Text.Substring(7 + id.Length);
-                    }
                     Log.Message("entering Node.Run");
                     new Thread(new Node(id, args, e.Channel).Run).Start();
                     Log.Message("finished Node.Run");
@@ -146,53 +145,36 @@ namespace IA
                 };
             });
 
-            modules.AddCommand("General", x =>
-            {
-                x.name = "say";
-                x.developerOnly = true;
-                x.processCommand = async e =>
-                {
-                    await e.Channel.SendMessage(e.Message.Text.Substring(5));
-                    await e.Message.Delete();
-                };
-            });
+            //Say
+            events.AddEvent(x =>
+             {
+                 x.name = "say";
+                 x.accessibility = EventAccessibility.DEVELOPERONLY;
+                 x.deletesMessage = true;
+                 x.processCommand = async (e, args) =>
+                 {
+                     await e.Channel.SendMessage(args);
+                 };
+             });
 
-            modules.AddCommand("General", x =>
-            {
-                x.name = "get";
-                x.developerOnly = true;
-                x.processCommand = async e =>
-                {
-                    await e.Channel.SendMessage(":desktop:[SQL] " + SQL.GetQuery(e.Message.RawText.Substring(5)));
-                };
-            });
-
-            modules.AddCommand("General", x =>
-            {
-                x.name = "sql";
-                x.developerOnly = true;
-                x.processCommand = async e =>
-                {
-                    SQL.Query(e.Message.RawText.Substring(5), e.Channel);
-                    await e.Channel.SendMessage("Sent SQL code!");
-                };
-            });
-
-            modules.AddCommand("General", x =>
+            //Ping
+            events.AddEvent(x =>
             {
                 x.name = "ping";
-                x.processCommand = async e =>
+                x.processCommand = async (e, args) =>
                 {
                     DateTime pongTime = DateTime.Now;
                     int ping = (pongTime - e.Message.Timestamp).Milliseconds;
-                    Message m = await e.Channel.SendMessage((ping < 500 ? ":green_heart:" : ping > 900 ? ":heart:" : ":yellow_heart:") + "Pong! " + ping + "ms!");
+                    Discord.Message m = await e.Channel.SendMessage((ping < 500 ? ":green_heart:" : ping > 900 ? ":heart:" : ":yellow_heart:") + "Pong! " + ping + "ms!");
                 };
             });
 
-            modules.AddCommand("Node-js", x =>
+            //CNode
+            events.AddEvent(x =>
             {
                 x.name = "cnode";
-                x.processCommand = async e =>
+                x.accessibility = EventAccessibility.DEVELOPERONLY;
+                x.processCommand = async (e, args) =>
                 {
                     string id = e.Message.Text.Split(' ')[1];
                     string code = e.Message.Text.Substring(7 + id.Length);
@@ -201,19 +183,22 @@ namespace IA
                 };
             });
 
-            modules.AddCommand("General", x =>
+            //Stats
+            events.AddEvent(x =>
             {
                 x.name = "stats";
-                x.processCommand = async e =>
+                x.accessibility = EventAccessibility.DEVELOPERONLY;
+                x.processCommand = async (e, args) =>
                 {
                     await e.Channel.SendMessage("Ram: " + Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024 + "mb");
                 };
             });
 
-            modules.AddCommand("General", x =>
+            //Roll
+            events.AddEvent(x =>
             {
                 x.name = "roll";
-                x.processCommand = async (e) =>
+                x.processCommand = async (e, args) =>
                 {
                     Random r = new Random();
                     string rollCalc = "";
@@ -244,36 +229,37 @@ namespace IA
                         rollAmount = r.Next(0, 100);
                     }
 
-                    await e.Channel.SendMessage(":game_die: You rolled a **" + rollAmount + "**" + (rollCalc!=""?" (" + rollCalc + ")":""));
+                    await e.Channel.SendMessage(":game_die: You rolled a **" + rollAmount + "**" + (rollCalc != "" ? " (" + rollCalc + ")" : ""));
 
                 };
             });
 
-            modules.AddMention("General", x =>
+            //Cleverbot
+            events.AddEvent(x =>
             {
                 x.name = "cleverbot";
-                x.processCommand = async (e) =>
+                x.type = EventType.MENTION;
+                x.checkCommand = (c, a, e) =>
                 {
-                    if(e.Message.RawText.Trim(new char[] { '!' }).StartsWith("<@" + client.CurrentUser.Id + ">"))
-                    {
-                        await e.Channel.SendIsTyping();
-                        await e.Channel.SendMessage(":speech_balloon: - " + Node.Run("c", e.Message.RawText.Substring(client.CurrentUser.Id.ToString().Length + 4)).Result);
-                    }
+                    return e.Message.RawText.StartsWith(client.CurrentUser.Mention) || e.Message.RawText.StartsWith(client.CurrentUser.NicknameMention);
+                };
+                x.processCommand = async (e, args) =>
+                {
+                    await e.Channel.SendIsTyping();
+                    await e.Channel.SendMessage(":speech_balloon: - " + Node.Run("c", e.Message.RawText.Substring(client.CurrentUser.Id.ToString().Length + 4)).Result);
                 };
             });
-
-            modules.FinishLoading();
         }
 
         private async void Client_MessageReceived(object sender, MessageEventArgs e)
         {
-            await modules.Check(e);
+            await events.Check(e);
         }
 
         private void Client_Ready(object sender, EventArgs e)
         {
             Log.Done("Connected, user: " + client.CurrentUser.Name);
-            client.SetGame("`help | running IA v0.1.3");
+            client.SetGame("`help | " + client.Config.AppVersion);
         }
     }
 }
