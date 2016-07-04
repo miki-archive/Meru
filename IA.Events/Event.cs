@@ -42,7 +42,6 @@ namespace IA.Events
             {
                 if (info.accessibility == EventAccessibility.DEVELOPERONLY)
                 {
-                    await e.Channel.SendMessage("This is a admin-only command!");
                     return;
                 }
 
@@ -50,7 +49,6 @@ namespace IA.Events
                 {
                     if (!e.User.ServerPermissions.Administrator)
                     {
-                        await e.Channel.SendMessage("This is a admin-only command!");
                         return;
                     }
                 }
@@ -65,7 +63,7 @@ namespace IA.Events
             if(info.checkCommand(command, aliases, e))
             {
                 await Task.Run(() => info.processCommand(e, args));
-                Console.WriteLine(command + " called");
+                Console.WriteLine(command + " called from " + e.Server.Name + " [" + e.Server.Id + " # " + e.Channel.Id + "]");
                 CommandUsed++;
             }
         }
@@ -95,6 +93,18 @@ namespace IA.Events
             {
                 lastTimeUsed.Add(id, DateTime.Now);
                 return false;
+            }
+        }
+
+        public void SetEnabled(MessageEventArgs e, bool v)
+        {
+            if(!enabled.ContainsKey(e.Channel.Id))
+            {
+                enabled.Add(e.Channel.Id, v);
+            }
+            else
+            {
+                enabled[e.Channel.Id] = v;
             }
         }
     }

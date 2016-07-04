@@ -16,10 +16,11 @@ namespace IA.Events
         Dictionary<string, Event> events = new Dictionary<string, Event>();
         Dictionary<string, string> aliases = new Dictionary<string, string>();
 
+        List<ulong> ignore = new List<ulong>();
+
         static BotInformation bot = new BotInformation();
 
         public string OverrideIdentifier { private set; get; }
-        public int CommandsUsed { private set; get; }
 
         public EventSystem(Action<BotInformation> botInfo)
         {
@@ -46,17 +47,23 @@ namespace IA.Events
             }
             catch(Exception ex)
             {
-                await e.Channel.SendMessage(ex.Message + "\n\n" + ex.StackTrace);
+                Console.WriteLine(ex.Message + "\n\n" + ex.StackTrace);
             }
         }
+
+        public void Ignore(ulong id)
+        {
+            ignore.Add(id);
+        }
+
         public async void Toggle(MessageEventArgs e)
         {
             string command = e.Message.RawText.Substring(identifier[e.Server.Id].Length).Split(' ')[0].ToLower();
             string targetcommand = e.Message.RawText.Split(' ')[1].ToLower();
 
-            if(targetcommand == "toggle")
+            if(targetcommand == "toggle" || targetcommand == "help" || targetcommand == "info")
             {
-                await e.Channel.SendMessage("You can't toggle 'toggle'");
+                await e.Channel.SendMessage("You can't toggle `" + targetcommand + "`");
                 return;
             }
 
@@ -66,23 +73,134 @@ namespace IA.Events
                 {
                     bool isEnabled = await CheckEnabled(events[targetcommand], e.Channel.Id);
                     events[targetcommand].enabled[e.Channel.Id] = !isEnabled;
-                    await Task.Run(() => SendToSQL(string.Format("UPDATE event_information_{0} SET enabled = {1} WHERE id = {2};", targetcommand, events[targetcommand].enabled[e.Channel.Id], e.Channel.Id)));
+                    await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events[targetcommand].enabled[e.Channel.Id], e.Channel.Id)));
+                    await e.Channel.SendMessage(!isEnabled == true?"Enabled " : "Disabled " + targetcommand + " for this channel!");
                 }
                 else if (aliases.ContainsKey(targetcommand))
                 {
                     bool isEnabled = await CheckEnabled(events[targetcommand], e.Channel.Id);
                     events[aliases[targetcommand]].enabled[e.Channel.Id] = !isEnabled;
-                    await Task.Run(() => SendToSQL(string.Format("UPDATE event_information_{0} SET enabled = {1} WHERE id = {2};", targetcommand, events[aliases[targetcommand]].enabled[e.Channel.Id], e.Channel.Id)));
+                    await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events[aliases[targetcommand]].enabled[e.Channel.Id], e.Channel.Id)));
+                    await e.Channel.SendMessage(!isEnabled == true ? "Enabled " : "Disabled " + targetcommand + " for this channel!");
                 }
             }
             catch(Exception ex)
             {
-                await e.Channel.SendMessage(ex.Message + "\n\n" + ex.StackTrace);
+                Console.WriteLine(ex.Message + "\n\n" + ex.StackTrace);
+            }
+        }
+
+        public async void Disable(MessageEventArgs e)
+        {
+            string command = e.Message.RawText.Substring(identifier[e.Server.Id].Length).Split(' ')[0].ToLower();
+            string targetcommand = e.Message.RawText.Split(' ')[1].ToLower();
+
+            if (targetcommand == "toggle" || targetcommand == "help" || targetcommand == "info")
+            {
+                await e.Channel.SendMessage("You can't toggle 'toggle'");
+                return;
+            }
+
+            try
+            {
+                if (targetcommand == "all")
+                {
+                    foreach (Event ev in events.Values)
+                    {
+                        if (ev.info.accessibility != EventAccessibility.PUBLIC)
+                        {
+                            continue;
+                        }
+
+                        events[ev.info.name].enabled[e.Channel.Id] = false;
+                    }
+                    await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, false, e.Channel.Id)));
+                    await e.Channel.SendMessage("Disabled everything for this channel!");
+                    return;
+                }
+
+                if (events.ContainsKey(targetcommand))
+                {
+                    bool isEnabled = await CheckEnabled(events[targetcommand], e.Channel.Id);
+                    events[targetcommand].enabled[e.Channel.Id] = false;
+                    await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = false WHERE id = {1} AND name = '{0}';", targetcommand, e.Channel.Id)));
+                    await e.Channel.SendMessage("Disabled " + targetcommand + " for this channel!");
+                }
+                else if (aliases.ContainsKey(targetcommand))
+                {
+                    bool isEnabled = await CheckEnabled(events[targetcommand], e.Channel.Id);
+                    events[aliases[targetcommand]].enabled[e.Channel.Id] = false;
+                    await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events[aliases[targetcommand]].enabled[e.Channel.Id], e.Channel.Id)));
+                    await e.Channel.SendMessage("Disabled " + targetcommand + " for this channel!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message + "\n\n" + ex.StackTrace);
+            }
+        }
+        public async void Enable(MessageEventArgs e)
+        {
+            string command = e.Message.RawText.Substring(identifier[e.Server.Id].Length).Split(' ')[0].ToLower();
+            string targetcommand = e.Message.RawText.Split(' ')[1].ToLower();
+
+            if (targetcommand == "toggle" || targetcommand == "help" || targetcommand == "info")
+            {
+                await e.Channel.SendMessage("You can't toggle 'toggle'");
+                return;
+            }
+
+            try
+            {
+                if (targetcommand == "all")
+                {
+                    foreach (Event ev in events.Values)
+                    {
+                        if(ev.info.accessibility != EventAccessibility.PUBLIC)
+                        {
+                            continue;
+                        }
+
+                        events[ev.info.name].enabled[e.Channel.Id] = true;
+                        await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = true WHERE id = {1} AND name = '{0}';", targetcommand, e.Channel.Id)));
+                    }
+                    await e.Channel.SendMessage("Disabled everything for this channel!");
+                    return;
+                }
+
+                if (events.ContainsKey(targetcommand))
+                {
+                    bool isEnabled = await CheckEnabled(events[targetcommand], e.Channel.Id);
+                    events[targetcommand].enabled[e.Channel.Id] = true;
+                    await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = true WHERE id = {1} AND name = '{0}';", targetcommand, e.Channel.Id)));
+                    await e.Channel.SendMessage("Enabled " + targetcommand + " for this channel!");
+                }
+                else if (aliases.ContainsKey(targetcommand))
+                {
+                    bool isEnabled = await CheckEnabled(events[targetcommand], e.Channel.Id);
+                    events[aliases[targetcommand]].enabled[e.Channel.Id] = true;
+                    await Task.Run(() => SendToSQL(string.Format("UPDATE event SET enabled = true WHERE id = {1} AND name = '{0}';", targetcommand, e.Channel.Id)));
+                    await e.Channel.SendMessage("Enabled " + targetcommand + " for this channel!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message + "\n\n" + ex.StackTrace);
             }
         }
 
         public async Task Check(MessageEventArgs e)
         {
+            if(e.Channel.IsPrivate)
+            {
+                return;
+            }
+            if(ignore.Contains(e.Server.Id))
+            {
+                return;
+            }
+
+
             try
             {
                 if (!identifier.ContainsKey(e.Server.Id))
@@ -91,7 +209,7 @@ namespace IA.Events
                     if (identif == "ERROR")
                     {
                         SendToSQL("INSERT INTO identifier VALUES(" + e.Server.Id + ", \">\")");
-                        identifier.Add(e.Server.Id, "`");
+                        identifier.Add(e.Server.Id, ">");
                     }
                     else
                     {
@@ -113,7 +231,6 @@ namespace IA.Events
                     if (await CheckEnabled(events[command], e.Channel.Id))
                     {
                         await Task.Run(() => events[command].Check(identifier[e.Server.Id], e));
-                        CommandsUsed++;
                     }
                 }
                 else if (aliases.ContainsKey(command))
@@ -121,7 +238,6 @@ namespace IA.Events
                     if (await CheckEnabled(events[aliases[command]], e.Channel.Id))
                     {
                         await Task.Run(() => events[aliases[command]].Check(identifier[e.Server.Id], e));
-                        CommandsUsed++;
                     }
                 }
             }
@@ -134,7 +250,6 @@ namespace IA.Events
                     if (await CheckEnabled(events[command], e.Channel.Id))
                     {
                         await Task.Run(() => events[command].Check(OverrideIdentifier, e));
-                        CommandsUsed++;
                     }
                 }
                 else if (aliases.ContainsKey(command))
@@ -142,7 +257,6 @@ namespace IA.Events
                     if (await CheckEnabled(events[aliases[command]], e.Channel.Id))
                     {
                         await Task.Run(() => events[aliases[command]].Check(OverrideIdentifier, e));
-                        CommandsUsed++;
                     }
                 }
             }
@@ -160,7 +274,7 @@ namespace IA.Events
                 }
             }
         }
-        public async Task<string> ListCommands(ulong channel_id)
+        public async Task<string> ListCommands(MessageEventArgs e)
         {
             try
             {            
@@ -169,7 +283,7 @@ namespace IA.Events
 
                 foreach (Event ev in events.Values)
                 {
-                    if (await CheckEnabled(ev, channel_id))
+                    if (await CheckEnabled(ev, e.Channel.Id))
                     {
                         if (ev.info.parent != null)
                         {
@@ -177,7 +291,10 @@ namespace IA.Events
                             {
                                 moduleEvents.Add(ev.info.parent.defaultInfo.name, new List<string>());
                             }
-                            moduleEvents[ev.info.parent.defaultInfo.name].Add(ev.info.name);
+                            if (GetUserAccessibility(e) >= ev.info.accessibility)
+                            {
+                                moduleEvents[ev.info.parent.defaultInfo.name].Add(ev.info.name);
+                            }
                         }
                         else
                         {
@@ -210,8 +327,24 @@ namespace IA.Events
             }
             catch(Exception ex)
             {
-                return ex.Message + "\n\n" + ex.StackTrace;
+                return "";
             }
+        }
+        public EventAccessibility GetUserAccessibility(MessageEventArgs e)
+        {
+            if (developers.Contains(e.User.Id)) return EventAccessibility.DEVELOPERONLY;
+            if (e.User.ServerPermissions.Administrator) return EventAccessibility.ADMINONLY;
+            return EventAccessibility.PUBLIC;
+        }
+
+        public int CommandsUsed()
+        {
+            int output = 0;
+            foreach(Event e in events.Values)
+            {
+                output += e.CommandUsed;
+            }
+            return output;
         }
 
         public string GetPrefix(ulong server_id)
@@ -242,7 +375,7 @@ namespace IA.Events
 
             try
             {
-                SendToSQL("CREATE TABLE event_information_" + newEvent.info.name + "(id BIGINT, enabled BOOLEAN)");
+                SendToSQL("CREATE TABLE event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
             }
             catch
             {
@@ -251,10 +384,15 @@ namespace IA.Events
 
         async Task<bool> CheckEnabled(Event e, ulong id)
         {
+            if(events[e.info.name].enabled.ContainsKey(id))
+            {
+                return events[e.info.name].enabled[id];
+            }
+
             int state = await Task.Run(() => GetEnabledFromSQL(e.info.name, id));
             if(state == -1)
             {
-                await Task.Run(() => SendToSQL(string.Format("INSERT INTO event_information_{0}(id, enabled) VALUES({1},{2});", e.info.name, id, e.info.enabled)));
+                await Task.Run(() => SendToSQL(string.Format("INSERT INTO event(name, id, enabled) VALUES('{0}', {1}, {2});", e.info.name, id, e.info.enabled)));
                 return e.info.enabled;
             }
             return (state == 1) ? true : false;
@@ -264,7 +402,7 @@ namespace IA.Events
         {
             MySqlConnection connection = new MySqlConnection(bot.SqlInformation.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = string.Format("SELECT enabled FROM event_information_{0} WHERE id={1} ", name, id);
+            command.CommandText = string.Format("SELECT enabled FROM event WHERE id={1} AND name='{0}'", name, id);
             connection.Open();
             MySqlDataReader r = command.ExecuteReader();
             string outputName = "ERROR";
@@ -283,7 +421,6 @@ namespace IA.Events
             }
             return -1;
         }
-
         string GetIdentifierFromSQL(ulong id)
         {
             MySqlConnection connection = new MySqlConnection(bot.SqlInformation.GetConnectionString());
