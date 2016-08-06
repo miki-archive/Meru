@@ -40,6 +40,7 @@ namespace IA.Events
         public int cooldown = 1;
 
         public Module parent;
+        public EventSystem origin;
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
         public EventType type = EventType.COMMAND;
@@ -48,6 +49,7 @@ namespace IA.Events
         {
             return aliases.Contains(command);
         };
+
         public ProcessCommand processCommand = (e, args) =>
         {
             e.Channel.SendMessage("This command has not been set up properly.");

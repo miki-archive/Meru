@@ -1,4 +1,5 @@
 ﻿using Discord;
+using IA.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,9 +37,15 @@ namespace IA.Events
                 args = e.Message.RawText.Substring(e.Message.RawText.Split(' ')[0].Length + 1);
             }
             string[] aliases = new string[info.aliases.Length + 1];
+            int i = 0; 
+            foreach (string a in info.aliases)
+            {
+                aliases[i] = a;
+                i++;
+            }
             aliases[aliases.Length - 1] = info.name;
 
-            if (!EventSystem.developers.Contains(e.User.Id))
+            if (!info.origin.developers.Contains(e.User.Id))
             {
                 if (info.accessibility == EventAccessibility.DEVELOPERONLY)
                 {
@@ -62,8 +69,15 @@ namespace IA.Events
 
             if(info.checkCommand(command, aliases, e))
             {
-                await Task.Run(() => info.processCommand(e, args));
-                Console.WriteLine(command + " called from " + e.Server.Name + " [" + e.Server.Id + " # " + e.Channel.Id + "]");
+                try
+                {
+                    info.processCommand(e, args);
+                }
+                catch(Exception ex)
+                {
+                    Log.ErrorAt(info.name, ex.Message);
+                }
+                Log.Message(info.name + " called from " + e.Server.Name + " [" + e.Server.Id + " # " + e.Channel.Id + "]");
                 CommandUsed++;
             }
         }
@@ -73,9 +87,14 @@ namespace IA.Events
             Message m = await e.Channel.SendMessage(message);
             if (s != null)
             {
-                await Task.Delay(s.Seconds * 1000);
-                await m.Delete();
+                await Task.Run(() => DeleteMessage(s, m)); 
             }
+        }
+
+        static async Task DeleteMessage(DeleteSelf s, Message message)
+        {
+            await Task.Delay(s.Seconds * 1000);
+            await message.Delete();
         }
 
         bool IsOnCooldown(ulong id)

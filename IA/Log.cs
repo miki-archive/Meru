@@ -2,7 +2,7 @@
 
 namespace IA.Logging
 {
-    class Log
+    public class Log
     {
         /// <summary>
         /// Display a [msg] message.

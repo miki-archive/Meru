@@ -9,9 +9,13 @@ namespace IA
 {
     public class ClientInformation
     {
-        public string botName;
-        public string botVersion;
-        public LogLevel logLevel;
+        public string botName = "IABot";
+        public string botVersion = "1.2.1";
+
+        public string botToken = "";
+        public string botIdentifier = ">";
+
+        public LogLevel logLevel = LogLevel.ERROR;
 
         public SQLInformation sqlInformation;
 
@@ -34,7 +38,6 @@ namespace IA
     {
         ALL,
         INFO,
-        ERROR,
-        NONE
+        ERROR
     }
 }

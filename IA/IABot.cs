@@ -8,17 +8,20 @@ using System.Diagnostics;
 using IA.Events;
 using System.Threading;
 using IA.Logging;
+using IA.SQL;
 
 namespace IA
 {
     public class IABot
     {
-        public ClientInformation clientInformation = new ClientInformation();
+        public ClientInformation clientInformation { private set; get; } = new ClientInformation();
 
-        public DiscordClient client;
+        public DiscordClient client { private set; get; }
+        public SQLManager sql { private set; get; }
         EventSystem events;
 
-        static string version = "1.2";
+        public const string VersionText = "IA v" + VersionNumber;
+        public const string VersionNumber = "1.3";
 
         public IABot(Action<ClientInformation> client)
         {
@@ -28,23 +31,35 @@ namespace IA
                 events = new EventSystem(x =>
                 {
                     x.Name = clientInformation.botName;
+                    x.Identifier = clientInformation.botIdentifier;
                     x.SqlInformation = clientInformation.sqlInformation;
                 });
+                sql = new SQLManager(clientInformation.sqlInformation, clientInformation.botIdentifier);
                 Start();
             }
         }
 
         void Start()
         {
-            if (clientInformation.CanLog(LogLevel.INFO)) Log.Message("Starting IA v" + version);
+            if (clientInformation.CanLog(LogLevel.INFO)) Log.Message("Starting " + VersionText);
             client = new DiscordClient(x =>
             {
                 x.AppName = clientInformation.botName;
                 x.AppVersion = clientInformation.botVersion;
             });
             client.MessageReceived += Client_MessageReceived;
+            client.Ready += Client_Ready;
         }
- 
+
+        public void AddDeveloper(ulong developerId)
+        {
+            events.developers.Add(developerId);
+        }
+        public void AddDeveloper(User user)
+        {
+            events.developers.Add(user.Id);
+        }
+
         public void AddEvent(Action<EventInformation> e)
         {
             events.AddEvent(e);
@@ -52,31 +67,44 @@ namespace IA
 
         public void Connect()
         {
+            if(clientInformation.botToken == "")
+            {
+                Log.Error("No Discord token found in bot properties.");
+                return;
+            }
+
             client.ExecuteAndWait(async () =>
             {
-                await client.Connect(Global.ApiKey);
+                await client.Connect(clientInformation.botToken);
             });
         }
 
         public void DisableEvent(MessageEventArgs e)
         {
-            events.Disable(e);
-        }
-        public void EnableEvent(MessageEventArgs e)
-        {
-            events.Enable(e);
+            events.Toggle(e, false);
         }
 
+        public void EnableEvent(MessageEventArgs e)
+        {
+            events.Toggle(e, true);
+        }
+
+        /// <summary>
+        /// Returns total usage of all events.
+        /// </summary>
         public int GetEventUses()
         {
             return events.CommandsUsed();
         }
 
-        //TODO
-        //public int GetEventUses(string eventName)
-        //{
-            
-        //}
+        /// <summary>
+        /// Returns usage from specific event.
+        /// </summary>
+        /// <param name="eventName">name of event</param>
+        public int GetEventUses(string eventName)
+        {
+            return events.CommandsUsed(eventName);
+        }
 
         public void IgnoreUser(ulong userId)
         {
@@ -95,6 +123,11 @@ namespace IA
         public void ToggleEvent(MessageEventArgs e)
         {
             events.Toggle(e);
+        }
+
+        private void Client_Ready(object sender, EventArgs e)
+        {
+            Log.DoneAt(clientInformation.botName, "Connected to discord!");
         }
 
         private async void Client_MessageReceived(object sender, MessageEventArgs e)

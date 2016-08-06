@@ -97,9 +97,6 @@ namespace IA.Node
                     process.Start();
                     process.WaitForExit();
                     string output = process.StandardOutput.ReadToEnd();
-                    Console.WriteLine("CLEVERBOT| " + process.StandardOutput.ReadToEnd());
-                    Console.WriteLine("CLEVERBOT| " + process.StandardError.ReadToEnd());
-
                     return output != "" ? output : ":white_check_mark:";
                 }
                 else
