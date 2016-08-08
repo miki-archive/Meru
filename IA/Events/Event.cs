@@ -28,7 +28,7 @@ namespace IA.Events
             info.Invoke(this.info);
         }
 
-        public async Task Check(string identifier, MessageEventArgs e)
+        public async Task Check(MessageEventArgs e, string identifier = "")
         {
             string command = e.Message.RawText.Substring(identifier.Length).Split(' ')[0];
             string args = "";

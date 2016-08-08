@@ -9,13 +9,11 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    //TODO: clean up.
     public class EventSystem
     {
         public List<ulong> developers = new List<ulong>();
 
         Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
-        Dictionary<string, Event> events = new Dictionary<string, Event>();
         Dictionary<string, string> aliases = new Dictionary<string, string>();
 
         List<ulong> ignore = new List<ulong>();
@@ -24,6 +22,7 @@ namespace IA.Events
         /// Variable to check if eventSystem has been defined already.
         /// </summary>
         static BotInformation bot;
+        EventContainer events;
         static SQLManager sql;
 
         public string OverrideIdentifier { private set; get; }
@@ -41,15 +40,20 @@ namespace IA.Events
             }
 
             bot = new BotInformation(botInfo);
-            sql = new SQLManager(bot.SqlInformation, bot.Identifier);
-            try
+            events = new EventContainer();
+
+            if (bot.SqlInformation != null)
             {
-                MySqlConnection connection = new MySqlConnection(bot.SqlInformation.GetConnectionString());
-                sql.SendToSQL("CREATE TABLE identifier(id BIGINT, i varchar(255))");
-            }
-            catch
-            {
-                //TODO: fix error about creating new table.
+                sql = new SQLManager(bot.SqlInformation, bot.Identifier);
+                try
+                {
+                    MySqlConnection connection = new MySqlConnection(bot.SqlInformation.GetConnectionString());
+                    sql.SendToSQL("CREATE TABLE identifier(id BIGINT, i varchar(255))");
+                }
+                catch
+                {
+                    //TODO: fix error about creating new table.
+                }
             }
             OverrideIdentifier = bot.Name.ToLower() + ".";
         }
@@ -58,12 +62,13 @@ namespace IA.Events
         /// Creates a new event
         /// </summary>
         /// <param name="info">all information for said event</param>
+        [Obsolete("This method is obsolete, use AddCommandEvent instead.")]
         public void AddEvent(Action<EventInformation> info)
         {
             Event newEvent = new Event();
             info.Invoke(newEvent.info);
             newEvent.info.origin = this;
-            events.Add(newEvent.info.name.ToLower(), newEvent);
+            events.CommandEvents.Add(newEvent.info.name.ToLower(), newEvent);
             if (newEvent.info.aliases.Length > 0)
             {
                 foreach (string s in newEvent.info.aliases)
@@ -84,6 +89,33 @@ namespace IA.Events
                 //todo: fix error about table already existing.
             }
         }
+        public void AddCommandEvent(Action<EventInformation> info)
+        {
+            Event newEvent = new Event();
+            info.Invoke(newEvent.info);
+            newEvent.info.origin = this;
+            events.CommandEvents.Add(newEvent.info.name.ToLower(), newEvent);
+            if (newEvent.info.aliases.Length > 0)
+            {
+                foreach (string s in newEvent.info.aliases)
+                {
+                    aliases.Add(s, newEvent.info.name.ToLower());
+                }
+            }
+
+            try
+            {
+                if (bot.SqlInformation != null)
+                {
+                    sql.SendToSQL("CREATE TABLE event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+                }
+            }
+            catch
+            {
+                //todo: fix error about table already existing.
+            }
+        }
+
 
         public async void SetIdentifier(MessageEventArgs e, string prefix)
         {
@@ -120,17 +152,17 @@ namespace IA.Events
             try
             {
                 bool isEnabled = false;
-                if (events.ContainsKey(targetcommand))
+                if (events.CommandEvents.ContainsKey(targetcommand))
                 {
                     if (bot.SqlInformation != null)
                     {
-                        isEnabled = await IsEnabled(events[targetcommand], e.Channel.Id);
+                        isEnabled = await IsEnabled(events.CommandEvents[targetcommand], e.Channel.Id);
                         Log.Warning("toggle won't be saved due to no sql information");
                     }
-                    events[targetcommand].enabled[e.Channel.Id] = !events[targetcommand].enabled[e.Channel.Id];
+                    events.CommandEvents[targetcommand].enabled[e.Channel.Id] = !events.CommandEvents[targetcommand].enabled[e.Channel.Id];
                     if (bot.SqlInformation != null)
                     {
-                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events[targetcommand].enabled[e.Channel.Id], e.Channel.Id)));
+                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events.CommandEvents[targetcommand].enabled[e.Channel.Id], e.Channel.Id)));
                         await e.Channel.SendMessage(!isEnabled == true ? "Enabled " : "Disabled " + targetcommand + " for this channel!");
                     }
                 }
@@ -138,12 +170,12 @@ namespace IA.Events
                 {
                     if (bot.SqlInformation != null)
                     {
-                        isEnabled = await IsEnabled(events[targetcommand], e.Channel.Id);
+                        isEnabled = await IsEnabled(events.CommandEvents[targetcommand], e.Channel.Id);
                     }
-                    events[aliases[targetcommand]].enabled[e.Channel.Id] = !isEnabled;
+                    events.CommandEvents[aliases[targetcommand]].enabled[e.Channel.Id] = !isEnabled;
                     if (bot.SqlInformation != null)
                     {
-                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events[aliases[targetcommand]].enabled[e.Channel.Id], e.Channel.Id)));
+                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events.CommandEvents[aliases[targetcommand]].enabled[e.Channel.Id], e.Channel.Id)));
                         await e.Channel.SendMessage(!isEnabled == true ? "Enabled " : "Disabled " + targetcommand + " for this channel!");
                     }
                 }
@@ -166,17 +198,17 @@ namespace IA.Events
             try
             {
                 bool isEnabled = false;
-                if (events.ContainsKey(targetcommand))
+                if (events.CommandEvents.ContainsKey(targetcommand))
                 {
                     if (bot.SqlInformation != null)
                     {
-                        isEnabled = await IsEnabled(events[targetcommand], e.Channel.Id);
+                        isEnabled = await IsEnabled(events.CommandEvents[targetcommand], e.Channel.Id);
                         Log.Warning("toggle won't be saved due to no sql information");
                     }
-                    events[targetcommand].enabled[e.Channel.Id] = overriddenState;
+                    events.CommandEvents[targetcommand].enabled[e.Channel.Id] = overriddenState;
                     if (bot.SqlInformation != null)
                     {
-                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events[targetcommand].enabled[e.Channel.Id], e.Channel.Id)));
+                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events.CommandEvents[targetcommand].enabled[e.Channel.Id], e.Channel.Id)));
                         await e.Channel.SendMessage(!isEnabled == true ? "Enabled " : "Disabled " + targetcommand + " for this channel!");
                     }
                 }
@@ -184,12 +216,12 @@ namespace IA.Events
                 {
                     if (bot.SqlInformation != null)
                     {
-                        isEnabled = await IsEnabled(events[targetcommand], e.Channel.Id);
+                        isEnabled = await IsEnabled(events.CommandEvents[targetcommand], e.Channel.Id);
                     }
-                    events[aliases[targetcommand]].enabled[e.Channel.Id] = overriddenState;
+                    events.CommandEvents[aliases[targetcommand]].enabled[e.Channel.Id] = overriddenState;
                     if (bot.SqlInformation != null)
                     {
-                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events[aliases[targetcommand]].enabled[e.Channel.Id], e.Channel.Id)));
+                        await Task.Run(() => sql.SendToSQL(string.Format("UPDATE event SET enabled = {1} WHERE id = {2} AND name = '{0}';", targetcommand, events.CommandEvents[aliases[targetcommand]].enabled[e.Channel.Id], e.Channel.Id)));
                         await e.Channel.SendMessage(!isEnabled == true ? "Enabled " : "Disabled " + targetcommand + " for this channel!");
                     }
                 }
@@ -200,7 +232,7 @@ namespace IA.Events
             }
         }
 
-        public async Task Check(MessageEventArgs e)
+        public async Task OnMessageRecieved(MessageEventArgs e)
         {
             if (e.Channel.IsPrivate || ignore.Contains(e.Server.Id)) return;
             if (!identifier.ContainsKey(e.Server.Id)) LoadIdentifier(e.Server.Id);
@@ -211,34 +243,40 @@ namespace IA.Events
 
             if (await CheckIdentifier(message, identifier[e.Server.Id], e)) return;
             else if (await CheckIdentifier(message, OverrideIdentifier, e)) return;
-            else if (e.Message.IsMentioningMe())
+        }
+        public async Task OnMention(MessageEventArgs e)
+        {
+            foreach (Event ev in events.MentionEvents.Values)
             {
-                foreach (Event ev in events.Values)
-                {
-                    if (ev.info.type == EventType.MENTION)
-                    {
-                        await Task.Run(() => ev.Check("", e));
-                    }
-                }
+                await ev.Check(e);
             }
         }
+        public async Task OnUserJoin(UserEventArgs e)
+        {
+
+        }
+        public async Task OnUserLeave(UserEventArgs e)
+        {
+
+        }
+
         public async Task<bool> CheckIdentifier(string message, string identifier, MessageEventArgs e)
         {
             string command = message.Substring(identifier.Length).Split(' ')[0];
 
-            if (events.ContainsKey(command))
+            if (events.CommandEvents.ContainsKey(command))
             {
-                if (await IsEnabled(events[command], e.Channel.Id))
+                if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
                 {
-                    await Task.Run(() => events[command].Check(identifier, e));
+                    await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
                     return true;
                 }
             }
             else if (aliases.ContainsKey(command))
             {
-                if (await IsEnabled(events[aliases[command]], e.Channel.Id))
+                if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
                 {
-                    await Task.Run(() => events[aliases[command]].Check(identifier, e));
+                    await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
                     return true;
                 }
             }
@@ -252,7 +290,7 @@ namespace IA.Events
                 Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
                 moduleEvents.Add("Misc", new List<string>());
 
-                foreach (Event ev in events.Values)
+                foreach (Event ev in events.CommandEvents.Values)
                 {
                     if (await IsEnabled(ev, e.Channel.Id))
                     {
@@ -304,7 +342,7 @@ namespace IA.Events
 
         public Event GetEvent(string eventName)
         {
-            return events[eventName.ToLower()];
+            return events.CommandEvents[eventName.ToLower()];
         }
         public EventAccessibility GetUserAccessibility(MessageEventArgs e)
         {
@@ -325,7 +363,7 @@ namespace IA.Events
             int output = 0;
             try
             {
-                foreach (Event e in events.Values)
+                foreach (Event e in events.CommandEvents.Values)
                 {
                     output += e.CommandUsed;
                 }
@@ -377,9 +415,9 @@ namespace IA.Events
         {
             if (bot.SqlInformation == null) return true;
 
-            if (events[e.info.name].enabled.ContainsKey(id))
+            if (events.CommandEvents[e.info.name].enabled.ContainsKey(id))
             {
-                return events[e.info.name].enabled[id];
+                return events.CommandEvents[e.info.name].enabled[id];
             }
 
             int state = await Task.Run(() => sql.IsEventEnabled(e.info.name, id));

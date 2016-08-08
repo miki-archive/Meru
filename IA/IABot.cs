@@ -23,6 +23,10 @@ namespace IA
         public const string VersionText = "IA v" + VersionNumber;
         public const string VersionNumber = "1.3";
 
+        public IABot()
+        {
+            
+        }
         public IABot(Action<ClientInformation> client)
         {
             if (client != null)
@@ -48,7 +52,13 @@ namespace IA
                 x.AppVersion = clientInformation.botVersion;
             });
             client.MessageReceived += Client_MessageReceived;
+            client.UserJoined += Client_UserJoined;
             client.Ready += Client_Ready;
+        }
+
+        private async void Client_UserJoined(object sender, UserEventArgs e)
+        {
+            await events.OnUserJoin(e);
         }
 
         public void AddDeveloper(ulong developerId)
@@ -61,6 +71,10 @@ namespace IA
         }
 
         public void AddEvent(Action<EventInformation> e)
+        {
+            events.AddEvent(e);
+        }
+        public void AddCommandEvent(Action<EventInformation> e)
         {
             events.AddEvent(e);
         }
@@ -132,7 +146,7 @@ namespace IA
 
         private async void Client_MessageReceived(object sender, MessageEventArgs e)
         {
-            await events.Check(e);
+            await events.OnMessageRecieved(e);
         }
     }
 }

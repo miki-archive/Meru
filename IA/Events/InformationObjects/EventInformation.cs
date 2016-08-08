@@ -17,14 +17,6 @@ namespace IA.Events
         DEVELOPERONLY
     }
 
-    public enum EventType
-    {
-        COMMAND,
-        MENTION,
-        ONJOIN,
-        ONLEAVE
-    }
-
     public class EventInformation
     {
         public string name = "name not set";
@@ -43,7 +35,6 @@ namespace IA.Events
         public EventSystem origin;
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
-        public EventType type = EventType.COMMAND;
 
         public CheckCommand checkCommand = (command, aliases, e) =>
         {
