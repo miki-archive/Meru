@@ -7,7 +7,6 @@ using Discord;
 using System.Diagnostics;
 using IA.Events;
 using System.Threading;
-using IA.Logging;
 using IA.SQL;
 
 namespace IA
@@ -16,9 +15,9 @@ namespace IA
     {
         public ClientInformation clientInformation { private set; get; } = new ClientInformation();
 
-        public DiscordClient client { private set; get; }
-        public SQLManager sql { private set; get; }
-        EventSystem events;
+        public DiscordClient Client { private set; get; }
+        public SQLManager Sql { private set; get; }
+        public EventSystem Events { private set; get; }
 
         public const string VersionText = "IA v" + VersionNumber;
         public const string VersionNumber = "1.3";
@@ -32,13 +31,13 @@ namespace IA
             if (client != null)
             {
                 client.Invoke(clientInformation);
-                events = new EventSystem(x =>
+                Events = new EventSystem(x =>
                 {
                     x.Name = clientInformation.botName;
                     x.Identifier = clientInformation.botIdentifier;
                     x.SqlInformation = clientInformation.sqlInformation;
                 });
-                sql = new SQLManager(clientInformation.sqlInformation, clientInformation.botIdentifier);
+                Sql = new SQLManager(clientInformation.sqlInformation, clientInformation.botIdentifier);
                 Start();
             }
         }
@@ -46,37 +45,39 @@ namespace IA
         void Start()
         {
             if (clientInformation.CanLog(LogLevel.INFO)) Log.Message("Starting " + VersionText);
-            client = new DiscordClient(x =>
+            Client = new DiscordClient(x =>
             {
                 x.AppName = clientInformation.botName;
                 x.AppVersion = clientInformation.botVersion;
             });
-            client.MessageReceived += Client_MessageReceived;
-            client.UserJoined += Client_UserJoined;
-            client.Ready += Client_Ready;
+            Client.MessageReceived += Client_MessageReceived;
+            Client.UserJoined += Client_UserJoined;
+            Client.UserLeft += Client_UserLeft;
+            Client.Ready += Client_Ready;
+        }
+
+        private async void Client_UserLeft(object sender, UserEventArgs e)
+        {
+            await Events.OnUserLeave(e);
         }
 
         private async void Client_UserJoined(object sender, UserEventArgs e)
         {
-            await events.OnUserJoin(e);
+            await Events.OnUserJoin(e);
         }
 
         public void AddDeveloper(ulong developerId)
         {
-            events.developers.Add(developerId);
+            Events.developers.Add(developerId);
         }
         public void AddDeveloper(User user)
         {
-            events.developers.Add(user.Id);
+            Events.developers.Add(user.Id);
         }
 
+        [Obsolete("use IABot.EventSystem.AddCommandEvent()", true)]
         public void AddEvent(Action<EventInformation> e)
         {
-            events.AddEvent(e);
-        }
-        public void AddCommandEvent(Action<EventInformation> e)
-        {
-            events.AddEvent(e);
         }
 
         public void Connect()
@@ -87,56 +88,10 @@ namespace IA
                 return;
             }
 
-            client.ExecuteAndWait(async () =>
+            Client.ExecuteAndWait(async () =>
             {
-                await client.Connect(clientInformation.botToken);
+                await Client.Connect(clientInformation.botToken);
             });
-        }
-
-        public void DisableEvent(MessageEventArgs e)
-        {
-            events.Toggle(e, false);
-        }
-
-        public void EnableEvent(MessageEventArgs e)
-        {
-            events.Toggle(e, true);
-        }
-
-        /// <summary>
-        /// Returns total usage of all events.
-        /// </summary>
-        public int GetEventUses()
-        {
-            return events.CommandsUsed();
-        }
-
-        /// <summary>
-        /// Returns usage from specific event.
-        /// </summary>
-        /// <param name="eventName">name of event</param>
-        public int GetEventUses(string eventName)
-        {
-            return events.CommandsUsed(eventName);
-        }
-
-        public void IgnoreUser(ulong userId)
-        {
-            events.Ignore(userId);
-        }
-
-        public string ListEvents(MessageEventArgs e)
-        {
-            return events.ListCommands(e).Result;
-        }
-        public async Task<string> ListEventsAsync(MessageEventArgs e)
-        {
-            return await events.ListCommands(e);
-        }
-
-        public void ToggleEvent(MessageEventArgs e)
-        {
-            events.Toggle(e);
         }
 
         private void Client_Ready(object sender, EventArgs e)
@@ -146,7 +101,12 @@ namespace IA
 
         private async void Client_MessageReceived(object sender, MessageEventArgs e)
         {
-            await events.OnMessageRecieved(e);
+            if (e.Message.RawText.StartsWith(Client.CurrentUser.Mention))
+            {
+                await Events.OnMention(e);
+                return;
+            }
+            await Events.OnMessageRecieved(e);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IA.Logging
+namespace IA
 {
     public class Log
     {

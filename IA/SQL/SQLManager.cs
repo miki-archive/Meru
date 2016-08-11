@@ -75,16 +75,34 @@ namespace IA.SQL
             return "ERROR";
         }
 
-        public void SendToSQL(string sqlcode)
+        public void SendToSQL(string sqlCode)
         {
             if (info == null) return;
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = sqlcode;
+            command.CommandText = sqlCode;
             connection.Open();
             MySqlDataReader r = command.ExecuteReader();
             connection.Close();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="sqlCode"></param>
+        public void TryCreateTable(string sqlCode)
+        {
+            if (info == null) return;
+
+            MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = $"CREATE TABLE IF NOT EXISTS {sqlCode}";
+            connection.Open();
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
     }
 }
+

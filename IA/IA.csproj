@@ -107,14 +107,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientInformation.cs" />
+    <Compile Include="Events\CommandEvent.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\EventContainer.cs" />
     <Compile Include="Events\EventSystem.cs" />
     <Compile Include="Events\InformationObjects\BotInformation.cs" />
-    <Compile Include="Events\InformationObjects\CommandEventInformation.cs" />
-    <Compile Include="Events\InformationObjects\EventInformation.cs" />
+    <Compile Include="Events\InformationObjects\EventsObjects\CommandEventInformation.cs" />
+    <Compile Include="Events\InformationObjects\EventsObjects\EventInformation.cs" />
     <Compile Include="Events\InformationObjects\ModuleInformation.cs" />
+    <Compile Include="Events\InformationObjects\EventsObjects\ServerEventInformation.cs" />
     <Compile Include="Events\Module.cs" />
+    <Compile Include="Events\UserEvent.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Node\Node.cs" />
     <Compile Include="IABot.cs" />

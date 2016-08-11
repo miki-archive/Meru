@@ -1,5 +1,4 @@
 ﻿using Discord;
-using IA.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +12,9 @@ namespace IA.Events
         public EventInformation info;
 
         public Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
-        Dictionary<ulong, DateTime> lastTimeUsed = new Dictionary<ulong, DateTime>();
+        protected Dictionary<ulong, DateTime> lastTimeUsed = new Dictionary<ulong, DateTime>();
 
-        public int CommandUsed { private set; get; }
+        public int CommandUsed { protected set; get; }
 
         public Event()
         {
@@ -28,59 +27,7 @@ namespace IA.Events
             info.Invoke(this.info);
         }
 
-        public async Task Check(MessageEventArgs e, string identifier = "")
-        {
-            string command = e.Message.RawText.Substring(identifier.Length).Split(' ')[0];
-            string args = "";
-            if (e.Message.RawText.Split(' ').Length > 1)
-            {
-                args = e.Message.RawText.Substring(e.Message.RawText.Split(' ')[0].Length + 1);
-            }
-            string[] aliases = new string[info.aliases.Length + 1];
-            int i = 0; 
-            foreach (string a in info.aliases)
-            {
-                aliases[i] = a;
-                i++;
-            }
-            aliases[aliases.Length - 1] = info.name;
-
-            if (!info.origin.developers.Contains(e.User.Id))
-            {
-                if (info.accessibility == EventAccessibility.DEVELOPERONLY)
-                {
-                    return;
-                }
-
-                if (info.accessibility != EventAccessibility.PUBLIC)
-                {
-                    if (!e.User.ServerPermissions.Administrator)
-                    {
-                        return;
-                    }
-                }
-
-                if (IsOnCooldown(e.User.Id))
-                {
-                    await e.Channel.SendMessage("Sorry, this command is still on cooldown!");
-                    return;
-                }
-            }
-
-            if(info.checkCommand(command, aliases, e))
-            {
-                try
-                {
-                    info.processCommand(e, args);
-                }
-                catch(Exception ex)
-                {
-                    Log.ErrorAt(info.name, ex.Message);
-                }
-                Log.Message(info.name + " called from " + e.Server.Name + " [" + e.Server.Id + " # " + e.Channel.Id + "]");
-                CommandUsed++;
-            }
-        }
+       
 
         public static async Task PrintMessage(MessageEventArgs e, string message, DeleteSelf s = null)
         {
@@ -97,33 +44,24 @@ namespace IA.Events
             await message.Delete();
         }
 
-        bool IsOnCooldown(ulong id)
-        {
-            if (lastTimeUsed.ContainsKey(id))
-            {
-                if (DateTime.Now.AddSeconds(-info.cooldown) >= lastTimeUsed[id])
-                {
-                    lastTimeUsed[id] = DateTime.Now;
-                    return false;
-                }
-                return true;
-            }
-            else
-            {
-                lastTimeUsed.Add(id, DateTime.Now);
-                return false;
-            }
-        }
-
         public void SetEnabled(MessageEventArgs e, bool v)
         {
+            ulong id = 0;
+
+            switch (info.range)
+            {
+                case EventRange.CHANNEL: id = e.Channel.Id; break;
+                case EventRange.SERVER: id = e.Server.Id; break;
+                case EventRange.USER: id = e.User.Id; break;    
+            }
+
             if(!enabled.ContainsKey(e.Channel.Id))
             {
-                enabled.Add(e.Channel.Id, v);
+                enabled.Add(id, v);
             }
             else
             {
-                enabled[e.Channel.Id] = v;
+                enabled[id] = v;
             }
         }
     }

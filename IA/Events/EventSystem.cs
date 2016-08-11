@@ -1,9 +1,10 @@
 ﻿using Discord;
-using IA.Logging;
+using IA.Events.InformationObjects;
 using IA.SQL;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -41,20 +42,10 @@ namespace IA.Events
 
             bot = new BotInformation(botInfo);
             events = new EventContainer();
+            sql = new SQLManager(bot.SqlInformation, bot.Identifier);
 
-            if (bot.SqlInformation != null)
-            {
-                sql = new SQLManager(bot.SqlInformation, bot.Identifier);
-                try
-                {
-                    MySqlConnection connection = new MySqlConnection(bot.SqlInformation.GetConnectionString());
-                    sql.SendToSQL("CREATE TABLE identifier(id BIGINT, i varchar(255))");
-                }
-                catch
-                {
-                    //TODO: fix error about creating new table.
-                }
-            }
+            sql.TryCreateTable("identifier(id BIGINT, i varchar(255))");
+
             OverrideIdentifier = bot.Name.ToLower() + ".";
         }
 
@@ -62,13 +53,16 @@ namespace IA.Events
         /// Creates a new event
         /// </summary>
         /// <param name="info">all information for said event</param>
-        [Obsolete("This method is obsolete, use AddCommandEvent instead.")]
-        public void AddEvent(Action<EventInformation> info)
+        [Obsolete("use AddCommandEvent instead.", true)]
+        public void AddEvent(Action<Event> info)
         {
-            Event newEvent = new Event();
+
+        }
+        public void AddCommandEvent(Action<CommandEventInformation> info)
+        {
+            CommandEvent newEvent = new CommandEvent();
             info.Invoke(newEvent.info);
             newEvent.info.origin = this;
-            events.CommandEvents.Add(newEvent.info.name.ToLower(), newEvent);
             if (newEvent.info.aliases.Length > 0)
             {
                 foreach (string s in newEvent.info.aliases)
@@ -76,25 +70,15 @@ namespace IA.Events
                     aliases.Add(s, newEvent.info.name.ToLower());
                 }
             }
+            events.CommandEvents.Add(newEvent.info.name.ToLower(), newEvent);
 
-            try
-            {
-                if (bot.SqlInformation != null)
-                {
-                    sql.SendToSQL("CREATE TABLE event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
-                }
-            }
-            catch
-            {
-                //todo: fix error about table already existing.
-            }
+            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
-        public void AddCommandEvent(Action<EventInformation> info)
+        public void AddJoinEvent(Action<UserEventInformation> info)
         {
-            Event newEvent = new Event();
+            UserEvent newEvent = new UserEvent();
             info.Invoke(newEvent.info);
             newEvent.info.origin = this;
-            events.CommandEvents.Add(newEvent.info.name.ToLower(), newEvent);
             if (newEvent.info.aliases.Length > 0)
             {
                 foreach (string s in newEvent.info.aliases)
@@ -102,20 +86,11 @@ namespace IA.Events
                     aliases.Add(s, newEvent.info.name.ToLower());
                 }
             }
+            events.JoinServerEvents.Add(newEvent.info.name.ToLower(), newEvent);
 
-            try
-            {
-                if (bot.SqlInformation != null)
-                {
-                    sql.SendToSQL("CREATE TABLE event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
-                }
-            }
-            catch
-            {
-                //todo: fix error about table already existing.
-            }
+
+            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
-
 
         public async void SetIdentifier(MessageEventArgs e, string prefix)
         {
@@ -126,7 +101,7 @@ namespace IA.Events
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + "\n\n" + ex.StackTrace);
+                Log.ErrorAt("IABot.EventSystem.SetIdentifier", ex.Message + "\n\n" + ex.StackTrace);
             }
         }
 
@@ -239,28 +214,45 @@ namespace IA.Events
 
             string message = e.Message.RawText.ToLower();
 
-            if (!message.StartsWith(identifier[e.Server.Id]) && !e.Message.IsMentioningMe()) return;
+            if (!message.StartsWith(identifier[e.Server.Id])) return;
 
             if (await CheckIdentifier(message, identifier[e.Server.Id], e)) return;
             else if (await CheckIdentifier(message, OverrideIdentifier, e)) return;
         }
+        public async Task SimulateMessage(MessageEventArgs e, string message)
+        {
+            if (e.Channel.IsPrivate || ignore.Contains(e.Server.Id)) return;
+            if (!identifier.ContainsKey(e.Server.Id)) LoadIdentifier(e.Server.Id);
+
+            if (!message.StartsWith(identifier[e.Server.Id])) return;
+
+            if (await CheckIdentifier(message, identifier[e.Server.Id], e, false)) return;
+            else if (await CheckIdentifier(message, OverrideIdentifier, e, false)) return;
+        }
+
         public async Task OnMention(MessageEventArgs e)
         {
-            foreach (Event ev in events.MentionEvents.Values)
+            foreach (CommandEvent ev in events.MentionEvents.Values)
             {
-                await ev.Check(e);
+                
             }
         }
         public async Task OnUserJoin(UserEventArgs e)
         {
-
+            foreach (UserEvent ev in events.JoinServerEvents.Values)
+            {
+                //await ev.Check(e);
+            }
         }
         public async Task OnUserLeave(UserEventArgs e)
         {
-
+            foreach (UserEvent ev in events.LeaveServerEvents.Values)
+            {
+                //await ev.Check(e);
+            }
         }
 
-        public async Task<bool> CheckIdentifier(string message, string identifier, MessageEventArgs e)
+        public async Task<bool> CheckIdentifier(string message, string identifier, MessageEventArgs e, bool doRunCommand = true)
         {
             string command = message.Substring(identifier.Length).Split(' ')[0];
 
@@ -268,8 +260,12 @@ namespace IA.Events
             {
                 if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
                 {
-                    await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
-                    return true;
+                    if (doRunCommand)
+                    {
+                        await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+
+                        return true;
+                    }
                 }
             }
             else if (aliases.ContainsKey(command))
@@ -340,10 +336,6 @@ namespace IA.Events
             }
         }
 
-        public Event GetEvent(string eventName)
-        {
-            return events.CommandEvents[eventName.ToLower()];
-        }
         public EventAccessibility GetUserAccessibility(MessageEventArgs e)
         {
             try
@@ -376,7 +368,7 @@ namespace IA.Events
         }
         public int CommandsUsed(string eventName)
         {
-            return GetEvent(eventName).CommandUsed;
+            return events.GetEvent(eventName).CommandUsed;
         }
 
         public void LoadIdentifier(ulong server)
@@ -424,8 +416,10 @@ namespace IA.Events
             if(state == -1)
             {
                 await Task.Run(() => sql.SendToSQL(string.Format("INSERT INTO event(name, id, enabled) VALUES('{0}', {1}, {2});", e.info.name, id, e.info.enabled)));
+                e.enabled.Add(id, e.info.enabled);
                 return e.info.enabled;
             }
+            e.enabled.Add(id, e.info.enabled);
             return (state == 1) ? true : false;
         }
     }

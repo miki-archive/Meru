@@ -7,9 +7,6 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public delegate bool CheckCommand(string command, string[] allAliases, MessageEventArgs e);
-    public delegate void ProcessCommand(MessageEventArgs e, string args);
-
     public enum EventAccessibility
     {
         PUBLIC,
@@ -17,6 +14,13 @@ namespace IA.Events
         DEVELOPERONLY
     }
 
+    public enum EventRange
+    {
+        USER,
+        CHANNEL,
+        SERVER
+    }
+    
     public class EventInformation
     {
         public string name = "name not set";
@@ -24,27 +28,17 @@ namespace IA.Events
 
         public string description;
         public string[] usage = new string[0];
+        public string errorMessage = "Something went wrong!";
 
         public bool enabled = true;
         public bool deletesMessage = false;
         public DeleteSelf deletesSelf = null;
 
-        public int cooldown = 1;
-
         public Module parent;
         public EventSystem origin;
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
-
-        public CheckCommand checkCommand = (command, aliases, e) =>
-        {
-            return aliases.Contains(command);
-        };
-
-        public ProcessCommand processCommand = (e, args) =>
-        {
-            e.Channel.SendMessage("This command has not been set up properly.");
-        };
+        public EventRange range = EventRange.CHANNEL;
 
         public EventInformation()
         {
