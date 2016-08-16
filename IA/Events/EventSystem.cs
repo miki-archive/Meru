@@ -47,17 +47,10 @@ namespace IA.Events
             sql.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 
             OverrideIdentifier = bot.Name.ToLower() + ".";
+
+            events.InternalEvents.Add("ia-enabled-db", new Event());
         }
 
-        /// <summary>
-        /// Creates a new event
-        /// </summary>
-        /// <param name="info">all information for said event</param>
-        [Obsolete("use AddCommandEvent instead.", true)]
-        public void AddEvent(Action<Event> info)
-        {
-
-        }
         public void AddCommandEvent(Action<CommandEventInformation> info)
         {
             CommandEvent newEvent = new CommandEvent();
@@ -74,6 +67,24 @@ namespace IA.Events
 
             sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
+
+        public void AddMentionEvent(Action<CommandEventInformation> info)
+        {
+            CommandEvent newEvent = new CommandEvent();
+            info.Invoke(newEvent.info);
+            newEvent.info.origin = this;
+            if (newEvent.info.aliases.Length > 0)
+            {
+                foreach (string s in newEvent.info.aliases)
+                {
+                    aliases.Add(s, newEvent.info.name.ToLower());
+                }
+            }
+            events.MentionEvents.Add(newEvent.info.name.ToLower(), newEvent);
+
+            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
+
         public void AddJoinEvent(Action<UserEventInformation> info)
         {
             UserEvent newEvent = new UserEvent();
@@ -90,6 +101,38 @@ namespace IA.Events
 
 
             sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
+
+        public void AddLeaveEvent(Action<UserEventInformation> info)
+        {
+            UserEvent newEvent = new UserEvent();
+            info.Invoke(newEvent.info);
+            newEvent.info.origin = this;
+            if (newEvent.info.aliases.Length > 0)
+            {
+                foreach (string s in newEvent.info.aliases)
+                {
+                    aliases.Add(s, newEvent.info.name.ToLower());
+                }
+            }
+            events.LeaveServerEvents.Add(newEvent.info.name.ToLower(), newEvent);
+
+
+            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
+
+        /// <summary>
+        /// Gets event and returns as base value.
+        /// </summary>
+        /// <param name="id">event id</param>
+        /// <returns>Event from local database</returns>
+        public Event GetEvent(string id)
+        {
+            return events.GetEvent(id);
+        }
+        public CommandEvent GetCommandEvent(string id)
+        {
+            return events.CommandEvents.First(c => { return c.Key == id; }).Value;
         }
 
         public async void SetIdentifier(MessageEventArgs e, string prefix)
@@ -207,82 +250,10 @@ namespace IA.Events
             }
         }
 
-        public async Task OnMessageRecieved(MessageEventArgs e)
-        {
-            if (e.Channel.IsPrivate || ignore.Contains(e.Server.Id)) return;
-            if (!identifier.ContainsKey(e.Server.Id)) LoadIdentifier(e.Server.Id);
-
-            string message = e.Message.RawText.ToLower();
-
-            if (!message.StartsWith(identifier[e.Server.Id])) return;
-
-            if (await CheckIdentifier(message, identifier[e.Server.Id], e)) return;
-            else if (await CheckIdentifier(message, OverrideIdentifier, e)) return;
-        }
-        public async Task SimulateMessage(MessageEventArgs e, string message)
-        {
-            if (e.Channel.IsPrivate || ignore.Contains(e.Server.Id)) return;
-            if (!identifier.ContainsKey(e.Server.Id)) LoadIdentifier(e.Server.Id);
-
-            if (!message.StartsWith(identifier[e.Server.Id])) return;
-
-            if (await CheckIdentifier(message, identifier[e.Server.Id], e, false)) return;
-            else if (await CheckIdentifier(message, OverrideIdentifier, e, false)) return;
-        }
-
-        public async Task OnMention(MessageEventArgs e)
-        {
-            foreach (CommandEvent ev in events.MentionEvents.Values)
-            {
-                
-            }
-        }
-        public async Task OnUserJoin(UserEventArgs e)
-        {
-            foreach (UserEvent ev in events.JoinServerEvents.Values)
-            {
-                //await ev.Check(e);
-            }
-        }
-        public async Task OnUserLeave(UserEventArgs e)
-        {
-            foreach (UserEvent ev in events.LeaveServerEvents.Values)
-            {
-                //await ev.Check(e);
-            }
-        }
-
-        public async Task<bool> CheckIdentifier(string message, string identifier, MessageEventArgs e, bool doRunCommand = true)
-        {
-            string command = message.Substring(identifier.Length).Split(' ')[0];
-
-            if (events.CommandEvents.ContainsKey(command))
-            {
-                if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
-                {
-                    if (doRunCommand)
-                    {
-                        await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
-
-                        return true;
-                    }
-                }
-            }
-            else if (aliases.ContainsKey(command))
-            {
-                if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
-                {
-                    await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public async Task<string> ListCommands(MessageEventArgs e)
         {
             try
-            {            
+            {
                 Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
                 moduleEvents.Add("Misc", new List<string>());
 
@@ -336,18 +307,80 @@ namespace IA.Events
             }
         }
 
+        public async Task OnMessageRecieved(MessageEventArgs e)
+        {
+            Event internalEvent = events.GetInternalEvent("ia-enabled-db");
+            if (!internalEvent.enabled.ContainsKey(e.User.Id))
+            {
+                Event[] allEvents = events.GetAllEvents();
+                foreach(Event ev in allEvents)
+                {
+                    ulong id = 0;
+                    switch (ev.info.range)
+                    {
+                        case EventRange.CHANNEL: id = e.Channel.Id; break;
+                        case EventRange.SERVER: id = e.Server.Id; break;
+                        case EventRange.USER: id = e.User.Id; break;
+                    }
+                    await IsEnabled(ev, id);
+                }
+                internalEvent.enabled.Add(e.User.Id, true);
+            }
+
+            if (e.Channel.IsPrivate || ignore.Contains(e.Server.Id)) return;
+            if (!identifier.ContainsKey(e.Server.Id)) LoadIdentifier(e.Server.Id);
+
+            string message = e.Message.RawText.ToLower();
+
+            if (!message.StartsWith(identifier[e.Server.Id])) return;
+
+            if (await CheckIdentifier(message, identifier[e.Server.Id], e)) return;
+            else if (await CheckIdentifier(message, OverrideIdentifier, e)) return;
+        }
+
+        public async Task OnMention(MessageEventArgs e)
+        {
+            foreach (CommandEvent ev in events.MentionEvents.Values)
+            {
+                await ev.Check(e);
+            }
+        }
+
+        public async Task OnUserJoin(UserEventArgs e)
+        {
+            foreach (UserEvent ev in events.JoinServerEvents.Values)
+            {
+                if (await IsEnabled(ev, e.Server.Id))
+                {
+                    await ev.Check(e);
+                }
+            }
+        }
+
+        public async Task OnUserLeave(UserEventArgs e)
+        {
+            foreach (UserEvent ev in events.LeaveServerEvents.Values)
+            {
+                await ev.Check(e);
+            }
+        }
+
+        public async Task SimulateMessage(MessageEventArgs e, string message)
+        {
+            if (e.Channel.IsPrivate || ignore.Contains(e.Server.Id)) return;
+            if (!identifier.ContainsKey(e.Server.Id)) LoadIdentifier(e.Server.Id);
+
+            if (!message.StartsWith(identifier[e.Server.Id])) return;
+
+            if (await CheckIdentifier(message, identifier[e.Server.Id], e, false)) return;
+            else if (await CheckIdentifier(message, OverrideIdentifier, e, false)) return;
+        }
+
         public EventAccessibility GetUserAccessibility(MessageEventArgs e)
         {
-            try
-            {
-                if (developers.Contains(e.User.Id)) return EventAccessibility.DEVELOPERONLY;
-                if (e.User.ServerPermissions.Administrator) return EventAccessibility.ADMINONLY;
-                return EventAccessibility.PUBLIC;
-            }
-            catch
-            {
-                return EventAccessibility.DEVELOPERONLY;
-            }
+            if (developers.Contains(e.User.Id)) return EventAccessibility.DEVELOPERONLY;
+            if (e.User.ServerPermissions.Administrator) return EventAccessibility.ADMINONLY;
+            return EventAccessibility.PUBLIC;
         }
 
         public int CommandsUsed()
@@ -403,9 +436,36 @@ namespace IA.Events
             }
         }
 
+        async Task<bool> CheckIdentifier(string message, string identifier, MessageEventArgs e, bool doRunCommand = true)
+        {
+            string command = message.Substring(identifier.Length).Split(' ')[0];
+
+            if (events.CommandEvents.ContainsKey(command))
+            {
+                if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
+                {
+                    if (doRunCommand)
+                    {
+                        await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+
+                        return true;
+                    }
+                }
+            }
+            else if (aliases.ContainsKey(command))
+            {
+                if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
+                {
+                    await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
+                    return true;
+                }
+            }
+            return false;
+        }
+
         async Task<bool> IsEnabled(Event e, ulong id)
         {
-            if (bot.SqlInformation == null) return true;
+            if (bot.SqlInformation == null) return e.info.enabled;
 
             if (events.CommandEvents[e.info.name].enabled.ContainsKey(id))
             {

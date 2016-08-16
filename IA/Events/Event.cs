@@ -25,23 +25,7 @@ namespace IA.Events
         public Event(Action<EventInformation> info)
         {
             info.Invoke(this.info);
-        }
-
-       
-
-        public static async Task PrintMessage(MessageEventArgs e, string message, DeleteSelf s = null)
-        {
-            Message m = await e.Channel.SendMessage(message);
-            if (s != null)
-            {
-                await Task.Run(() => DeleteMessage(s, m)); 
-            }
-        }
-
-        static async Task DeleteMessage(DeleteSelf s, Message message)
-        {
-            await Task.Delay(s.Seconds * 1000);
-            await message.Delete();
+            CommandUsed = 0;
         }
 
         public void SetEnabled(MessageEventArgs e, bool v)

@@ -41,6 +41,14 @@
       <HintPath>..\packages\Discord.Net.0.9.4\lib\net45\Discord.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DynamicExpresso.Core, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicExpresso.Core.1.3.1.0\lib\net40\DynamicExpresso.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IA, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ia.1.3.1\lib\IA.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -81,12 +89,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\IA\IA.csproj">
-      <Project>{e4b74dd1-8ccb-4fcc-9bde-0f79c43211e7}</Project>
-      <Name>IA</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

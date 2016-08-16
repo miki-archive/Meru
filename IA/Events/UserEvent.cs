@@ -12,12 +12,15 @@ namespace IA.Events
     {
         public new UserEventInformation info;
 
-        public async void Check(UserEventArgs e)
+        public UserEvent()
         {
-            if (enabled[e.Server.Id])
-            {
+            info = new UserEventInformation();
+            CommandUsed = 0;
+        }
 
-            }
+        public async Task Check(UserEventArgs e)
+        {
+            await Task.Run(() => info.processCommand(e));
         }
     }
 }

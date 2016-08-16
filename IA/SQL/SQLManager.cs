@@ -26,7 +26,10 @@ namespace IA.SQL
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = string.Format("SELECT enabled FROM event WHERE id={1} AND name='{0}'", name, channelId);
+            command.CommandText = string.Format("SELECT enabled FROM event WHERE id=?id AND name=?name");
+            command.Parameters.Add(new MySqlParameter("name", MySqlDbType.VarChar).Value = name);
+            command.Parameters.Add(new MySqlParameter("id", MySqlDbType.UInt64).Value = channelId);
+
             connection.Open();
             MySqlDataReader r = command.ExecuteReader();
 

@@ -118,6 +118,9 @@
     <Compile Include="Events\InformationObjects\EventsObjects\ServerEventInformation.cs" />
     <Compile Include="Events\Module.cs" />
     <Compile Include="Events\UserEvent.cs" />
+    <Compile Include="Extension Methods\Channel.cs" />
+    <Compile Include="FileHandling\FileReader.cs" />
+    <Compile Include="FileHandling\FileWriter.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Node\Node.cs" />
     <Compile Include="IABot.cs" />

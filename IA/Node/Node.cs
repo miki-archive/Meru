@@ -11,71 +11,20 @@ namespace IA.Node
 {
     public class Node
     {
-        static Channel c;
-        static string c_id;
-        static string c_args;
-
-        public Node()
-        {
-
-        }
-
-        public Node(string id, string args = "", Channel outputChannel = null)
-        {
-            c = outputChannel;
-            c_id = id;
-            c_args = args;
-        }
-
         public static void Create(string id, string code)
         {
             StreamWriter sw = new StreamWriter(Directory.GetCurrentDirectory() + @"\" + id + ".js");
             sw.Write(
-                "if(process.argv.length > 2)" +
-                "{" +
-                    "var input = process.argv[2];" +
-                    "input = input.replace(/_/g, ' ');" +
-                "}");
+                    "if(process.argv.length > 2)" +
+                    "{" +
+                        "var input = process.argv[2];" +
+                        "input = input.replace(/_/g, ' ');" +
+                    "}");
             sw.Write(code);
             sw.Close();
         }
 
-        public void Run()
-        {
-            ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = @"C:\Program Files\nodejs\node.exe";
-            c_args = c_args.Replace(' ', '_');
-            start.Arguments = string.Format("{0} {1}", c_id, c_args);
-            start.UseShellExecute = false;
-            start.RedirectStandardOutput = true;
-            start.RedirectStandardError = true;
-            RunProcessRealtime(start);
-            c.SendMessage(":white_check_mark: " + c_id + ".js successfully ended.");
-        }
-
-        void RunProcessRealtime(ProcessStartInfo p)
-        {
-            try
-            {
-                if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
-                {
-                    Process process = Process.Start(p);
-                    process.EnableRaisingEvents = true;
-                    process.OutputDataReceived += (s, e) =>
-                    {
-                        c.SendMessage("[" + c_id + "] " + e.Data);
-                    };
-                    process.BeginOutputReadLine();
-                    process.WaitForExit();
-                    process.Start();
-                }
-            }
-            catch
-            {
-            }
-        }
-
-        public static async Task<string> Run(string id, string args = "", Channel outputChannel = null)
+        public static async Task<string> RunAsync(string id, string args = "")
         {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = @"C:\Program Files\nodejs\node.exe";
@@ -84,30 +33,53 @@ namespace IA.Node
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             start.RedirectStandardError = true;
-            string output = await Task.Run(() => new Node().RunProcessAsync(start));
+            string output = await Task.Run(() => RunProcessAsync(start));
             return output;
         }
-        string RunProcessAsync(ProcessStartInfo p)
+
+        public static void Run(string programName, string args, Channel channel)
         {
-            try
+            ProcessStartInfo start = new ProcessStartInfo();
+            start.FileName = @"C:\Program Files\nodejs\node.exe";
+            args = args.Replace(' ', '_');
+            start.Arguments = string.Format("{0} {1}", programName, args);
+            start.UseShellExecute = false;
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardError = true;
+            RunProcessRealtime(start, programName, channel);
+            channel.SendMessage(":white_check_mark: " + programName + ".js successfully ended.");
+        }
+
+        static string RunProcessAsync(ProcessStartInfo p)
+        {
+            if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
             {
-                if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
-                {
-                    Process process = Process.Start(p);
-                    process.Start();
-                    process.WaitForExit();
-                    string output = process.StandardOutput.ReadToEnd();
-                    return output != "" ? output : ":white_check_mark:";
-                }
-                else
-                {
-                    Console.WriteLine(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js");
-                    return ":no_entry_sign: Node '" + p.Arguments.Split(' ')[0] + ".js'not found.";
-                }
+                Process process = Process.Start(p);
+                process.Start();
+                process.WaitForExit();
+                string output = process.StandardOutput.ReadToEnd();
+                return output != "" ? output : ":white_check_mark:";
             }
-            catch (Exception e)
+            else
             {
-                return ":no_entry_sign: " + e.Message;
+                Console.WriteLine(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js");
+                return ":no_entry_sign: Node '" + p.Arguments.Split(' ')[0] + ".js'not found.";
+            }
+        }
+
+        static void RunProcessRealtime(ProcessStartInfo p, string programName, Channel channel)
+        {
+            if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
+            {
+                Process process = Process.Start(p);
+                process.EnableRaisingEvents = true;
+                process.OutputDataReceived += (s, e) =>
+                {
+                    channel.SendMessage("[" + programName + "] " + e.Data);
+                };
+                process.BeginOutputReadLine();
+                process.WaitForExit();
+                process.Start();
             }
         }
     }

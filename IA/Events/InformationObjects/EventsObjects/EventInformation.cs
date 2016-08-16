@@ -31,8 +31,6 @@ namespace IA.Events
         public string errorMessage = "Something went wrong!";
 
         public bool enabled = true;
-        public bool deletesMessage = false;
-        public DeleteSelf deletesSelf = null;
 
         public Module parent;
         public EventSystem origin;
@@ -47,16 +45,6 @@ namespace IA.Events
         public EventInformation(Action<EventInformation> info)
         {
             info.Invoke(this);
-        }
-    }
-
-    public class DeleteSelf
-    {
-        public int Seconds;
-
-        public DeleteSelf(int seconds)
-        {
-            Seconds = seconds;
         }
     }
 }
