@@ -1,5 +1,4 @@
 ﻿using Discord;
-using IA.Events.InformationObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,17 +9,19 @@ namespace IA.Events
 {
     public class UserEvent:Event
     {
-        public new UserEventInformation info;
+        public ProcessServerCommand processCommand = (e) =>
+        {
+            e.Server.DefaultChannel.SendMessage("This server event has not been set up correctly.");
+        };
 
         public UserEvent()
         {
-            info = new UserEventInformation();
             CommandUsed = 0;
         }
 
         public async Task Check(UserEventArgs e)
         {
-            await Task.Run(() => info.processCommand(e));
+            await Task.Run(() => processCommand(e));
         }
     }
 }

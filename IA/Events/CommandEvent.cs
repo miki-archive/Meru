@@ -1,5 +1,4 @@
 ﻿using Discord;
-using IA.Events.InformationObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +9,20 @@ namespace IA.Events
 {
     public class CommandEvent : Event
     {
-        public new CommandEventInformation info;
+        public int cooldown = 1;
+
+        public CheckCommand checkCommand = (e, command, aliases) =>
+        {
+            return aliases.Contains(command);
+        };
+
+        public ProcessCommand processCommand = (e, args) =>
+        {
+            e.Channel.SendMessage("This command has not been set up properly.");
+        };
 
         public CommandEvent()
         {
-            info = new CommandEventInformation();
             CommandUsed = 0;
         }
 
@@ -27,16 +35,16 @@ namespace IA.Events
             {
                 args = e.Message.RawText.Substring(e.Message.RawText.Split(' ')[0].Length + 1);
             }
-            string[] aliases = new string[info.aliases.Length + 1];
+            string[] allAliases = new string[aliases.Length + 1];
             int i = 0;
 
             // loading aliases
-            foreach (string a in info.aliases)
+            foreach (string a in allAliases)
             {
-                aliases[i] = a;
+                allAliases[i] = a;
                 i++;
             }
-            aliases[aliases.Length - 1] = info.name;
+            allAliases[allAliases.Length - 1] = name;
 
             if (enabled.ContainsKey(e.Channel.Id))
             {
@@ -47,14 +55,14 @@ namespace IA.Events
 
             }
 
-            if (!info.origin.developers.Contains(e.User.Id))
+            if (!origin.developers.Contains(e.User.Id))
             {
-                if (info.accessibility == EventAccessibility.DEVELOPERONLY)
+                if (accessibility == EventAccessibility.DEVELOPERONLY)
                 {
                     return;
                 }
 
-                if (info.accessibility != EventAccessibility.PUBLIC)
+                if (accessibility != EventAccessibility.PUBLIC)
                 {
                     if (!e.User.ServerPermissions.Administrator)
                     {
@@ -69,18 +77,18 @@ namespace IA.Events
                 }
             }
 
-            if (info.checkCommand(e, command, aliases))
+            if (checkCommand(e, command, allAliases))
             {
                 try
                 {
-                    info.processCommand(e, args);
-                    Log.Message(info.name + " called from " + e.Server.Name + " [" + e.Server.Id + " # " + e.Channel.Id + "]");
+                    processCommand(e, args);
+                    Log.Message(name + " called from " + e.Server.Name + " [" + e.Server.Id + " # " + e.Channel.Id + "]");
                     CommandUsed++;
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorAt(info.name, ex.Message);
-                    await e.Channel.SendMessage(info.errorMessage);
+                    Log.ErrorAt(name, ex.Message);
+                    await e.Channel.SendMessage(errorMessage);
                 }
             }
         }
@@ -88,7 +96,7 @@ namespace IA.Events
         {
             if (lastTimeUsed.ContainsKey(id))
             {
-                if (DateTime.Now.AddSeconds(-info.cooldown) >= lastTimeUsed[id])
+                if (DateTime.Now.AddSeconds(-cooldown) >= lastTimeUsed[id])
                 {
                     lastTimeUsed[id] = DateTime.Now;
                     return false;

@@ -1,11 +1,10 @@
-﻿using Discord;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace IA
+namespace Discord
 {
-    static class ChannelExtension
+    public static class ChannelExtension
     {
-        public static async Task<Message> SendMessage(this Channel channel, string message, int seconds = 0)
+        public static async Task<Message> SendMessageAndDelete(this Channel channel, string message, int seconds)
         {
             Message m = await channel.SendMessage(message);
             if(seconds > 0)

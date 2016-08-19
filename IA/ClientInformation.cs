@@ -10,7 +10,7 @@ namespace IA
     public class ClientInformation
     {
         public string botName = "IABot";
-        public string botVersion = "1.2.1";
+        public string botVersion = "1.0.0";
 
         public string botToken = "";
         public string botIdentifier = ">";

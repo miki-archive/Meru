@@ -51,5 +51,14 @@ namespace IA.Events
             allEvents.AddRange(LeaveServerEvents.Values);
             return allEvents.ToArray();
         }
+        public Dictionary<string, Event> GetAllEventsDictionary()
+        {
+            Dictionary<string, Event> allEvents = new Dictionary<string, Event>();
+            CommandEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
+            MentionEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
+            JoinServerEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
+            LeaveServerEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
+            return allEvents;
+        }
     }
 }

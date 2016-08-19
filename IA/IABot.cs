@@ -22,7 +22,7 @@ namespace IA
         public SQLManager Sql { private set; get; }
 
         public const string VersionText = "IA v" + VersionNumber;
-        public const string VersionNumber = "1.3.1";
+        public const string VersionNumber = "1.3.2";
 
         FileWriter crashLog;
 
@@ -81,8 +81,6 @@ namespace IA
             Client.Ready += Client_Ready;
         }
 
-
-
         public void AddDeveloper(ulong developerId)
         {
             Events.developers.Add(developerId);
@@ -92,8 +90,8 @@ namespace IA
             Events.developers.Add(user.Id);
         }
 
-        [Obsolete("use IABot.EventSystem.AddCommandEvent()")]
-        public void AddEvent(Action<EventInformation> e)
+        [Obsolete("use IABot.Events.AddCommandEvent(...)")]
+        public void AddEvent(Action<Event> e)
         {
             Events.AddCommandEvent(e);
         }
@@ -102,7 +100,7 @@ namespace IA
         {
             if(clientInformation.botToken == "")
             {
-                Log.ErrorAt("Connect", "No Discord token found in bot properties.");
+                Log.ErrorAt("Connect", "No Discord token found.");
                 return;
             }
 
@@ -134,6 +132,7 @@ namespace IA
         {
             return VersionText;
         }
+
 
 
         private void Client_Ready(object sender, EventArgs e)

@@ -20,31 +20,8 @@ namespace IA.Events
         CHANNEL,
         SERVER
     }
-    
-    public class EventInformation
-    {
-        public string name = "name not set";
-        public string[] aliases = new string[0];
 
-        public string description;
-        public string[] usage = new string[0];
-        public string errorMessage = "Something went wrong!";
-
-        public bool enabled = true;
-
-        public Module parent;
-        public EventSystem origin;
-
-        public EventAccessibility accessibility = EventAccessibility.PUBLIC;
-        public EventRange range = EventRange.CHANNEL;
-
-        public EventInformation()
-        {
-
-        }
-        public EventInformation(Action<EventInformation> info)
-        {
-            info.Invoke(this);
-        }
-    }
+    public delegate void ProcessServerCommand(UserEventArgs e);
+    public delegate void ProcessCommand(MessageEventArgs e, string args);
+    public delegate bool CheckCommand(MessageEventArgs e, string command, string[] allAliases);
 }

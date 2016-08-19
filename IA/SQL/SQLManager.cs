@@ -13,11 +13,25 @@ namespace IA.SQL
     {
         SQLInformation info;
         string defaultIdentifier;
+        static SQLManager instance;
+
+        public SQLManager()
+        {
+            if (instance == null)
+            {
+                Log.ErrorAt("IA.SQLManager", "IA not initialized");
+                return;
+            }
+
+            info = instance.info;
+            defaultIdentifier = instance.defaultIdentifier;
+        }
 
         public SQLManager(SQLInformation info, string defaultIdentifier = ">")
         {
             this.info = info;
             this.defaultIdentifier = defaultIdentifier;
+            instance = this;
         }
 
         public int IsEventEnabled(string name, ulong channelId)
@@ -26,9 +40,7 @@ namespace IA.SQL
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = string.Format("SELECT enabled FROM event WHERE id=?id AND name=?name");
-            command.Parameters.Add(new MySqlParameter("name", MySqlDbType.VarChar).Value = name);
-            command.Parameters.Add(new MySqlParameter("id", MySqlDbType.UInt64).Value = channelId);
+            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{channelId}\" AND name=\"{name}\"";
 
             connection.Open();
             MySqlDataReader r = command.ExecuteReader();
@@ -52,6 +64,7 @@ namespace IA.SQL
         {
             await Task.Run(() => SendToSQL("INSERT INTO identifier VALUES(" + server + ", \"" + identifier + "\")"));
         }
+
         public string GetIdentifier(ulong server)
         {
             if (info == null) return defaultIdentifier;
@@ -78,6 +91,16 @@ namespace IA.SQL
             return "ERROR";
         }
 
+        public string GetConnectionString()
+        {
+            return info.GetConnectionString();
+        }
+
+        public static SQLManager GetInitializedObject()
+        {
+            return instance;
+        }
+
         public void SendToSQL(string sqlCode)
         {
             if (info == null) return;
@@ -90,11 +113,6 @@ namespace IA.SQL
             connection.Close();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <param name="sqlCode"></param>
         public void TryCreateTable(string sqlCode)
         {
             if (info == null) return;

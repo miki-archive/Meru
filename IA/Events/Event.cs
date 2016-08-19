@@ -9,7 +9,20 @@ namespace IA.Events
 {
     public class Event
     {
-        public EventInformation info;
+        public string name = "name not set";
+        public string[] aliases = new string[0];
+
+        public string description;
+        public string[] usage = new string[0];
+        public string errorMessage = "Something went wrong!";
+
+        public bool defaultEnabled = true;
+
+        public Module parent;
+        public EventSystem origin;
+
+        public EventAccessibility accessibility = EventAccessibility.PUBLIC;
+        public EventRange range = EventRange.CHANNEL;
 
         public Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
         protected Dictionary<ulong, DateTime> lastTimeUsed = new Dictionary<ulong, DateTime>();
@@ -18,13 +31,12 @@ namespace IA.Events
 
         public Event()
         {
-            info = new EventInformation();
             CommandUsed = 0;
         }
 
-        public Event(Action<EventInformation> info)
+        public Event(Action<Event> info)
         {
-            info.Invoke(this.info);
+            info.Invoke(this);
             CommandUsed = 0;
         }
 
@@ -32,7 +44,7 @@ namespace IA.Events
         {
             ulong id = 0;
 
-            switch (info.range)
+            switch (range)
             {
                 case EventRange.CHANNEL: id = e.Channel.Id; break;
                 case EventRange.SERVER: id = e.Server.Id; break;

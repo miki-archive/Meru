@@ -112,10 +112,8 @@
     <Compile Include="Events\EventContainer.cs" />
     <Compile Include="Events\EventSystem.cs" />
     <Compile Include="Events\InformationObjects\BotInformation.cs" />
-    <Compile Include="Events\InformationObjects\EventsObjects\CommandEventInformation.cs" />
     <Compile Include="Events\InformationObjects\EventsObjects\EventInformation.cs" />
     <Compile Include="Events\InformationObjects\ModuleInformation.cs" />
-    <Compile Include="Events\InformationObjects\EventsObjects\ServerEventInformation.cs" />
     <Compile Include="Events\Module.cs" />
     <Compile Include="Events\UserEvent.cs" />
     <Compile Include="Extension Methods\Channel.cs" />
