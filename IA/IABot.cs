@@ -128,12 +128,6 @@ namespace IA
         {
             return Events.GetEvent(id);
         }
-        public string GetVersion()
-        {
-            return VersionText;
-        }
-
-
 
         private void Client_Ready(object sender, EventArgs e)
         {
