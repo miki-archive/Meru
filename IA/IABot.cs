@@ -22,7 +22,7 @@ namespace IA
         public SQLManager Sql { private set; get; }
 
         public const string VersionText = "IA v" + VersionNumber;
-        public const string VersionNumber = "1.3.2";
+        public const string VersionNumber = "1.3.3";
 
         FileWriter crashLog;
 

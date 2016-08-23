@@ -361,27 +361,31 @@ namespace IA.Events
 
         async Task<bool> CheckIdentifier(string message, string identifier, MessageEventArgs e, bool doRunCommand = true)
         {
-            string command = message.Substring(identifier.Length).Split(' ')[0];
-
-            if (events.CommandEvents.ContainsKey(command))
+            if (message.StartsWith(identifier))
             {
-                if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
-                {
-                    if (doRunCommand)
-                    {
-                        await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+                string command = message.Substring(identifier.Length).Split(' ')[0];
 
+                if (events.CommandEvents.ContainsKey(command))
+                {
+                    if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
+                    {
+                        if (doRunCommand)
+                        {
+                            await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+
+                            return true;
+                        }
+                    }
+                }
+                else if (aliases.ContainsKey(command))
+                {
+                    if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
+                    {
+                        await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
                         return true;
                     }
                 }
-            }
-            else if (aliases.ContainsKey(command))
-            {
-                if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
-                {
-                    await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
-                    return true;
-                }
+                return false;
             }
             return false;
         }

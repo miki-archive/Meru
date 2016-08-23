@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IA.FileHandling
 {
-    class FileWriter : IDisposable
+    public class FileWriter : IDisposable
     {
         string filePath;
 

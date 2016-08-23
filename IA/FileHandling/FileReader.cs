@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IA.FileHandling
 {
-    class FileReader : IDisposable
+    public class FileReader : IDisposable
     {
         StreamReader file;
 
@@ -31,21 +31,25 @@ namespace IA.FileHandling
             file.Dispose();
         }
 
+        public static bool FileExist(string fileName)
+        {
+            return File.Exists(Directory.GetCurrentDirectory() + "\\" + fileName);
+        }
+
         public string ReadLine()
         {
-            try
+            while (true)
             {
-                while (true)
+                string currentLine = file.ReadLine();
+                if (currentLine == null)
                 {
-                    string currentLine = file.ReadLine();
-                    if (!currentLine.StartsWith("#")) return currentLine;
+                    Log.WarningAt("filereader", "no data found.");
+                    break;
                 }
+
+                if (!currentLine.StartsWith("#")) return currentLine;
             }
-            catch
-            {
-                Log.ErrorAt("FileReader.ReadLine", "No more data to load.");
-                return "";
-            }
+            return "";
         }
 
         public void Finish()

@@ -70,6 +70,17 @@ namespace IA
         }
 
         /// <summary>
+        /// Display a warning message.
+        /// </summary>
+        /// <param name="message">information about the action</param>
+        public static void WarningAt(string tag, string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("[wrn@" + tag + "]: " + message);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        /// <summary>
         /// Display a message when something is done.
         /// </summary>
         /// <param name="message">information about the action</param>
