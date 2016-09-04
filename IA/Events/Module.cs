@@ -18,7 +18,7 @@ namespace IA.Events
             defaultInfo.name = name;
             defaultInfo.enabled = enabled;
         }
-
+        
         public Module(Action<ModuleInformation> info)
         {
             info.Invoke(defaultInfo);

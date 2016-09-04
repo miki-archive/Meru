@@ -17,16 +17,16 @@ namespace IA.FileHandling
         public FileWriter(string fileName)
         {
             filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
-            file = new StreamWriter(filePath + ".config");
-            file.WriteLine($"# {fileName} created with {IABot.VersionText}");
+            file = new StreamWriter(new FileStream(filePath + ".config", FileMode.OpenOrCreate));
+            file.WriteLine($"# {fileName} created with {Bot.VersionText}");
         }
         public FileWriter(string fileName, string extension)
         {
             extension = extension.TrimStart('.');
 
             filePath = Directory.GetCurrentDirectory()+ "\\" + fileName;
-            file = new StreamWriter(filePath + "." + extension);
-            file.WriteLine($"# {fileName} created with {IABot.VersionText}");
+            file = new StreamWriter(new FileStream(filePath + "." + extension, FileMode.OpenOrCreate));
+            file.WriteLine($"# {fileName} created with {Bot.VersionText}");
         }
 
         public void Dispose()
@@ -34,9 +34,13 @@ namespace IA.FileHandling
             file.Dispose();
         }
 
-        public void Write(string variable, string comment = "")
+        public void Write(string variable)
         {
-            if (comment != "") file.WriteLine($"# {comment}");
+            file.WriteLine(variable);
+        }
+        public void Write(string variable, string comment)
+        {
+            file.WriteLine($"# {comment}");
             file.WriteLine(variable);
         }
         public void WriteComment(string comment)
@@ -47,7 +51,6 @@ namespace IA.FileHandling
         public void Finish()
         {
             file.Flush();
-            file.Close();
             Dispose();
         }
     }

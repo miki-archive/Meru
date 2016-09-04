@@ -18,7 +18,7 @@ namespace IA.Events
 
         public ProcessCommand processCommand = (e, args) =>
         {
-            e.Channel.SendMessage("This command has not been set up properly.");
+            e.Channel.SendMessageAsync("This command has not been set up properly.");
         };
 
         public CommandEvent()
@@ -26,14 +26,16 @@ namespace IA.Events
             CommandUsed = 0;
         }
 
-        public async Task Check(MessageEventArgs e, string identifier = "")
+        public async Task Check(IMessage e, string identifier = "")
         {
+            IGuildChannel guild = (e.Channel as IGuildChannel);
+
             // declaring variables
-            string command = e.Message.RawText.Substring(identifier.Length).Split(' ')[0];
+            string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
-            if (e.Message.RawText.Split(' ').Length > 1)
+            if (e.Content.Split(' ').Length > 1)
             {
-                args = e.Message.RawText.Substring(e.Message.RawText.Split(' ')[0].Length + 1);
+                args = e.Content.Substring(e.Content.Split(' ')[0].Length + 1);
             }
             string[] allAliases = new string[aliases.Length + 1];
             int i = 0;
@@ -55,42 +57,49 @@ namespace IA.Events
 
             }
 
-            if (!origin.developers.Contains(e.User.Id))
+            if (IsOnCooldown(e.Author.Id))
             {
-                if (accessibility == EventAccessibility.DEVELOPERONLY)
-                {
-                    return;
-                }
-
-                if (accessibility != EventAccessibility.PUBLIC)
-                {
-                    if (!e.User.ServerPermissions.Administrator)
-                    {
-                        return;
-                    }
-                }
-
-                if (IsOnCooldown(e.User.Id))
-                {
-                    await e.Channel.SendMessage("Sorry, this command is still on cooldown!");
-                    return;
-                }
+                await e.Channel.SendMessageAsync($"Sorry, this command is still on cooldown for {GetCooldown(e.Author.Id)} seconds!");
+                return;
             }
 
             if (checkCommand(e, command, allAliases))
             {
                 try
                 {
-                    processCommand(e, args);
-                    Log.Message(name + " called from " + e.Server.Name + " [" + e.Server.Id + " # " + e.Channel.Id + "]");
-                    CommandUsed++;
+                    if (TryProcessCommand(e, args))
+                    {
+                        Log.Message(name + " called from " + guild.Name + " [" + guild.Id + " # " + e.Channel.Id + "]");
+                        CommandUsed++;
+                    }
                 }
                 catch (Exception ex)
                 {
                     Log.ErrorAt(name, ex.Message);
-                    await e.Channel.SendMessage(errorMessage);
+                    await e.Channel.SendMessageAsync(errorMessage);
                 }
             }
+        }
+
+        public bool TryProcessCommand(IMessage e, string args)
+        {
+            try
+            {
+                processCommand(e, args);
+                return true;
+            }
+            catch
+            {
+
+            }
+            return false;
+        }
+
+        float GetCooldown(ulong id)
+        {
+            float currentCooldown = (float)(DateTime.Now.AddSeconds(-cooldown) - lastTimeUsed[id]).TotalSeconds;
+            // do stuff?
+            return currentCooldown;
         }
         bool IsOnCooldown(ulong id)
         {

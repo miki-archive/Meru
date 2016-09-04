@@ -3,6 +3,7 @@ using IA.Events;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,18 +40,18 @@ namespace IA.SQL
             if (info == null) return 1;
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
+            DbCommand command = connection.CreateCommand();
             command.CommandText = $"SELECT enabled FROM event WHERE id=\"{channelId}\" AND name=\"{name}\"";
 
             connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
+            DbDataReader r = command.ExecuteReader();
 
             bool output = false;
             string check = "";
 
             while (r.Read())
             {
-                output = r.GetBoolean("enabled");
+                output = r.GetBoolean(0);
                 check = "ok";
                 break;
             }
@@ -72,14 +73,14 @@ namespace IA.SQL
             string output = "";
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
+            DbCommand command = connection.CreateCommand();
             command.CommandText = string.Format("SELECT i FROM identifier WHERE id={0}", server);
             connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
+            DbDataReader r = command.ExecuteReader();
 
             while (r.Read())
             {
-                output = r.GetString("i");
+                output = r.GetString(0);
                 break;
             }
             connection.Close();
@@ -106,10 +107,10 @@ namespace IA.SQL
             if (info == null) return;
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
+            DbCommand command = connection.CreateCommand();
             command.CommandText = sqlCode;
             connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
+            DbDataReader r = command.ExecuteReader();
             connection.Close();
         }
 
@@ -118,7 +119,7 @@ namespace IA.SQL
             if (info == null) return;
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
+            DbCommand command = connection.CreateCommand();
             command.CommandText = $"CREATE TABLE IF NOT EXISTS {sqlCode}";
             connection.Open();
             command.ExecuteNonQuery();

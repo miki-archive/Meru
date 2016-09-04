@@ -4,17 +4,17 @@ namespace Discord
 {
     public static class ChannelExtension
     {
-        public static async Task<Message> SendMessageAndDelete(this Channel channel, string message, int seconds)
+        public static async Task<IUserMessage> SendMessageAndDelete(this IMessageChannel channel, string message, int seconds)
         {
-            Message m = await channel.SendMessage(message);
+            IUserMessage m = await channel.SendMessageAsync(message);
             if(seconds > 0) await Task.Run(() => DeleteMessage(m, seconds));
             return m;
         }
 
-        static async Task DeleteMessage(Message message, int seconds)
+        static async Task DeleteMessage(IUserMessage message, int seconds)
         {
             await Task.Delay(seconds * 1000);
-            await message.Delete();
+            await message.DeleteAsync();
         }
     }
 }

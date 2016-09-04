@@ -40,15 +40,16 @@ namespace IA.Events
             CommandUsed = 0;
         }
 
-        public void SetEnabled(MessageEventArgs e, bool v)
+        public void SetEnabled(IMessage e, bool v)
         {
             ulong id = 0;
+            IGuildChannel g = (e.Channel as IGuildChannel);
 
             switch (range)
             {
                 case EventRange.CHANNEL: id = e.Channel.Id; break;
-                case EventRange.SERVER: id = e.Server.Id; break;
-                case EventRange.USER: id = e.User.Id; break;    
+                case EventRange.SERVER: id = g.Id; break;
+                case EventRange.USER: id = e.Author.Id; break;    
             }
 
             if(!enabled.ContainsKey(e.Channel.Id))

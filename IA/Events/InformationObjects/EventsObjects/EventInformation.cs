@@ -21,7 +21,7 @@ namespace IA.Events
         SERVER
     }
 
-    public delegate void ProcessServerCommand(UserEventArgs e);
-    public delegate void ProcessCommand(MessageEventArgs e, string args);
-    public delegate bool CheckCommand(MessageEventArgs e, string command, string[] allAliases);
+    public delegate void ProcessServerCommand(IGuildUser e);
+    public delegate void ProcessCommand(IMessage e, string args);
+    public delegate bool CheckCommand(IMessage e, string command, string[] allAliases);
 }

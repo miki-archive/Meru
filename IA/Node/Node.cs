@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.API;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +14,7 @@ namespace IA.Node
     {
         public static void Create(string id, string code)
         {
-            StreamWriter sw = new StreamWriter(Directory.GetCurrentDirectory() + @"\" + id + ".js");
+            StreamWriter sw = new StreamWriter(new FileStream(Directory.GetCurrentDirectory() + @"\" + id + ".js", FileMode.CreateNew));
             sw.Write(
                     "if(process.argv.length > 2)" +
                     "{" +
@@ -21,7 +22,8 @@ namespace IA.Node
                         "input = input.replace(/_/g, ' ');" +
                     "}");
             sw.Write(code);
-            sw.Close();
+            sw.Flush();
+            sw.Dispose();
         }
 
         public static async Task<string> RunAsync(string id, string args = "")
@@ -37,7 +39,7 @@ namespace IA.Node
             return output;
         }
 
-        public static void Run(string programName, string args, Channel channel)
+        public static void Run(string programName, string args, IMessageChannel channel)
         {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = @"C:\Program Files\nodejs\node.exe";
@@ -47,7 +49,7 @@ namespace IA.Node
             start.RedirectStandardOutput = true;
             start.RedirectStandardError = true;
             RunProcessRealtime(start, programName, channel);
-            channel.SendMessage(":white_check_mark: " + programName + ".js successfully ended.");
+            channel.SendMessageAsync(":white_check_mark: " + programName + ".js successfully ended.");
         }
 
         static string RunProcessAsync(ProcessStartInfo p)
@@ -67,7 +69,7 @@ namespace IA.Node
             }
         }
 
-        static void RunProcessRealtime(ProcessStartInfo p, string programName, Channel channel)
+        static void RunProcessRealtime(ProcessStartInfo p, string programName, IMessageChannel channel)
         {
             if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
             {
@@ -75,7 +77,7 @@ namespace IA.Node
                 process.EnableRaisingEvents = true;
                 process.OutputDataReceived += (s, e) =>
                 {
-                    channel.SendMessage("[" + programName + "] " + e.Data);
+                    channel.SendMessageAsync("[" + programName + "] " + e.Data);
                 };
                 process.BeginOutputReadLine();
                 process.WaitForExit();

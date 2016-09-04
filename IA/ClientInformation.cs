@@ -15,6 +15,8 @@ namespace IA
         public string botToken = "";
         public string botIdentifier = ">";
 
+        public int shardCount = 1;
+
         public LogLevel logLevel = LogLevel.ERROR;
 
         public SQLInformation sqlInformation;

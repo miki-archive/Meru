@@ -16,14 +16,14 @@ namespace IA.FileHandling
         public FileReader(string fileName)
         {
             filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
-            file = new StreamReader(filePath + ".config");
+            file = new StreamReader(new FileStream(filePath + ".config", FileMode.OpenOrCreate));
         }
         public FileReader(string fileName, string extension)
         {
             extension = extension.TrimStart('.');
 
             filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
-            file = new StreamReader(filePath + "." + extension);
+            file = new StreamReader(new FileStream(filePath + "." + extension, FileMode.OpenOrCreate));
         }
 
         public void Dispose()
@@ -54,7 +54,6 @@ namespace IA.FileHandling
 
         public void Finish()
         {
-            file.Close();
             Dispose();
         }
     }
