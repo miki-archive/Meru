@@ -23,8 +23,6 @@ namespace IA
         public const string VersionText = "IA v" + VersionNumber;
         public const string VersionNumber = "1.4";
 
-        FileWriter crashLog;
-
         string CurrentPath = Directory.GetCurrentDirectory();
         
 
@@ -77,7 +75,6 @@ namespace IA
 
         public void Dispose()
         {
-            crashLog.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -102,7 +99,6 @@ namespace IA
                 x.SqlInformation = clientInformation.sqlInformation;
             });
             Sql = new SQLManager(clientInformation.sqlInformation, clientInformation.botIdentifier);
-            crashLog = new FileWriter("crashLog_" + DateTime.Now.ToLocalTime());
 
             Client.MessageReceived += Client_MessageReceived;
             Client.UserLeft += Client_UserLeft;

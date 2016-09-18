@@ -246,7 +246,7 @@ namespace IA.Events
             string message = e.Content.ToLower();
 
             if (!message.StartsWith(identifier[g.Id])) return;
-
+                
             if (await CheckIdentifier(message, identifier[g.Id], e)) return;
             else if (await CheckIdentifier(message, OverrideIdentifier, e)) return;
         }

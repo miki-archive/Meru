@@ -17,7 +17,7 @@ namespace IA.FileHandling
         public FileWriter(string fileName)
         {
             filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
-            file = new StreamWriter(new FileStream(filePath + ".config", FileMode.OpenOrCreate));
+            file = new StreamWriter(new FileStream(filePath + ".config", FileMode.Create));
             file.WriteLine($"# {fileName} created with {Bot.VersionText}");
         }
         public FileWriter(string fileName, string extension)
@@ -25,7 +25,7 @@ namespace IA.FileHandling
             extension = extension.TrimStart('.');
 
             filePath = Directory.GetCurrentDirectory()+ "\\" + fileName;
-            file = new StreamWriter(new FileStream(filePath + "." + extension, FileMode.OpenOrCreate));
+            file = new StreamWriter(new FileStream(filePath + "." + extension, FileMode.Create));
             file.WriteLine($"# {fileName} created with {Bot.VersionText}");
         }
 
