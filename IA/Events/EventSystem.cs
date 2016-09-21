@@ -358,7 +358,6 @@ namespace IA.Events
         {
             if (message.StartsWith(identifier))
             {
-
                 string command = message.Substring(identifier.Length).Split(' ')[0];
 
                 if (events.CommandEvents.ContainsKey(command))
@@ -367,7 +366,7 @@ namespace IA.Events
                     {
                         if (doRunCommand)
                         {
-                            if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].accessibility)
+                            if (GetUserAccessibility(e) >= events.CommandEvents[command].accessibility)
                             {
                                 await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
                                 return true;
