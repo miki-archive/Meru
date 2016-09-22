@@ -68,6 +68,7 @@ namespace IA
         {
             if (!isManager)
             {
+                Log.Message("Connecting...");
                 await Client.LoginAsync(TokenType.Bot, clientInformation.botToken);
                 await Client.ConnectAsync();
             }
@@ -150,9 +151,8 @@ namespace IA
                 Client = new DiscordSocketClient(new DiscordSocketConfig()
                 {
                     ShardId = id,
-                    LogLevel = LogSeverity.Debug,
-                    TotalShards = clientInformation.shardCount,
-                    ConnectionTimeout = 1000       
+                    LogLevel = LogSeverity.Info,
+                    TotalShards = clientInformation.shardCount,   
                 });
 
                 Events = new EventSystem(x =>
@@ -167,12 +167,9 @@ namespace IA
                 Client.UserLeft += Client_UserLeft;
                 Client.UserJoined += Client_UserJoined;
                 Client.Ready += Client_Ready;
-                Client.Log += Client_Log;
-                Client.Disconnected += Client_Disconnected;
             }
             else
             {
-                Manager m = new Manager();
                 app.UnhandledException += App_UnhandledException;
                 app.ProcessExit += App_ProcessExit;
                 BotWin32Window.SetConsoleCtrlHandler(new BotWin32Window.HandlerRoutine(App_OnConsoleWindowClose), true);
@@ -198,7 +195,7 @@ namespace IA
         private async Task Client_Disconnected(Exception arg)
         {
             Log.Message("Disconnected!");
-            await Task.Delay(-1);
+            await Task.Delay(-1);   
         }
 
         private async Task Client_Log(LogMessage arg)
@@ -288,7 +285,7 @@ namespace IA
             return outputBotInfo;
         }
 
-        private async   Task Client_Ready()
+        private async Task Client_Ready()
         {
             Log.Done("Connected!");
             await Task.CompletedTask;
@@ -296,6 +293,7 @@ namespace IA
 
         private async Task Client_MessageReceived(IMessage arg)
         {
+            if (shardId == 0) Log.Message("Message recieved!");
             IGuild guild = (arg.Channel as IGuildChannel)?.Guild;
             if (guild != null)
             {
@@ -304,10 +302,6 @@ namespace IA
                     await Events.OnMention(arg, guild);
                 }
                 await Events.OnMessageRecieved(arg, guild);
-            }
-            else
-            {
-                await Events.OnPrivateMessage(arg);
             }
         }
 

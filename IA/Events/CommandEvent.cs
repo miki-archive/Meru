@@ -88,9 +88,9 @@ namespace IA.Events
                 processCommand(e, args);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
-
+                Log.Error(ex.Message);
             }
             return false;
         }
