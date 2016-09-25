@@ -7,15 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IA.SQL
+namespace IA.Sql
 {
-    public class SQLManager
+    public class SQL
     {
+        public delegate void QueryOutput(Dictionary<string, object> result);
+
         SQLInformation info;
         string defaultIdentifier;
-        static SQLManager instance;
+        static SQL instance;
 
-        public SQLManager()
+        public SQL()
         {
             if (instance == null)
             {
@@ -27,7 +29,7 @@ namespace IA.SQL
             defaultIdentifier = instance.defaultIdentifier;
         }
 
-        public SQLManager(SQLInformation info, string defaultIdentifier = ">")
+        public SQL(SQLInformation info, string defaultIdentifier = ">")
         {
             this.info = info;
             this.defaultIdentifier = defaultIdentifier;
@@ -96,7 +98,7 @@ namespace IA.SQL
             return info.GetConnectionString();
         }
 
-        public static SQLManager GetInitializedObject()
+        public static SQL GetInitializedObject()
         {
             return instance;
         }
@@ -122,6 +124,32 @@ namespace IA.SQL
             command.CommandText = $"CREATE TABLE IF NOT EXISTS {sqlCode}";
             connection.Open();
             command.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        /// <summary>
+        /// Queries the sqlCode to output
+        /// </summary>
+        /// <param name="sqlCode"></param>
+        /// <param name="output"></param>
+        public static void Query(string sqlCode, QueryOutput output)
+        {
+            if (instance.info == null) return;
+
+            MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = sqlCode;
+            connection.Open();
+            MySqlDataReader r = command.ExecuteReader();
+            while(r.Read())
+            {
+                Dictionary<string, object> outputdict = new Dictionary<string, object>();
+                for(int i = 0; i < r.VisibleFieldCount; i++)
+                {
+                    outputdict.Add(r.GetName(i), r.GetValue(i));
+                }
+                output(outputdict);
+            }
             connection.Close();
         }
     }

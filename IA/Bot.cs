@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IA.Events;
 using IA.FileHandling;
-using IA.SQL;
+using IA.Sql;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -21,7 +21,7 @@ namespace IA
 
         public DiscordSocketClient Client { private set; get; }
         public EventSystem Events { private set; get; }
-        public SQLManager Sql { private set; get; }
+        public SQL Sql { private set; get; }
 
         public const string VersionText = "IA v" + VersionNumber;
         public const string VersionNumber = "1.4";
@@ -161,11 +161,12 @@ namespace IA
                     x.Identifier = clientInformation.botIdentifier;
                     x.SqlInformation = clientInformation.sqlInformation;
                 });
-                Sql = new SQLManager(clientInformation.sqlInformation, clientInformation.botIdentifier);
+                Sql = new SQL(clientInformation.sqlInformation, clientInformation.botIdentifier);
 
                 Client.MessageReceived += Client_MessageReceived;
                 Client.UserLeft += Client_UserLeft;
                 Client.UserJoined += Client_UserJoined;
+                Client.JoinedGuild += Client_JoinedGuild;
                 Client.Ready += Client_Ready;
             }
             else
@@ -190,6 +191,12 @@ namespace IA
                 await Task.Run(async () => await Heartbeat());
                 await Task.Delay(-1);
             }
+        }
+
+        private async Task Client_JoinedGuild(IGuild arg)
+        {
+            Sql.SendToSQL($"Update set servercount={Client.GetGuilds().Count} where id={Client.ShardId}");
+            await Task.Delay(-1);
         }
 
         private async Task Client_Disconnected(Exception arg)

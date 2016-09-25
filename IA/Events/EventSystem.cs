@@ -1,5 +1,5 @@
 ﻿using Discord;
-using IA.SQL;
+using IA.Sql;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace IA.Events
         /// </summary>
         static BotInformation bot;
         EventContainer events;
-        static SQLManager sql;
+        static SQL sql;
 
         public string OverrideIdentifier { private set; get; }
 
@@ -41,7 +41,7 @@ namespace IA.Events
 
             bot = new BotInformation(botInfo);
             events = new EventContainer();
-            sql = new SQLManager(bot.SqlInformation, bot.Identifier);
+            sql = new SQL(bot.SqlInformation, bot.Identifier);
 
             sql.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 

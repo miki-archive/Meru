@@ -1,4 +1,4 @@
-﻿using IA.SQL;
+﻿using IA.Sql;
 using System;
 using System.Collections.Generic;
 using System.Linq;

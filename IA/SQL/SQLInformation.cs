@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IA.SQL
+namespace IA.Sql
 {
     public class SQLInformation
     {
