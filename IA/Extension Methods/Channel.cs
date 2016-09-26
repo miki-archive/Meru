@@ -4,6 +4,15 @@ namespace Discord
 {
     public static class ChannelExtension
     {
+        public static async Task<IUserMessage> SendMessageSafe(this IMessageChannel channel, string message)
+        {
+            if()
+            {
+                return null;
+            }
+            IUserMessage m = await channel.SendMessageAsync(message);
+        }
+
         public static async Task<IUserMessage> SendMessageAndDelete(this IMessageChannel channel, string message, int seconds)
         {
             IUserMessage m = await channel.SendMessageAsync(message);

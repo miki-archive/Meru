@@ -135,22 +135,34 @@ namespace IA.Sql
         public static void Query(string sqlCode, QueryOutput output)
         {
             if (instance.info == null) return;
+            MySqlConnection connection = new MySqlConnection();
 
-            MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = sqlCode;
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-            while(r.Read())
+            try
             {
-                Dictionary<string, object> outputdict = new Dictionary<string, object>();
-                for(int i = 0; i < r.VisibleFieldCount; i++)
+                connection = new MySqlConnection(instance.info.GetConnectionString());
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = sqlCode;
+                connection.Open();
+                MySqlDataReader r = command.ExecuteReader();
+                while (r.Read())
                 {
-                    outputdict.Add(r.GetName(i), r.GetValue(i));
+                    Dictionary<string, object> outputdict = new Dictionary<string, object>();
+                    for (int i = 0; i < r.VisibleFieldCount; i++)
+                    {
+                        outputdict.Add(r.GetName(i), r.GetValue(i));
+                    }
+                    output(outputdict);
                 }
-                output(outputdict);
+                connection.Close();
             }
-            connection.Close();
+            catch (Exception e)
+            {
+                Log.ErrorAt("mysql.query", e.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
         }
     }
 }
