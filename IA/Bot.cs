@@ -213,11 +213,6 @@ namespace IA
 
         private bool App_OnConsoleWindowClose(CtrlTypes ctrlType)
         {
-            SQL.Query("select * from ia.accounts where name='veld'", x =>
-            {
-                Log.Message(x["experience"].ToString());
-            });
-
             foreach (Shard b in shard)
             {
                 b.shardProcess.Kill();
@@ -305,7 +300,6 @@ namespace IA
 
         private async Task Client_MessageReceived(IMessage arg)
         {
-            if (shardId == 0) Log.Message("Message recieved!");
             IGuild guild = (arg.Channel as IGuildChannel)?.Guild;
             if (guild != null)
             {

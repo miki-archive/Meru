@@ -165,7 +165,13 @@ namespace IA.Events
 
         public async Task<bool> SetEnabled(string eventName, ulong channelId, bool enabled)
         {
+           
             Event setEvent = GetEvent(eventName);
+
+            if(!setEvent.canBeDisabled && !enabled)
+            {
+                return false;
+            }
 
             if (setEvent != null)
             {
@@ -207,6 +213,11 @@ namespace IA.Events
                             moduleEvents["Misc"].Add(ev.name);
                         }
                     }
+                }
+
+                if(moduleEvents["Misc"].Count == 0)
+                {
+                    moduleEvents.Remove("Misc");
                 }
 
                 moduleEvents.OrderBy(i => { return i.Key; });

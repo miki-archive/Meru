@@ -16,6 +16,7 @@ namespace IA.Events
         public string[] usage = new string[0];
         public string errorMessage = "Something went wrong!";
 
+        public bool canBeDisabled = true;
         public bool defaultEnabled = true;
 
         public Module parent;
@@ -42,6 +43,8 @@ namespace IA.Events
 
         public void SetEnabled(IMessage e, bool v)
         {
+            if (!canBeDisabled && !v) return;
+
             ulong id = 0;
             IGuildChannel g = (e.Channel as IGuildChannel);
 

@@ -1,21 +1,45 @@
-﻿using System.Threading.Tasks;
+﻿using IA;
+using System.Threading.Tasks;
 
 namespace Discord
 {
     public static class ChannelExtension
     {
-        public static async Task<IUserMessage> SendMessageSafe(this IMessageChannel channel, string message)
+        /// <summary>
+        /// Sends message only if is allowed.
+        /// </summary>
+        /// <param name="channel">channel</param>
+        /// <param name="message">output message</param>
+        /// <returns></returns>
+        public static async Task<IUserMessage> SendMessageSafeAsync(this IMessageChannel channel, string message)
         {
-            if()
+            //if ((await (channel as IGuildChannel).Guild.GetCurrentUserAsync()).GetPermissions(channel as IGuildChannel).SendMessages)
+            //{
+            //    Log.WarningAt("SendMessage", "Not enough permissions to send message");
+            //    return null;
+            //}
+            try
             {
-                return null;
+                IUserMessage m = await channel.SendMessageAsync(message);
+                return m;
             }
-            IUserMessage m = await channel.SendMessageAsync(message);
+            catch
+            {
+
+            }
+            return null;
         }
 
-        public static async Task<IUserMessage> SendMessageAndDelete(this IMessageChannel channel, string message, int seconds)
+        /// <summary>
+        /// Sends message and deletes it after "seconds"
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="message"></param>
+        /// <param name="seconds"></param>
+        /// <returns></returns>
+        public static async Task<IUserMessage> SendMessageAndDeleteAsync(this IMessageChannel channel, string message, int seconds)
         {
-            IUserMessage m = await channel.SendMessageAsync(message);
+            IUserMessage m = await channel.SendMessageSafeAsync(message);
             if(seconds > 0) await Task.Run(() => DeleteMessage(m, seconds));
             return m;
         }
