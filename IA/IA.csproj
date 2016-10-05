@@ -165,6 +165,7 @@
     <Compile Include="Extension Methods\Channel.cs" />
     <Compile Include="FileHandling\FileReader.cs" />
     <Compile Include="FileHandling\FileWriter.cs" />
+    <Compile Include="Extension Methods\UnicodeConvert.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Node\Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

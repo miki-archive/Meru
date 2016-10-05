@@ -18,7 +18,7 @@ namespace IA.Events
 
         public ProcessCommand processCommand = (e, args) =>
         {
-            e.Channel.SendMessageAsync("This command has not been set up properly.");
+            e.Channel.SendMessageSafeAsync("This command has not been set up properly.");
         };
 
         public CommandEvent()
@@ -59,7 +59,7 @@ namespace IA.Events
 
             if (IsOnCooldown(e.Author.Id))
             {
-                await e.Channel.SendMessageAsync($"Sorry, this command is still on cooldown for {GetCooldown(e.Author.Id)} seconds!");
+                await e.Channel.SendMessageSafeAsync($"Sorry, this command is still on cooldown for {GetCooldown(e.Author.Id)} seconds!");
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace IA.Events
                 catch (Exception ex)
                 {
                     Log.ErrorAt(name, ex.Message);
-                    await e.Channel.SendMessageAsync(errorMessage);
+                    await e.Channel.SendMessageSafeAsync(errorMessage);
                 }
             }
         }

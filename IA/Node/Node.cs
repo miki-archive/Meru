@@ -49,7 +49,7 @@ namespace IA.Node
             start.RedirectStandardOutput = true;
             start.RedirectStandardError = true;
             RunProcessRealtime(start, programName, channel);
-            channel.SendMessageAsync(":white_check_mark: " + programName + ".js successfully ended.");
+            channel.SendMessageSafeAsync(":white_check_mark: " + programName + ".js successfully ended.");
         }
 
         static string RunProcessAsync(ProcessStartInfo p)
@@ -77,7 +77,7 @@ namespace IA.Node
                 process.EnableRaisingEvents = true;
                 process.OutputDataReceived += (s, e) =>
                 {
-                    channel.SendMessageAsync("[" + programName + "] " + e.Data);
+                    channel.SendMessageSafeAsync("[" + programName + "] " + e.Data);
                 };
                 process.BeginOutputReadLine();
                 process.WaitForExit();

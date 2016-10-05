@@ -50,22 +50,7 @@ namespace IA.Events
             events.InternalEvents.Add("ia-enabled-db", new Event());
         }
 
-        public void AddCommandEvent(Action<CommandEvent> info)
-        {
-            CommandEvent newEvent = new CommandEvent();
-            info.Invoke(newEvent);
-            newEvent.origin = this;
-            if (newEvent.aliases.Length > 0)
-            {
-                foreach (string s in newEvent.aliases)
-                {
-                    aliases.Add(s, newEvent.name.ToLower());
-                }
-            }
-            events.CommandEvents.Add(newEvent.name.ToLower(), newEvent);
-
-            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
-        }
+       
 
         public async Task OnPrivateMessage(IMessage arg)
         {
@@ -87,6 +72,23 @@ namespace IA.Events
                 }
             }
             events.MentionEvents.Add(newEvent.name.ToLower(), newEvent);
+
+            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
+
+        public void AddCommandEvent(Action<CommandEvent> info)
+        {
+            CommandEvent newEvent = new CommandEvent();
+            info.Invoke(newEvent);
+            newEvent.origin = this;
+            if (newEvent.aliases.Length > 0)
+            {
+                foreach (string s in newEvent.aliases)
+                {
+                    aliases.Add(s, newEvent.name.ToLower());
+                }
+            }
+            events.CommandEvents.Add(newEvent.name.ToLower(), newEvent);
 
             sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
