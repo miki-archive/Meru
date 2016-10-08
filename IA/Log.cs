@@ -1,9 +1,12 @@
-﻿using System;
+﻿using IA.FileHandling;
+using System;
 
 namespace IA
 {
     public class Log
     {
+        static FileWriter log = new FileWriter($"log_{DateTime.Now.ToFileTime()}", ".log");
+
         /// <summary>
         /// Display a [msg] message.
         /// </summary>
@@ -12,6 +15,7 @@ namespace IA
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("[msg]: " + message);
+            log.Write(message);
         }
 
         /// <summary>
@@ -23,6 +27,7 @@ namespace IA
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("[msg]: " + message, arg0);
+            log.Write(message);
         }
 
         /// <summary>
@@ -34,6 +39,7 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("[!!!]: " + message);
             Console.ForegroundColor = ConsoleColor.White;
+            log.Write(message);
         }
 
         /// <summary>
@@ -45,6 +51,8 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("[err]: " + message);
             Console.ForegroundColor = ConsoleColor.White;
+            log.Write(message);
+
         }
 
         /// <summary>
@@ -56,6 +64,7 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("[err@{0}]: {1}", target, message);
             Console.ForegroundColor = ConsoleColor.White;
+            log.Write(message);
         }
 
         /// <summary>
@@ -67,6 +76,7 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("[wrn]: " + message);
             Console.ForegroundColor = ConsoleColor.White;
+            log.Write(message);
         }
 
         /// <summary>
@@ -78,6 +88,7 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("[wrn@" + tag + "]: " + message);
             Console.ForegroundColor = ConsoleColor.White;
+            log.Write(message);
         }
 
         /// <summary>
@@ -89,6 +100,7 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("[yay]: " + message);
             Console.ForegroundColor = ConsoleColor.White;
+            log.Write(message);
         }
 
         /// <summary>
@@ -100,6 +112,7 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("[yay@{0}]: {1}", target, message);
             Console.ForegroundColor = ConsoleColor.White;
+            log.Write(message);
         }
     }
 }

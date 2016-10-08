@@ -9,7 +9,10 @@ namespace IA.Events
     class EventContainer
     {
         public Dictionary<string, CommandEvent> CommandEvents { private set; get; } = new Dictionary<string, CommandEvent>();
+
         public Dictionary<string, Event> MentionEvents { private set; get; } = new Dictionary<string, Event>();
+        public Dictionary<string, Event> ContinuousEvents { private set; get; } = new Dictionary<string, Event>();
+
         public Dictionary<string, UserEvent> JoinServerEvents { private set; get; } = new Dictionary<string, UserEvent>();
         public Dictionary<string, UserEvent> LeaveServerEvents { private set; get; } = new Dictionary<string, UserEvent>();
 
@@ -28,6 +31,10 @@ namespace IA.Events
             {
                 return MentionEvents[name];
             }
+            if (ContinuousEvents.ContainsKey(name))
+            {
+                return ContinuousEvents[name];
+            }
             if (JoinServerEvents.ContainsKey(name))
             {
                 return JoinServerEvents[name];
@@ -38,24 +45,29 @@ namespace IA.Events
             }
             return null;
         }
+
         public Event GetInternalEvent(string name)
         {
             return InternalEvents[name];
         }
+
         public Event[] GetAllEvents()
         {
             List<Event> allEvents = new List<Event>();
             allEvents.AddRange(CommandEvents.Values);
             allEvents.AddRange(MentionEvents.Values);
+            allEvents.AddRange(ContinuousEvents.Values);
             allEvents.AddRange(JoinServerEvents.Values);
             allEvents.AddRange(LeaveServerEvents.Values);
             return allEvents.ToArray();
         }
+
         public Dictionary<string, Event> GetAllEventsDictionary()
         {
             Dictionary<string, Event> allEvents = new Dictionary<string, Event>();
             CommandEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
             MentionEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
+            ContinuousEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
             JoinServerEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
             LeaveServerEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
             return allEvents;

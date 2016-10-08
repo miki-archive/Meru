@@ -9,9 +9,9 @@ namespace IA.Events
 {
     public class UserEvent:Event
     {
-        public ProcessServerCommand processCommand = (e) =>
+        public ProcessServerCommand processCommand = async (e) =>
         {
-            e.Guild.GetDefaultChannelAsync().Result.SendMessageSafeAsync("This server event has not been set up correctly.");
+            await e.Guild.GetDefaultChannelAsync().Result.SendMessageSafeAsync("This server event has not been set up correctly.");
         };
 
         public UserEvent()

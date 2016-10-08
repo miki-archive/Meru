@@ -43,14 +43,12 @@ namespace IA.Events
             events = new EventContainer();
             sql = new SQL(bot.SqlInformation, bot.Identifier);
 
-            sql.TryCreateTable("identifier(id BIGINT, i varchar(255))");
+            SQL.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 
             OverrideIdentifier = bot.Name.ToLower() + ".";
 
             events.InternalEvents.Add("ia-enabled-db", new Event());
-        }
-
-       
+        }    
 
         public async Task OnPrivateMessage(IMessage arg)
         {
@@ -73,7 +71,7 @@ namespace IA.Events
             }
             events.MentionEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddCommandEvent(Action<CommandEvent> info)
@@ -90,7 +88,7 @@ namespace IA.Events
             }
             events.CommandEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddJoinEvent(Action<UserEvent> info)
@@ -108,7 +106,7 @@ namespace IA.Events
             events.JoinServerEvents.Add(newEvent.name.ToLower(), newEvent);
 
 
-            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddLeaveEvent(Action<UserEvent> info)
@@ -125,8 +123,17 @@ namespace IA.Events
             }
             events.LeaveServerEvents.Add(newEvent.name.ToLower(), newEvent);
 
+            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
 
-            sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        public void AddContinuousEvent(Action<ContinuousEvent> info)
+        {
+            ContinuousEvent newEvent = new ContinuousEvent();
+            info.Invoke(newEvent);
+            newEvent.origin = this;
+            events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
+
+            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         /// <summary>
@@ -138,12 +145,18 @@ namespace IA.Events
         {
             return events.GetEvent(id);
         }
+
+        /// <summary>
+        /// Gets only command events as commandevent value
+        /// </summary>
+        /// <param name="id">event id</param>
+        /// <returns>CommandEvent from local database</returns>
         public CommandEvent GetCommandEvent(string id)
         {
             return events.CommandEvents.First(c => { return c.Key == id; }).Value;
         }
 
-        public async void SetIdentifier(IUserGuild e, string prefix)
+        public async Task SetIdentifierAsync(IUserGuild e, string prefix)
         {
             try
             {
@@ -152,7 +165,7 @@ namespace IA.Events
             }
             catch (Exception ex)
             {
-                Log.ErrorAt("IABot.EventSystem.SetIdentifier", ex.Message + "\n\n" + ex.StackTrace);
+                Log.ErrorAt("IA.EventSystem.SetIdentifier", ex.Message + "\n\n" + ex.StackTrace);
             }
         }
 
@@ -292,16 +305,6 @@ namespace IA.Events
                     await ev.Check(e);
                 }
             }
-        }
-
-        public async Task SimulateMessage(IMessage e, IGuild g, string message)
-        {
-            if (!identifier.ContainsKey(g.Id)) LoadIdentifier(g.Id);
-
-            if (!message.StartsWith(identifier[g.Id])) return;
-
-            if (await CheckIdentifier(message, identifier[g.Id], e, false)) return;
-            else if (await CheckIdentifier(message, OverrideIdentifier, e, false)) return;
         }
 
         public EventAccessibility GetUserAccessibility(IMessage e)

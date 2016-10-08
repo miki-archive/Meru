@@ -37,15 +37,18 @@ namespace IA.FileHandling
         public void Write(string variable)
         {
             file.WriteLine(variable);
+            file.Flush();
         }
         public void Write(string variable, string comment)
         {
             file.WriteLine($"# {comment}");
             file.WriteLine(variable);
+            file.Flush();
         }
         public void WriteComment(string comment)
         {
             file.WriteLine($"# {comment}");
+            file.Flush();
         }
 
         public void Finish()

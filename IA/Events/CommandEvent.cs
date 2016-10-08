@@ -16,9 +16,9 @@ namespace IA.Events
             return aliases.Contains(command);
         };
 
-        public ProcessCommand processCommand = (e, args) =>
+        public ProcessCommand processCommand = async (e, args) =>
         {
-            e.Channel.SendMessageSafeAsync("This command has not been set up properly.");
+            await e.Channel.SendMessageSafeAsync("This command has not been set up properly.");
         };
 
         public CommandEvent()

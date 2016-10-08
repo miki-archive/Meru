@@ -102,7 +102,7 @@ namespace IA
         {
             for (int i = 0; i < shard.Count; i++)
             {
-                if(!shard[i].shardProcess.Responding)
+                if (!shard[i].shardProcess.Responding)
                 {
                     Log.Error("[Shard " + i + "] has stopped responding.");
                     shard[i].shardProcess.Kill();
@@ -171,6 +171,7 @@ namespace IA
             }
             else
             {
+                // fix
                 app.UnhandledException += App_UnhandledException;
                 app.ProcessExit += App_ProcessExit;
                 BotWin32Window.SetConsoleCtrlHandler(new BotWin32Window.HandlerRoutine(App_OnConsoleWindowClose), true);
@@ -276,6 +277,11 @@ namespace IA
             inputString = Console.ReadLine();
             file.Write(inputString);
             outputBotInfo.botToken = inputString;
+
+            file.WriteComment("Shard count");
+            Console.WriteLine("Shards [1-25565]:");
+            inputString = Console.ReadLine();
+            outputBotInfo.shardCount = int.Parse(inputString);               
 
             file.Finish();
 
