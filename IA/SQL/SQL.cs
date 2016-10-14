@@ -167,7 +167,25 @@ namespace IA.Sql
 
                     if (splitString.Count > 1)
                     {
-                        parameters.Add(new MySqlParameter(splitString[0], p[parameters.Count]));
+                        if (splitString[1].StartsWith("?"))
+                        {
+                            if (parameters.Find(x => { return x.ParameterName == splitString[0]; }) == null)
+                            {
+                                parameters.Add(new MySqlParameter(splitString[0], p[parameters.Count]));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(splitSql[i].Contains("?"))
+                        {
+                            splitString = new List<string>();
+                            splitString.AddRange(splitSql[i].Split('?'));
+                            if (parameters.Find(x => { return x.ParameterName == splitString[1].TrimEnd(',', ')', ';'); }) == null)
+                            {
+                                parameters.Add(new MySqlParameter(splitString[1].TrimEnd(',', ')', ';'), p[parameters.Count]));
+                            }
+                        }
                     }
                 }
 
@@ -176,15 +194,30 @@ namespace IA.Sql
                 command.Parameters.AddRange(parameters.ToArray());
                 connection.Open();
 
-                MySqlDataReader r = command.ExecuteReader();
-                while (r.Read())
+                bool hasRead = false;
+
+                if (output != null)
                 {
-                    Dictionary<string, object> outputdict = new Dictionary<string, object>();
-                    for (int i = 0; i < r.VisibleFieldCount; i++)
+                    MySqlDataReader r = command.ExecuteReader();
+                    while (r.Read())
                     {
-                        outputdict.Add(r.GetName(i), r.GetValue(i));
+                        Dictionary<string, object> outputdict = new Dictionary<string, object>();
+                        for (int i = 0; i < r.VisibleFieldCount; i++)
+                        {
+                            outputdict.Add(r.GetName(i), r.GetValue(i));
+                        }
+                        output?.Invoke(outputdict);
+                        hasRead = true;
                     }
-                    output(outputdict);
+
+                    if (!hasRead)
+                    {
+                        output?.Invoke(null);
+                    }
+                }
+                else
+                {
+                    command.ExecuteNonQuery();
                 }
                 connection.Close();
             }
@@ -240,6 +273,8 @@ namespace IA.Sql
                 command.Parameters.AddRange(parameters.ToArray());
                 connection.Open();
 
+                bool hasRead = false;
+
                 MySqlDataReader r = await command.ExecuteReaderAsync() as MySqlDataReader;
                 while (await r.ReadAsync())
                 {
@@ -249,7 +284,14 @@ namespace IA.Sql
                         outputdict.Add(r.GetName(i), r.GetValue(i));
                     }
                     output(outputdict);
+                    hasRead = true;
                 }
+
+                if(!hasRead)
+                {
+                    output(null);
+                }
+
                 await connection.CloseAsync();
             }
             catch (Exception e)

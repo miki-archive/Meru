@@ -19,8 +19,8 @@ namespace IA.Events
         public bool canBeDisabled = true;
         public bool defaultEnabled = true;
 
-        public Module parent;
-        public EventSystem origin;
+        public Module module;
+        public EventSystem eventSystem;
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
         public EventRange range = EventRange.CHANNEL;

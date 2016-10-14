@@ -12,6 +12,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static IA.BotWin32Window;
+using IA.Internal;
 
 namespace IA
 {
@@ -189,6 +190,7 @@ namespace IA
                 {
                     shard.Add(new Shard(i));
                 }
+                await ICMPListener.Listen();
                 await Task.Run(async () => await Heartbeat());
                 await Task.Delay(-1);
             }

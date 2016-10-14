@@ -61,7 +61,7 @@ namespace IA.Events
         {
             CommandEvent newEvent = new CommandEvent();
             info.Invoke(newEvent);
-            newEvent.origin = this;
+            newEvent.eventSystem = this;
             if (newEvent.aliases.Length > 0)
             {
                 foreach (string s in newEvent.aliases)
@@ -78,7 +78,7 @@ namespace IA.Events
         {
             CommandEvent newEvent = new CommandEvent();
             info.Invoke(newEvent);
-            newEvent.origin = this;
+            newEvent.eventSystem = this;
             if (newEvent.aliases.Length > 0)
             {
                 foreach (string s in newEvent.aliases)
@@ -91,11 +91,28 @@ namespace IA.Events
             SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
+        public void AddCommandDoneEvent(Action<CommandDoneEvent> info)
+        {
+            CommandDoneEvent newEvent = new CommandDoneEvent();
+            info.Invoke(newEvent);
+            newEvent.eventSystem = this;
+            if (newEvent.aliases.Length > 0)
+            {
+                foreach (string s in newEvent.aliases)
+                {
+                    aliases.Add(s, newEvent.name.ToLower());
+                }
+            }
+            events.CommandDoneEvents.Add(newEvent.name.ToLower(), newEvent);
+
+            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
+
         public void AddJoinEvent(Action<UserEvent> info)
         {
             UserEvent newEvent = new UserEvent();
             info.Invoke(newEvent);
-            newEvent.origin = this;
+            newEvent.eventSystem = this;
             if (newEvent.aliases.Length > 0)
             {
                 foreach (string s in newEvent.aliases)
@@ -113,7 +130,7 @@ namespace IA.Events
         {
             UserEvent newEvent = new UserEvent();
             info.Invoke(newEvent);
-            newEvent.origin = this;
+            newEvent.eventSystem = this;
             if (newEvent.aliases.Length > 0)
             {
                 foreach (string s in newEvent.aliases)
@@ -130,7 +147,7 @@ namespace IA.Events
         {
             ContinuousEvent newEvent = new ContinuousEvent();
             info.Invoke(newEvent);
-            newEvent.origin = this;
+            newEvent.eventSystem = this;
             events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
 
             SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
@@ -212,15 +229,15 @@ namespace IA.Events
                 {
                     if (await IsEnabled(ev, e.Channel.Id) && userEventAccessibility >= ev.accessibility)
                     {
-                        if (ev.parent != null)
+                        if (ev.module != null)
                         {
-                            if (!moduleEvents.ContainsKey(ev.parent.defaultInfo.name))
+                            if (!moduleEvents.ContainsKey(ev.module.defaultInfo.name))
                             {
-                                moduleEvents.Add(ev.parent.defaultInfo.name, new List<string>());
+                                moduleEvents.Add(ev.module.defaultInfo.name, new List<string>());
                             }
                             if (GetUserAccessibility(e) >= ev.accessibility)
                             {
-                                moduleEvents[ev.parent.defaultInfo.name].Add(ev.name);
+                                moduleEvents[ev.module.defaultInfo.name].Add(ev.name);
                             }
                         }
                         else
@@ -275,6 +292,14 @@ namespace IA.Events
                 
             if (await CheckIdentifier(message, identifier[g.Id], e)) return;
             else if (await CheckIdentifier(message, OverrideIdentifier, e)) return;
+        }
+
+        public void OnCommandDone(IMessage e, CommandEvent commandEvent)
+        {
+            foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
+            {
+                ev.processEvent(e, commandEvent);
+            }
         }
 
         public async Task OnMention(IMessage e, IGuild g)

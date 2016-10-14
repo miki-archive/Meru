@@ -9,6 +9,10 @@ namespace IA.Internal
 {
     public class APIModule
     {
+        /// <summary>
+        /// Loads API related events.
+        /// </summary>
+        /// <param name="bot"></param>
         public static void LoadEvents(Bot bot)
         {
             // join api call
@@ -18,7 +22,7 @@ namespace IA.Internal
                 x.canBeDisabled = false;
                 x.processCommand = async (e) =>
                 {
-                    SQL.TryCreateTable("ia.sharddata (id int unsigned, users int unsigned, channels int unsigned, servers int unsigned");
+                    SQL.TryCreateTable("ia.sharddata (id int unsigned, users int unsigned, channels int unsigned, servers int unsigned)");
 
                     await SQL.QueryAsync("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null, 
                         (await bot.Client.GetConnectionsAsync()).Count, 
@@ -36,7 +40,7 @@ namespace IA.Internal
                 x.canBeDisabled = false;
                 x.processCommand = async (e) =>
                 {
-                    SQL.TryCreateTable("ia.sharddata (id int unsigned, users int unsigned, channels int unsigned, servers int unsigned");
+                    SQL.TryCreateTable("ia.sharddata (id int unsigned, users int unsigned, channels int unsigned, servers int unsigned)");
 
                     await SQL.QueryAsync("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null,
                         (await bot.Client.GetConnectionsAsync()).Count,
@@ -45,7 +49,7 @@ namespace IA.Internal
                         bot.GetShardId()
                         );
                 };
-            });
+            }); 
         }
     }
 }

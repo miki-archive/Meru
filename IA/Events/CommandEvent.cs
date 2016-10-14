@@ -70,6 +70,7 @@ namespace IA.Events
                     if (TryProcessCommand(e, args))
                     {
                         Log.Message(name + " called from " + guild.Name + " [" + guild.Id + " # " + e.Channel.Id + "]");
+                        eventSystem.OnCommandDone(e, this);
                         CommandUsed++;
                     }
                 }

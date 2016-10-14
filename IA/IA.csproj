@@ -147,7 +147,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\CommandDoneEvent.cs" />
+    <Compile Include="Events\ContinuousEvent.cs" />
+    <Compile Include="Internal\APIModule.cs" />
     <Compile Include="Bot.cs" />
+    <Compile Include="Internal\ICMPListener.cs" />
     <Compile Include="Internal\IpcSocket.cs" />
     <Compile Include="Instances\Manager.cs" />
     <Compile Include="Instances\Shard.cs" />
@@ -169,7 +173,7 @@
     <Compile Include="Node\Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQL\SQLInformation.cs" />
-    <Compile Include="SQL\SQLManager.cs" />
+    <Compile Include="SQL\SQL.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
