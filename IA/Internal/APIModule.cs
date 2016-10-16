@@ -26,10 +26,11 @@ namespace IA.Internal
 
                     await SQL.QueryAsync("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null, 
                         (await bot.Client.GetConnectionsAsync()).Count, 
-                        (await bot.Client.GetGuildsAsync()).Sum(z => { return (z.GetChannelsAsync()).GetAwaiter().GetResult().Count; }), 
-                        (await bot.Client.GetGuildsAsync()).Count, 
+                        bot.Client.Guilds.Sum(z => { return z.Channels.Count; }), 
+                        bot.Client.Guilds.Count, 
                         bot.GetShardId()
                         );
+                    Log.Done("x");
                 };
             });
 
@@ -44,10 +45,11 @@ namespace IA.Internal
 
                     await SQL.QueryAsync("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null,
                         (await bot.Client.GetConnectionsAsync()).Count,
-                        (await bot.Client.GetGuildsAsync()).Sum(z => { return (z.GetChannelsAsync()).GetAwaiter().GetResult().Count; }),
-                        (await bot.Client.GetGuildsAsync()).Count,
+                        bot.Client.Guilds.Sum(z => { return z.Channels.Count; }),
+                        bot.Client.Guilds.Count,
                         bot.GetShardId()
                         );
+                    Log.Done("y");
                 };
             }); 
         }

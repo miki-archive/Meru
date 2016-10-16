@@ -25,6 +25,7 @@ namespace IA.Events
         EventContainer events;
         static SQL sql;
 
+        public string DefaultIdentifier { private set; get; }
         public string OverrideIdentifier { private set; get; }
 
         /// <summary>
@@ -46,6 +47,7 @@ namespace IA.Events
             SQL.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 
             OverrideIdentifier = bot.Name.ToLower() + ".";
+            DefaultIdentifier = bot.Identifier;
 
             events.InternalEvents.Add("ia-enabled-db", new Event());
         }    
@@ -79,6 +81,10 @@ namespace IA.Events
             CommandEvent newEvent = new CommandEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
+            if(newEvent.usage[0] == "usage not set!")
+            {
+                newEvent.usage[0] = newEvent.name;
+            }
             if (newEvent.aliases.Length > 0)
             {
                 foreach (string s in newEvent.aliases)
@@ -170,10 +176,14 @@ namespace IA.Events
         /// <returns>CommandEvent from local database</returns>
         public CommandEvent GetCommandEvent(string id)
         {
-            return events.CommandEvents.First(c => { return c.Key == id; }).Value;
+            if (events.CommandEvents.ContainsKey(id))
+            {
+                return events.CommandEvents[id];
+            }
+            return null;
         }
 
-        public async Task SetIdentifierAsync(IUserGuild e, string prefix)
+        public async Task SetIdentifierAsync(IGuild e, string prefix)
         {
             try
             {
@@ -289,9 +299,15 @@ namespace IA.Events
             string message = e.Content.ToLower();
 
             if (!message.StartsWith(identifier[g.Id])) return;
-                
-            if (await CheckIdentifier(message, identifier[g.Id], e)) return;
-            else if (await CheckIdentifier(message, OverrideIdentifier, e)) return;
+
+            if (await CheckIdentifier(message, identifier[g.Id], e))
+            {
+                return;
+            }
+            else if (await CheckIdentifier(message, OverrideIdentifier, e))
+            {
+                return;
+            }
         }
 
         public void OnCommandDone(IMessage e, CommandEvent commandEvent)

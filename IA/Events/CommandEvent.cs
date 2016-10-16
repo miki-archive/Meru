@@ -59,7 +59,7 @@ namespace IA.Events
 
             if (IsOnCooldown(e.Author.Id))
             {
-                await e.Channel.SendMessageSafeAsync($"Sorry, this command is still on cooldown for {GetCooldown(e.Author.Id)} seconds!");
+                await e.Channel.SendMessageSafeAsync($"Sorry, this command is still on cooldown for {-GetCooldown(e.Author.Id)} seconds!");
                 return;
             }
 
@@ -99,7 +99,6 @@ namespace IA.Events
         float GetCooldown(ulong id)
         {
             float currentCooldown = (float)(DateTime.Now.AddSeconds(-cooldown) - lastTimeUsed[id]).TotalSeconds;
-            // do stuff?
             return currentCooldown;
         }
         bool IsOnCooldown(ulong id)

@@ -12,10 +12,11 @@ namespace IA.Events
         public string name = "name not set";
         public string[] aliases = new string[0];
 
-        public string description;
-        public string[] usage = new string[0];
+        public string description = "description not set for this command!";
+        public string[] usage = new string[] { "usage not set!" };
         public string errorMessage = "Something went wrong!";
 
+        public bool canBeOverridenByDefaultPrefix = false;
         public bool canBeDisabled = true;
         public bool defaultEnabled = true;
 
@@ -23,7 +24,6 @@ namespace IA.Events
         public EventSystem eventSystem;
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
-        public EventRange range = EventRange.CHANNEL;
 
         public Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
         protected Dictionary<ulong, DateTime> lastTimeUsed = new Dictionary<ulong, DateTime>();
@@ -46,14 +46,6 @@ namespace IA.Events
             if (!canBeDisabled && !v) return;
 
             ulong id = 0;
-            IGuildChannel g = (e.Channel as IGuildChannel);
-
-            switch (range)
-            {
-                case EventRange.CHANNEL: id = e.Channel.Id; break;
-                case EventRange.SERVER: id = g.Id; break;
-                case EventRange.USER: id = e.Author.Id; break;    
-            }
 
             if(!enabled.ContainsKey(e.Channel.Id))
             {

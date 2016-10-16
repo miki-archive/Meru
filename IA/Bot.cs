@@ -24,20 +24,23 @@ namespace IA
         public EventSystem Events { private set; get; }
         public SQL Sql { private set; get; }
 
+        AppDomain app = AppDomain.CurrentDomain;
+        List<Shard> shard = new List<Shard>();
+
         public const string VersionText = "IA v" + VersionNumber;
-        public const string VersionNumber = "1.4";
+        public const string VersionNumber = "1.4.1";
 
         public int shardId = -1;
 
-        string CurrentPath = Directory.GetCurrentDirectory();
-        List<Shard> shard = new List<Shard>();
+        string currentPath = Directory.GetCurrentDirectory();
+
         bool isManager = false;
 
-        AppDomain app = AppDomain.CurrentDomain;
+
 
         public Bot()
         {
-            if (!File.Exists(CurrentPath + "/preferences.config"))
+            if (!File.Exists(currentPath + "/preferences.config"))
             {
                 clientInformation = InitializePreferencesFile();
             }
@@ -175,7 +178,7 @@ namespace IA
                 // fix
                 app.UnhandledException += App_UnhandledException;
                 app.ProcessExit += App_ProcessExit;
-                BotWin32Window.SetConsoleCtrlHandler(new BotWin32Window.HandlerRoutine(App_OnConsoleWindowClose), true);
+                SetConsoleCtrlHandler(new HandlerRoutine(App_OnConsoleWindowClose), true);
 
                 Process[] p = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
                 foreach(Process px in p)
@@ -198,7 +201,7 @@ namespace IA
 
         private async Task Client_JoinedGuild(IGuild arg)
         {
-            Sql.SendToSQL($"Update set servercount={Client.GetGuilds().Count} where id={Client.ShardId}");
+            Sql.SendToSQL($"Update set servercount={Client.Guilds.Count} where id={Client.ShardId}");
             await Task.Delay(-1);
         }
 
@@ -311,7 +314,7 @@ namespace IA
             IGuild guild = (arg.Channel as IGuildChannel)?.Guild;
             if (guild != null)
             {
-                if (arg.Content.Contains((await Client.GetCurrentUserAsync()).Id.ToString()))
+                if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
                 {
                     await Events.OnMention(arg, guild);
                 }
