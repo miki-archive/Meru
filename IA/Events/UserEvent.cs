@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public class UserEvent:Event
+    public class GuildEvent:Event
     {
         public ProcessServerCommand processCommand = async (e) =>
         {
-            await e.Guild.GetDefaultChannelAsync().Result.SendMessageSafeAsync("This server event has not been set up correctly.");
+            await e.GetDefaultChannelAsync().Result.SendMessageSafeAsync("This server event has not been set up correctly.");
         };
 
-        public UserEvent()
+        public GuildEvent()
         {
             CommandUsed = 0;
         }
 
-        public async Task Check(IGuildUser e)
+        public async Task Check(IGuild e)
         {
             await Task.Run(() => processCommand(e));
         }

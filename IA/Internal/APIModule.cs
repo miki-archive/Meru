@@ -20,17 +20,31 @@ namespace IA.Internal
             {
                 x.name = "joinapicall";
                 x.canBeDisabled = false;
-                x.processCommand = async (e) =>
+                x.processCommand = (e) =>
                 {
                     SQL.TryCreateTable("ia.sharddata (id int unsigned, users int unsigned, channels int unsigned, servers int unsigned)");
 
-                    await SQL.QueryAsync("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null, 
-                        (await bot.Client.GetConnectionsAsync()).Count, 
-                        bot.Client.Guilds.Sum(z => { return z.Channels.Count; }), 
-                        bot.Client.Guilds.Count, 
-                        bot.GetShardId()
-                        );
-                    Log.Done("x");
+                    SQL.Query("SELECT id FROM ia.sharddata where id=?id", output =>
+                    {
+                        if (output != null)
+                        {
+                            SQL.Query("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null,
+                                    (bot.Client.GetConnectionsAsync().GetAwaiter().GetResult()).Count,
+                                    bot.Client.Guilds.Sum(z => { return z.Channels.Count; }),
+                                    bot.Client.Guilds.Count,
+                                    bot.GetShardId()
+                                    );
+                        }
+                        else
+                        {
+                            SQL.Query("INSERT INTO ia.sharddata (id, users, channels, servers) VALUES (?id, ?users, ?channels, ?servers)", null,
+                                      bot.GetShardId(),
+                                      (bot.Client.GetConnectionsAsync().GetAwaiter().GetResult()).Count,
+                                      bot.Client.Guilds.Sum(z => { return z.Channels.Count; }),
+                                      bot.Client.Guilds.Count
+                                      );
+                        }
+                    }, bot.GetShardId());
                 };
             });
 
@@ -39,17 +53,31 @@ namespace IA.Internal
             {
                 x.name = "leaveapicall";
                 x.canBeDisabled = false;
-                x.processCommand = async (e) =>
+                x.processCommand = (e) =>
                 {
                     SQL.TryCreateTable("ia.sharddata (id int unsigned, users int unsigned, channels int unsigned, servers int unsigned)");
 
-                    await SQL.QueryAsync("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null,
-                        (await bot.Client.GetConnectionsAsync()).Count,
-                        bot.Client.Guilds.Sum(z => { return z.Channels.Count; }),
-                        bot.Client.Guilds.Count,
-                        bot.GetShardId()
-                        );
-                    Log.Done("y");
+                    SQL.Query("SELECT id FROM ia.sharddata where id=?id", output =>
+                    {
+                        if (output != null)
+                        {
+                            SQL.Query("UPDATE ia.sharddata users=?users, channels=?channels, servers=?servers WHERE id=?id", null,
+                                    (bot.Client.GetConnectionsAsync().GetAwaiter().GetResult()).Count,
+                                    bot.Client.Guilds.Sum(z => { return z.Channels.Count; }),
+                                    bot.Client.Guilds.Count,
+                                    bot.GetShardId()
+                                    );
+                        }
+                        else
+                        {
+                            SQL.Query("INSERT INTO ia.sharddata (id, users, channels, servers) VALUES (?id, ?users, ?channels, ?servers)", null,
+                                      bot.GetShardId(),
+                                      (bot.Client.GetConnectionsAsync().GetAwaiter().GetResult()).Count,
+                                      bot.Client.Guilds.Sum(z => { return z.Channels.Count; }),
+                                      bot.Client.Guilds.Count
+                                      );
+                        }
+                    }, bot.GetShardId());
                 };
             }); 
         }

@@ -114,9 +114,9 @@ namespace IA.Events
             SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
-        public void AddJoinEvent(Action<UserEvent> info)
+        public void AddJoinEvent(Action<GuildEvent> info)
         {
-            UserEvent newEvent = new UserEvent();
+            GuildEvent newEvent = new GuildEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
             if (newEvent.aliases.Length > 0)
@@ -132,9 +132,9 @@ namespace IA.Events
             SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
-        public void AddLeaveEvent(Action<UserEvent> info)
+        public void AddLeaveEvent(Action<GuildEvent> info)
         {
-            UserEvent newEvent = new UserEvent();
+            GuildEvent newEvent = new GuildEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
             if (newEvent.aliases.Length > 0)
@@ -193,6 +193,28 @@ namespace IA.Events
             catch (Exception ex)
             {
                 Log.ErrorAt("IA.EventSystem.SetIdentifier", ex.Message + "\n\n" + ex.StackTrace);
+            }
+        }
+
+        public async void OnGuildLeave(IGuild e)
+        {
+            foreach (GuildEvent ev in events.LeaveServerEvents.Values)
+            {
+                if (await IsEnabled(ev, e.Id))
+                {
+                    await ev.Check(e);
+                }
+            }
+        }
+
+        public async void OnGuildJoin(IGuild e)
+        {
+            foreach (GuildEvent ev in events.JoinServerEvents.Values)
+            {
+                if (await IsEnabled(ev, e.Id))
+                {
+                    await ev.Check(e);
+                }
             }
         }
 
@@ -323,28 +345,6 @@ namespace IA.Events
             foreach (CommandEvent ev in events.MentionEvents.Values)
             {
                 await ev.Check(e);
-            }
-        }
-
-        public async Task OnUserJoin(IGuildUser e)
-        {
-            foreach (UserEvent ev in events.JoinServerEvents.Values)
-            {
-                if (await IsEnabled(ev, e.Guild.Id))
-                {
-                    await ev.Check(e);
-                }
-            }
-        }
-
-        public async Task OnUserLeave(IGuildUser e)
-        {
-            foreach (UserEvent ev in events.LeaveServerEvents.Values)
-            {
-                if (await IsEnabled(ev, e.Guild.Id))
-                {
-                    await ev.Check(e);
-                }
             }
         }
 

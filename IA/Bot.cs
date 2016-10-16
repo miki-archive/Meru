@@ -167,15 +167,15 @@ namespace IA
                 });
                 Sql = new SQL(clientInformation.sqlInformation, clientInformation.botIdentifier);
 
+                APIModule.LoadEvents(this);
+
                 Client.MessageReceived += Client_MessageReceived;
-                Client.UserLeft += Client_UserLeft;
-                Client.UserJoined += Client_UserJoined;
                 Client.JoinedGuild += Client_JoinedGuild;
+                Client.LeftGuild += Client_LeftGuild;
                 Client.Ready += Client_Ready;
             }
             else
             {
-                // fix
                 app.UnhandledException += App_UnhandledException;
                 app.ProcessExit += App_ProcessExit;
                 SetConsoleCtrlHandler(new HandlerRoutine(App_OnConsoleWindowClose), true);
@@ -201,7 +201,13 @@ namespace IA
 
         private async Task Client_JoinedGuild(IGuild arg)
         {
-            Sql.SendToSQL($"Update set servercount={Client.Guilds.Count} where id={Client.ShardId}");
+            Events.OnGuildJoin(arg);
+            await Task.Delay(-1);
+        }
+
+        private async Task Client_LeftGuild(IGuild arg)
+        {
+            Events.OnGuildLeave(arg);
             await Task.Delay(-1);
         }
 
@@ -320,16 +326,6 @@ namespace IA
                 }
                 await Events.OnMessageRecieved(arg, guild);
             }
-        }
-
-        private async Task Client_UserJoined(IGuildUser user)
-        {
-            await Events.OnUserJoin(user);
-        }
-
-        private async Task Client_UserLeft(IGuildUser user)
-        {
-            await Events.OnUserLeave(user);
         }
     }
 }

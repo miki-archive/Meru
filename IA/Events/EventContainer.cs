@@ -14,8 +14,8 @@ namespace IA.Events
         public Dictionary<string, Event> MentionEvents { private set; get; } = new Dictionary<string, Event>();
         public Dictionary<string, Event> ContinuousEvents { private set; get; } = new Dictionary<string, Event>();
 
-        public Dictionary<string, UserEvent> JoinServerEvents { private set; get; } = new Dictionary<string, UserEvent>();
-        public Dictionary<string, UserEvent> LeaveServerEvents { private set; get; } = new Dictionary<string, UserEvent>();
+        public Dictionary<string, GuildEvent> JoinServerEvents { private set; get; } = new Dictionary<string, GuildEvent>();
+        public Dictionary<string, GuildEvent> LeaveServerEvents { private set; get; } = new Dictionary<string, GuildEvent>();
 
         /// <summary>
         /// I use this to store internal events.
