@@ -17,24 +17,30 @@ namespace IA.Events
             defaultInfo = new ModuleInformation();
             defaultInfo.name = name;
             defaultInfo.enabled = enabled;
-        }
-        
+        }       
         public Module(Action<ModuleInformation> info)
         {
             info.Invoke(defaultInfo);
         }
 
-        public void Load(ulong channelId)
+        public string GetState()
         {
-
+            return defaultInfo.name + ": " + "ACTIVE";
         }
 
-        public void SetActive(ulong channelId, bool value)
+        public Task Initialize()
         {
-            if(!enabled.ContainsKey(channelId))
-            {
-                Load(channelId);
-            }
+            return Task.CompletedTask;
+        }
+
+        public Task Install()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task Uninstall()
+        {
+            return Task.CompletedTask;
         }
     }
 }

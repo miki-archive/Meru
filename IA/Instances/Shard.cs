@@ -15,28 +15,44 @@ namespace IA
         public int id;
         public Process shardProcess;
 
-        public Shard(int id)
+        /// <summary>
+        /// Create a new shard
+        /// </summary>
+        /// <param name="shard_id">shard id</param>
+        public Shard(int shard_id)
         {
-            Log.Message("Starting shard " + id);
-            this.id = id;
+            Log.Message("Starting shard " + shard_id);
+            id = shard_id;
             OpenShard().GetAwaiter().GetResult();
         }
 
+        /// <summary>
+        /// Opens a new shard.
+        /// </summary>
         public async Task OpenShard()
         {
             ProcessStartInfo info = new ProcessStartInfo();
             info.Arguments = id.ToString();
-            info.FileName = Process.GetCurrentProcess().ProcessName;
+            info.WorkingDirectory = Directory.GetCurrentDirectory();
+            info.FileName = "Miki.exe";
             info.CreateNoWindow = true;
             info.RedirectStandardOutput = true;
+            info.RedirectStandardError = true;
             info.UseShellExecute = false;
+
             shardProcess = Process.Start(info);
             shardProcess.EnableRaisingEvents = true;
             shardProcess.OutputDataReceived += (s, e) =>
             {
-                Log.Message("[Shard " + id + "] " + e.Data);
+                Log.Print("[shard-" + id + "] " + e.Data);
+            };
+            shardProcess.ErrorDataReceived += (s, e) =>
+            {
+                Log.Print("[err@shard-" + id + "] " + e.Data, ConsoleColor.Red, LogLevel.ERROR);
             };
             shardProcess.BeginOutputReadLine();
+            shardProcess.BeginErrorReadLine();
+
             await Task.Delay(5000);
         }
     }

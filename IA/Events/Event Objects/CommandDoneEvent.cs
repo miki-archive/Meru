@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public delegate void ProcessCommandDoneEvent(IMessage m, Event e);
+    public delegate Task ProcessCommandDoneEvent(IMessage m, Event e);
 
     public class CommandDoneEvent : Event
     {

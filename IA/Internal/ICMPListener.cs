@@ -11,9 +11,6 @@ namespace IA.Internal
 {
     class ICMPListener
     {
-        public static async Task Listen()
-        {
-         
-        }
+
     }
 }

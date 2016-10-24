@@ -1,4 +1,4 @@
-﻿using IA.Sql;
+﻿using IA.SQL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,23 +7,31 @@ using System.Threading.Tasks;
 
 namespace IA
 {
-    public class ClientInformation
+    public  class ClientInformation
     {
-        public string botName = "IABot";
-        public string botVersion = "1.0.0";
+        public string Name = "IABot";
+        public string Version = "1.0.0";
 
-        public string botToken = "";
-        public string botIdentifier = ">";
+        public string Token = "";
+        public string Prefix = ">";
 
         public int shardCount = 1;
 
-        public LogLevel logLevel = LogLevel.ERROR;
+        public LogLevel logLevel = LogLevel.ALL;
+        /// <summary>
+        /// Saves logs to ./logs/xxxxx.log
+        /// </summary>
+        public LogLevel fileLogLevel = LogLevel.ERROR;
 
         public SQLInformation sqlInformation;
 
         public bool CanLog(LogLevel level)
         {
-            return logLevel >= level;
+            return logLevel <= level;
+        }
+        public bool CanFileLog(LogLevel level)
+        {
+            return fileLogLevel <= level;
         }
 
         public string GetSQLConnectionString()
@@ -32,14 +40,17 @@ namespace IA
         }
         public string GetVersion()
         {
-            return "v" + botVersion;
+            return "v" + Version;
         }
     }
 
     public enum LogLevel
     {
         ALL,
-        INFO,
-        ERROR
+        NOTICE,
+        MESSAGE,
+        WARNING,
+        ERROR,
+        NONE
     }
 }

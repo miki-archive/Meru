@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IA</RootNamespace>
     <AssemblyName>IA</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
@@ -48,39 +48,28 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'debug2|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\debug2\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Events\CommandDoneEvent.cs" />
-    <Compile Include="Events\ContinuousEvent.cs" />
+    <Compile Include="Events\Event Objects\CommandDoneEvent.cs" />
+    <Compile Include="Events\Event Objects\ContinuousEvent.cs" />
     <Compile Include="Internal\APIModule.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Internal\ICMPListener.cs" />
     <Compile Include="Internal\IpcSocket.cs" />
     <Compile Include="Instances\Manager.cs" />
     <Compile Include="Instances\Shard.cs" />
-    <Compile Include="BotWin32Window.cs" />
     <Compile Include="ClientInformation.cs" />
-    <Compile Include="Events\CommandEvent.cs" />
-    <Compile Include="Events\Event.cs" />
+    <Compile Include="Events\Event Objects\CommandEvent.cs" />
+    <Compile Include="Events\Event Objects\Event.cs" />
     <Compile Include="Events\EventContainer.cs" />
     <Compile Include="Events\EventSystem.cs" />
     <Compile Include="Events\InformationObjects\BotInformation.cs" />
     <Compile Include="Events\InformationObjects\EventsObjects\EventInformation.cs" />
     <Compile Include="Events\InformationObjects\ModuleInformation.cs" />
     <Compile Include="Events\Module.cs" />
-    <Compile Include="Events\UserEvent.cs" />
+    <Compile Include="Events\Event Objects\UserEvent.cs" />
     <Compile Include="Extension Methods\Channel.cs" />
     <Compile Include="FileHandling\FileReader.cs" />
     <Compile Include="FileHandling\FileWriter.cs" />
@@ -104,20 +93,24 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Discord.Net.Commands, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Commands.1.0.0-beta2-00450\lib\netstandard1.3\Discord.Net.Commands.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Discord.Net.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-beta2-00434\lib\netstandard1.3\Discord.Net.Core.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-beta2-00450\lib\netstandard1.3\Discord.Net.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rest, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-beta2-00434\lib\netstandard1.3\Discord.Net.Rest.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-beta2-00450\lib\netstandard1.3\Discord.Net.Rest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rpc, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-beta2-00434\lib\netstandard1.3\Discord.Net.Rpc.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-beta2-00450\lib\netstandard1.3\Discord.Net.Rpc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.WebSocket, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-beta2-00434\lib\netstandard1.3\Discord.Net.WebSocket.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-beta2-00450\lib\netstandard1.3\Discord.Net.WebSocket.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
@@ -129,11 +122,32 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Interactive.Async, Version=3.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.Interactive.Async.3.0.0\lib\net45\System.Interactive.Async.dll</HintPath>
+    <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.AppContext.4.1.0\lib\net46\System.AppContext.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Console, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.Console.4.0.0\lib\net46\System.Console.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Globalization.Calendars, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.Globalization.Calendars.4.0.1\lib\net46\System.Globalization.Calendars.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Interactive.Async, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.Interactive.Async.3.1.0-rc\lib\net46\System.Interactive.Async.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.IO.Compression.ZipFile.4.0.1\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

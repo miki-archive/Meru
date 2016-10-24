@@ -22,6 +22,6 @@ namespace IA.Events
     }
 
     public delegate void ProcessServerCommand(IGuild e);
-    public delegate void ProcessCommand(IMessage e, string args);
+    public delegate Task ProcessCommand(IMessage e, string args);
     public delegate bool CheckCommand(IMessage e, string command, string[] allAliases);
 }

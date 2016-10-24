@@ -1,5 +1,5 @@
 ﻿using Discord;
-using IA.Sql;
+using IA.SQL;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -22,8 +22,9 @@ namespace IA.Events
         /// Variable to check if eventSystem has been defined already.
         /// </summary>
         static BotInformation bot;
+
         EventContainer events;
-        static SQL sql;
+        static MySQL sql;
 
         public string DefaultIdentifier { private set; get; }
         public string OverrideIdentifier { private set; get; }
@@ -42,21 +43,17 @@ namespace IA.Events
 
             bot = new BotInformation(botInfo);
             events = new EventContainer();
-            sql = new SQL(bot.SqlInformation, bot.Identifier);
+            sql = new MySQL(bot.SqlInformation, bot.Identifier);
 
-            SQL.TryCreateTable("identifier(id BIGINT, i varchar(255))");
+            MySQL.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 
             OverrideIdentifier = bot.Name.ToLower() + ".";
             DefaultIdentifier = bot.Identifier;
-
-            events.InternalEvents.Add("ia-enabled-db", new Event());
         }    
 
         public async Task OnPrivateMessage(IMessage arg)
         {
-            //Do PM stuff
-            
-            await Task.Delay(-1);
+            await Task.CompletedTask;
         }
 
         public void AddMentionEvent(Action<CommandEvent> info)
@@ -73,7 +70,7 @@ namespace IA.Events
             }
             events.MentionEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddCommandEvent(Action<CommandEvent> info)
@@ -94,7 +91,7 @@ namespace IA.Events
             }
             events.CommandEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddCommandDoneEvent(Action<CommandDoneEvent> info)
@@ -111,7 +108,7 @@ namespace IA.Events
             }
             events.CommandDoneEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddJoinEvent(Action<GuildEvent> info)
@@ -129,7 +126,7 @@ namespace IA.Events
             events.JoinServerEvents.Add(newEvent.name.ToLower(), newEvent);
 
 
-            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddLeaveEvent(Action<GuildEvent> info)
@@ -146,7 +143,7 @@ namespace IA.Events
             }
             events.LeaveServerEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddContinuousEvent(Action<ContinuousEvent> info)
@@ -156,7 +153,7 @@ namespace IA.Events
             newEvent.eventSystem = this;
             events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            SQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         /// <summary>
@@ -185,18 +182,19 @@ namespace IA.Events
 
         public async Task SetIdentifierAsync(IGuild e, string prefix)
         {
-            try
+            if (identifier.ContainsKey(e.Id))
             {
                 identifier[e.Id] = prefix;
-                await Task.Run(() => sql.SendToSQL(string.Format("UPDATE identifier SET i = \"{0}\" WHERE id = {1};", prefix, e.Id)));
             }
-            catch (Exception ex)
+            else
             {
-                Log.ErrorAt("IA.EventSystem.SetIdentifier", ex.Message + "\n\n" + ex.StackTrace);
+                identifier.Add(e.Id, prefix);
             }
+
+            await Task.Run(() => MySQL.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
         }
 
-        public async void OnGuildLeave(IGuild e)
+        public async Task OnGuildLeave(IGuild e)
         {
             foreach (GuildEvent ev in events.LeaveServerEvents.Values)
             {
@@ -207,7 +205,7 @@ namespace IA.Events
             }
         }
 
-        public async void OnGuildJoin(IGuild e)
+        public async Task OnGuildJoin(IGuild e)
         {
             foreach (GuildEvent ev in events.JoinServerEvents.Values)
             {
@@ -218,21 +216,12 @@ namespace IA.Events
             }
         }
 
-        /// <summary>
-        /// TODO: add sql support.
-        /// </summary>
-        /// <param name="serverId">server id to ignore</param>
-        public void Ignore(ulong serverId)
-        {
-            ignore.Add(serverId);
-        }
-
         public async Task<bool> SetEnabled(string eventName, ulong channelId, bool enabled)
         {
            
             Event setEvent = GetEvent(eventName);
 
-            if(!setEvent.canBeDisabled && !enabled)
+            if(!setEvent.canBeDisabled && !enabled|| setEvent == null)
             {
                 return false;
             }
@@ -241,75 +230,68 @@ namespace IA.Events
             {
                 if (bot.SqlInformation != null)
                 {
-                    await Task.Run(() => sql.SendToSQL($"UPDATE event SET enabled = {enabled} WHERE id = {channelId} AND name = '{setEvent.name}';"));
+                    await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, channelId, setEvent.name);
                 }
                 setEvent.enabled[channelId] = enabled;
                 return true;
             }
             return false;
         }
- 
+
         public async Task<string> ListCommands(IMessage e)
         {
-            try
-            {
-                Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
-                moduleEvents.Add("Misc", new List<string>());
-                EventAccessibility userEventAccessibility = GetUserAccessibility(e);
+            Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
+            moduleEvents.Add("Misc", new List<string>());
+            EventAccessibility userEventAccessibility = GetUserAccessibility(e);
 
-                foreach (Event ev in events.CommandEvents.Values)
+            foreach (Event ev in events.CommandEvents.Values)
+            {
+                if (await IsEnabled(ev, e.Channel.Id) && userEventAccessibility >= ev.accessibility)
                 {
-                    if (await IsEnabled(ev, e.Channel.Id) && userEventAccessibility >= ev.accessibility)
+                    if (ev.module != null)
                     {
-                        if (ev.module != null)
+                        if (!moduleEvents.ContainsKey(ev.module.defaultInfo.name))
                         {
-                            if (!moduleEvents.ContainsKey(ev.module.defaultInfo.name))
-                            {
-                                moduleEvents.Add(ev.module.defaultInfo.name, new List<string>());
-                            }
-                            if (GetUserAccessibility(e) >= ev.accessibility)
-                            {
-                                moduleEvents[ev.module.defaultInfo.name].Add(ev.name);
-                            }
+                            moduleEvents.Add(ev.module.defaultInfo.name, new List<string>());
                         }
-                        else
+                        if (GetUserAccessibility(e) >= ev.accessibility)
                         {
-                            moduleEvents["Misc"].Add(ev.name);
+                            moduleEvents[ev.module.defaultInfo.name].Add(ev.name);
                         }
                     }
-                }
-
-                if(moduleEvents["Misc"].Count == 0)
-                {
-                    moduleEvents.Remove("Misc");
-                }
-
-                moduleEvents.OrderBy(i => { return i.Key; });
-                foreach (List<string> list in moduleEvents.Values)
-                {
-                    list.OrderBy(x =>
+                    else
                     {
-                        return x;
-                    });
-                }
-
-                string output = "";
-                foreach (KeyValuePair<string, List<string>> items in moduleEvents)
-                {
-                    output += "**" + items.Key + "**\n";
-                    for (int i = 0; i < items.Value.Count; i++)
-                    {
-                        output += items.Value[i] + ", ";
+                        moduleEvents["Misc"].Add(ev.name);
                     }
-                    output.Remove(output.Length - 2);
-                    output += "\n\n";
                 }
-                return output;
             }
-            catch
+
+            if (moduleEvents["Misc"].Count == 0)
             {
-                return "";
+                moduleEvents.Remove("Misc");
             }
+
+            moduleEvents.OrderBy(i => { return i.Key; });
+            foreach (List<string> list in moduleEvents.Values)
+            {
+                list.OrderBy(x =>
+                {
+                    return x;
+                });
+            }
+
+            string output = "";
+            foreach (KeyValuePair<string, List<string>> items in moduleEvents)
+            {
+                output += "**" + items.Key + "**\n";
+                for (int i = 0; i < items.Value.Count; i++)
+                {
+                    output += items.Value[i] + ", ";
+                }
+                output.Remove(output.Length - 2);
+                output += "\n\n";
+            }
+            return output;
         }
 
         public async Task OnMessageRecieved(IMessage e, IGuild g)
@@ -332,11 +314,11 @@ namespace IA.Events
             }
         }
 
-        public void OnCommandDone(IMessage e, CommandEvent commandEvent)
+        public async Task OnCommandDone(IMessage e, CommandEvent commandEvent)
         {
             foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
             {
-                ev.processEvent(e, commandEvent);
+                await ev.processEvent(e, commandEvent);
             }
         }
 
@@ -361,19 +343,13 @@ namespace IA.Events
         public int CommandsUsed()
         {
             int output = 0;
-            try
+            foreach (Event e in events.CommandEvents.Values)
             {
-                foreach (Event e in events.CommandEvents.Values)
-                {
-                    output += e.CommandUsed;
-                }
-                return output;
+                output += e.CommandUsed;
             }
-            catch
-            {
-                return output;
-            }
+            return output;
         }
+
         public int CommandsUsed(string eventName)
         {
             return events.GetEvent(eventName).CommandUsed;
@@ -459,7 +435,7 @@ namespace IA.Events
             int state = await Task.Run(() => sql.IsEventEnabled(e.name, id));
             if(state == -1)
             {
-                await Task.Run(() => sql.SendToSQL(string.Format("INSERT INTO event(name, id, enabled) VALUES('{0}', {1}, {2});", e.name, id, e.defaultEnabled)));
+                await Task.Run(() => MySQL.Query("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, e.name, id, e.defaultEnabled));
                 e.enabled.Add(id, e.defaultEnabled);
                 return e.defaultEnabled;
             }

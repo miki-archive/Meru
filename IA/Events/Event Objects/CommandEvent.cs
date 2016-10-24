@@ -11,6 +11,8 @@ namespace IA.Events
     {
         public int cooldown = 1;
 
+        public GuildPermission[] requiresPermissions = new GuildPermission[0];
+
         public CheckCommand checkCommand = (e, command, aliases) =>
         {
             return aliases.Contains(command);
@@ -63,37 +65,40 @@ namespace IA.Events
                 return;
             }
 
-            if (checkCommand(e, command, allAliases))
+            if (requiresPermissions.Length > 0)
             {
-                try
+                foreach (GuildPermission g in requiresPermissions)
                 {
-                    if (TryProcessCommand(e, args))
+                    if (!await hasPermission(e.Channel as IGuildChannel, g))
                     {
-                        Log.Message(name + " called from " + guild.Name + " [" + guild.Id + " # " + e.Channel.Id + "]");
-                        eventSystem.OnCommandDone(e, this);
-                        CommandUsed++;
+                        await e.Channel.SendMessageSafeAsync($"Please give me `{g}` to use this command.");
+                        return;
                     }
                 }
-                catch (Exception ex)
+            }
+
+            if (checkCommand(e, command, allAliases))
+            {
+                if (await TryProcessCommand(e, args))
                 {
-                    Log.ErrorAt(name, ex.Message);
-                    await e.Channel.SendMessageSafeAsync(errorMessage);
+                    Log.Message(name + " called from " + guild.Name + " [" + guild.Id + " # " + e.Channel.Id + "]");
+                    await eventSystem.OnCommandDone(e, this);
+                    CommandUsed++;
                 }
             }
         }
 
-        public bool TryProcessCommand(IMessage e, string args)
+        public async Task<bool> TryProcessCommand(IMessage e, string args)
         {
             try
             {
-                processCommand(e, args);
-                return true;
+                await processCommand(e, args);
             }
             catch(Exception ex)
             {
-                Log.Error(ex.Message);
+                Log.ErrorAt(name, ex.Message);
             }
-            return false;
+            return true;
         }
 
         float GetCooldown(ulong id)
@@ -101,6 +106,7 @@ namespace IA.Events
             float currentCooldown = (float)(DateTime.Now.AddSeconds(-cooldown) - lastTimeUsed[id]).TotalSeconds;
             return currentCooldown;
         }
+
         bool IsOnCooldown(ulong id)
         {
             if (lastTimeUsed.ContainsKey(id))
@@ -117,6 +123,11 @@ namespace IA.Events
                 lastTimeUsed.Add(id, DateTime.Now);
                 return false;
             }
+        }
+    
+        async Task<bool> hasPermission(IGuildChannel e, GuildPermission r)
+        {
+            return (await e.GetUserAsync(Bot.instance.Client.CurrentUser.Id)).GuildPermissions.Has(r);
         }
     }
 }

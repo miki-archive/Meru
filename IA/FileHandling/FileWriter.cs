@@ -16,17 +16,40 @@ namespace IA.FileHandling
 
         public FileWriter(string fileName)
         {
-            filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
-            file = new StreamWriter(new FileStream(filePath + ".config", FileMode.Create));
-            file.WriteLine($"# {fileName} created with {Bot.VersionText}");
-        }
-        public FileWriter(string fileName, string extension)
-        {
-            extension = extension.TrimStart('.');
 
-            filePath = Directory.GetCurrentDirectory()+ "\\" + fileName;
-            file = new StreamWriter(new FileStream(filePath + "." + extension, FileMode.Create));
-            file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+            if (fileName.Split('.').Length == 1)
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
+                file = new StreamWriter(new FileStream(filePath + ".config", FileMode.Create));
+                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+            }
+            else
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
+                file = new StreamWriter(new FileStream(filePath, FileMode.Create));
+                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+            }
+        }
+        public FileWriter(string fileName, string relativePath)
+        {
+            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);
+            if (fileName.Split('.').Length == 1)
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
+                file = new StreamWriter(new FileStream(filePath + ".config", FileMode.Create));
+                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+            }
+            else
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
+                file = new StreamWriter(new FileStream(filePath, FileMode.Create));
+                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+            }
+        }
+
+        public static explicit operator bool(FileWriter x)
+        {
+            return x != null;
         }
 
         public void Dispose()

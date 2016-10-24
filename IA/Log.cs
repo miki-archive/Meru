@@ -1,11 +1,23 @@
 ﻿using IA.FileHandling;
 using System;
+using System.IO;
 
 namespace IA
 {
     public class Log
     {
-        static FileWriter log = new FileWriter($"log_{DateTime.Now.ToFileTime()}", ".log");
+        static ClientInformation client;
+        static FileWriter log;
+
+        public static void InitializeLogging(ClientInformation c)
+        {   
+            client = c;
+            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/logs");
+            if (client.CanFileLog(LogLevel.ERROR))
+            {
+                log = new FileWriter($"log_{DateTime.Now.ToFileTime()}.log", "/logs");
+            }
+        }
 
         /// <summary>
         /// Display a [msg] message.
@@ -13,21 +25,20 @@ namespace IA
         /// <param name="message">information about the action</param>
         public static void Message(string message)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("[msg]: " + message);
-            log.Write(message);
-        }
+            if (client == null)
+            {
+                return;
+            }
 
-        /// <summary>
-        /// Display a [msg] message in the console.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="arg0"></param>
-        public static void Message(string message, object arg0)
-        {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("[msg]: " + message, arg0);
-            log.Write(message);
+            if (client.CanLog(LogLevel.MESSAGE))
+            {
+                Console.WriteLine("[msg]: " + message);
+            }
+            if (client.CanFileLog(LogLevel.MESSAGE))
+            {
+                log?.Write(message);
+            }
         }
 
         /// <summary>
@@ -36,10 +47,21 @@ namespace IA
         /// <param name="message"></param>
         public static void Notice(string message)
         {
+            if (client == null)
+            {
+                return;
+            }
+
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("[!!!]: " + message);
+            if (client.CanLog(LogLevel.NOTICE))
+            {
+                Console.WriteLine("[!!!]: " + message);
+            }
+            if (client.CanFileLog(LogLevel.NOTICE))
+            {
+                log?.Write(message);
+            }
             Console.ForegroundColor = ConsoleColor.White;
-            log.Write(message);
         }
 
         /// <summary>
@@ -48,11 +70,21 @@ namespace IA
         /// <param name="message">information about the action</param>
         public static void Error(string message)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("[err]: " + message);
-            Console.ForegroundColor = ConsoleColor.White;
-            log.Write(message);
+            if (client == null)
+            {
+                return;
+            } 
 
+            Console.ForegroundColor = ConsoleColor.Red;
+            if (client.CanLog(LogLevel.ERROR))
+            {
+                Console.WriteLine("[err]: " + message);
+            }
+            if (client.CanFileLog(LogLevel.ERROR))
+            {
+                log?.Write(message);
+            }
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         /// <summary>
@@ -61,10 +93,21 @@ namespace IA
         /// <param name="message">information about the action</param>
         public static void ErrorAt(string target, string message)
         {
+            if (client == null)
+            {
+                return;
+            } 
+
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("[err@{0}]: {1}", target, message);
-            Console.ForegroundColor = ConsoleColor.White;
-            log.Write(message);
+            if (client.CanLog(LogLevel.ERROR))
+            {
+                Console.WriteLine("[err@{0}]: {1}", target, message);
+            }
+            if (client.CanFileLog(LogLevel.ERROR))
+            {
+                log?.Write(message);
+            }
+        Console.ForegroundColor = ConsoleColor.White;
         }
 
         /// <summary>
@@ -73,10 +116,21 @@ namespace IA
         /// <param name="message">information about the action</param>
         public static void Warning(string message)
         {
+            if (client == null)
+            {
+                return;
+            }
+
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("[wrn]: " + message);
+            if (client.CanFileLog(LogLevel.WARNING))
+            {
+                Console.WriteLine("[wrn]: " + message);
+            }
+            if (client.CanFileLog(LogLevel.WARNING))
+            {
+                log?.Write(message);
+            }
             Console.ForegroundColor = ConsoleColor.White;
-            log.Write(message);
         }
 
         /// <summary>
@@ -85,10 +139,20 @@ namespace IA
         /// <param name="message">information about the action</param>
         public static void WarningAt(string tag, string message)
         {
+            if (client == null)
+            {
+                return;
+            }
+
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("[wrn@" + tag + "]: " + message);
-            Console.ForegroundColor = ConsoleColor.White;
-            log.Write(message);
+            if (client.CanFileLog(LogLevel.WARNING))
+            {
+                Console.WriteLine("[wrn@" + tag + "]: " + message);
+            }
+            if (client.CanLog(LogLevel.WARNING))
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         /// <summary>
@@ -97,10 +161,21 @@ namespace IA
         /// <param name="message">information about the action</param>
         public static void Done(string message)
         {
+            if (client == null)
+            {
+                return;
+            }
+
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("[yay]: " + message);
+            if (client.CanLog(LogLevel.NOTICE))
+            {
+                Console.WriteLine("[yay]: " + message);
+            }
+            if (client.CanFileLog(LogLevel.NOTICE))
+            {
+                log?.Write(message);
+            }
             Console.ForegroundColor = ConsoleColor.White;
-            log.Write(message);
         }
 
         /// <summary>
@@ -109,10 +184,40 @@ namespace IA
         /// <param name="message">information about the action</param>
         public static void DoneAt(string target, string message)
         {
+            if (client == null)
+            {
+                return;
+            }
+
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("[yay@{0}]: {1}", target, message);
+            if (client.CanLog(LogLevel.NOTICE))
+            {
+                Console.WriteLine("[yay@{0}]: {1}", target, message);
+            }
             Console.ForegroundColor = ConsoleColor.White;
-            log.Write(message);
+            if (client.CanFileLog(LogLevel.NOTICE))
+            {
+                log?.Write(message);
+            }
+        }
+
+        public static void Print(string message, ConsoleColor color = ConsoleColor.White, LogLevel logLevel = LogLevel.MESSAGE)
+        {
+            if (client == null)
+            {
+                return;
+            }
+
+            Console.ForegroundColor = color;
+            if (client.CanLog(logLevel))
+            {
+                Console.WriteLine(message);
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+            if (client.CanFileLog(logLevel))
+            {
+                log?.Write(message);
+            }
         }
     }
 }

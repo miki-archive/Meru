@@ -1,25 +1,21 @@
-﻿using Discord;
-using IA.Events;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace IA.Sql
+namespace IA.SQL
 {
-    public class SQL
-    {
-        public delegate void QueryOutput(Dictionary<string, object> result);
+    public delegate void QueryOutput(Dictionary<string, object> result);
+
+    public class MySQL
+    {   
+        static MySQL instance;
 
         SQLInformation info;
-        string defaultIdentifier;
-        static SQL instance;
 
-        public SQL()
+        string defaultIdentifier;
+
+        public MySQL()
         {
             if (instance == null)
             {
@@ -30,21 +26,20 @@ namespace IA.Sql
             info = instance.info;
             defaultIdentifier = instance.defaultIdentifier;
         }
-
-        public SQL(SQLInformation info, string defaultIdentifier = ">")
+        public MySQL(SQLInformation info, string defaultIdentifier = ">")
         {
             this.info = info;
             this.defaultIdentifier = defaultIdentifier;
             instance = this;
         }
 
-        public int IsEventEnabled(string name, ulong channelId)
+        public int IsEventEnabled(string event_name, ulong channel_id)
         {
             if (info == null) return 1;
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{channelId}\" AND name=\"{name}\"";
+            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{channel_id}\" AND name=\"{event_name}\"";
 
             connection.Open();
             MySqlDataReader r = command.ExecuteReader();
@@ -60,16 +55,24 @@ namespace IA.Sql
             }
             connection.Close();
 
-            if (check == "") return -1;
-            return output?1:0;
+            if (check == "")
+            {
+                return -1;
+            }
+            return output ? 1 : 0;
         }
 
-        public async void SetIdentifier(string identifier, ulong server)
+        public string GetConnectionString()
         {
-            await Task.Run(() => SendToSQL("INSERT INTO identifier VALUES(" + server + ", \"" + identifier + "\")"));
+            return info.GetConnectionString();
         }
 
-        public string GetIdentifier(ulong server)
+        /// <summary>
+        /// Gets the prefix from the server's id
+        /// </summary>
+        /// <param name="server_id">server id</param>
+        /// <returns></returns>
+        public string GetIdentifier(ulong server_id)
         {
             if (info == null) return defaultIdentifier;
 
@@ -77,7 +80,7 @@ namespace IA.Sql
 
             MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = string.Format("SELECT i FROM identifier WHERE id={0}", server);
+            command.CommandText = string.Format("SELECT i FROM identifier WHERE id={0}", server_id);
             connection.Open();
             MySqlDataReader r = command.ExecuteReader();
 
@@ -95,44 +98,19 @@ namespace IA.Sql
             return "ERROR";
         }
 
-        public string GetConnectionString()
-        {
-            return info.GetConnectionString();
-        }
-
-        public static SQL GetInitializedObject()
+        /// <summary>
+        /// Gets the instance of the initialized object if created.
+        /// </summary>
+        /// <returns></returns>
+        public static MySQL GetInstance()
         {
             return instance;
-        }
-
-        public void SendToSQL(string sqlCode)
-        {
-            if (info == null) return;
-
-            MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = sqlCode;
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-            connection.Close();
-        }
-
-        public static void TryCreateTable(string sqlCode)
-        {
-            if (instance.info == null) return;
-
-            MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"CREATE TABLE IF NOT EXISTS {sqlCode}";
-            connection.Open();
-            command.ExecuteNonQuery();
-            connection.Close();
         }
 
         /// <summary>
         /// Queries the sqlCode to output
         /// </summary>
-        /// <param name="sqlCode"></param>
+        /// <param name="sqlCode">valid sql code</param>
         /// <param name="output"></param>
         public static void Query(string sqlCode, QueryOutput output, params object[] p)
         {
@@ -145,91 +123,79 @@ namespace IA.Sql
             string curCode = sqlCode;
             string prevCode = "";
 
-            try
+            // Get code ready to extract
+            while (curCode != prevCode)
             {
-                // Get code ready to extract
-                while (curCode != prevCode)
+                prevCode = curCode;
+
+                curCode = curCode.Replace(" = ", "=");
+                curCode = curCode.Replace(" =", "=");
+                curCode = curCode.Replace("= ", "=");
+            }
+
+            List<string> splitSql = new List<string>();
+            splitSql.AddRange(curCode.Split(' '));
+
+            for (int i = 0; i < splitSql.Count; i++)
+            {
+                List<string> splitString = new List<string>();
+                splitString.AddRange(splitSql[i].Split('='));
+
+                if (splitString.Count > 1)
                 {
-                    prevCode = curCode;
-
-                    curCode = curCode.Replace(" = ", "=");
-                    curCode = curCode.Replace(" =", "=");
-                    curCode = curCode.Replace("= ", "=");
-                }
-
-                List<string> splitSql = new List<string>();
-                splitSql.AddRange(curCode.Split(' '));
-
-                for (int i = 0; i < splitSql.Count; i++)
-                {
-                    List<string> splitString = new List<string>();
-                    splitString.AddRange(splitSql[i].Split('='));
-
-                    if (splitString.Count > 1)
+                    if (splitString[1].StartsWith("?"))
                     {
-                        if (splitString[1].StartsWith("?"))
+                        if (parameters.Find(x => { return x.ParameterName == splitString[0]; }) == null)
                         {
-                            if (parameters.Find(x => { return x.ParameterName == splitString[0]; }) == null)
-                            {
-                                parameters.Add(new MySqlParameter(splitString[0], p[parameters.Count]));
-                            }
+                            parameters.Add(new MySqlParameter(splitString[0], p[parameters.Count]));
                         }
-                    }
-                    else
-                    {
-                        if(splitSql[i].Contains("?"))
-                        {
-                            splitString = new List<string>();
-                            splitString.AddRange(splitSql[i].Split('?'));
-                            if (parameters.Find(x => { return x.ParameterName == splitString[1].TrimEnd(',', ')', ';'); }) == null)
-                            {
-                                parameters.Add(new MySqlParameter(splitString[1].TrimEnd(',', ')', ';'), p[parameters.Count]));
-                            }
-                        }
-                    }
-                }
-
-                MySqlCommand command = connection.CreateCommand();
-                command.CommandText = curCode;
-                command.Parameters.AddRange(parameters.ToArray());
-                connection.Open();
-
-                bool hasRead = false;
-
-                if (output != null)
-                {
-                    MySqlDataReader r = command.ExecuteReader();
-                    while (r.Read())
-                    {
-                        Dictionary<string, object> outputdict = new Dictionary<string, object>();
-                        for (int i = 0; i < r.VisibleFieldCount; i++)
-                        {
-                            outputdict.Add(r.GetName(i), r.GetValue(i));
-                        }
-                        output?.Invoke(outputdict);
-                        hasRead = true;
-                    }
-
-                    if (!hasRead)
-                    {
-                        output?.Invoke(null);
                     }
                 }
                 else
                 {
-                    command.ExecuteNonQuery();
+                    if (splitSql[i].Contains("?"))
+                    {
+                        splitString = new List<string>();
+                        splitString.AddRange(splitSql[i].Split('?'));
+                        if (parameters.Find(x => { return x.ParameterName == splitString[1].TrimEnd(',', ')', ';'); }) == null)
+                        {
+                            parameters.Add(new MySqlParameter(splitString[1].TrimEnd(',', ')', ';'), p[parameters.Count]));
+                        }
+                    }
                 }
-                connection.Close();
-            }
-            catch (Exception e)
-            {
-                Log.ErrorAt("mysql.query", e.Message);
-            }
-            finally
-            {
-                connection.Close();
             }
 
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = curCode;
+            command.Parameters.AddRange(parameters.ToArray());
+            connection.Open();
+
+            bool hasRead = false;
+
+            if (output != null)
+            {
+                MySqlDataReader r = command.ExecuteReader();
+                while (r.Read())
+                {
+                    Dictionary<string, object> outputdict = new Dictionary<string, object>();
+                    for (int i = 0; i < r.VisibleFieldCount; i++)
+                    {
+                        outputdict.Add(r.GetName(i), r.GetValue(i));
+                    }
+                    output?.Invoke(outputdict);
+                    hasRead = true;
+                }
+
+                if (!hasRead)
+                {
+                    output?.Invoke(null);
+                }
+            }
+            else
+            {
+                command.ExecuteNonQuery();
+            }
+            connection.Close();
         }
         public static async Task QueryAsync(string sqlCode, QueryOutput output, params object[] p)
         {
@@ -242,39 +208,57 @@ namespace IA.Sql
             string curCode = sqlCode;
             string prevCode = "";
 
-            try
+            // Get code ready to extract
+            while (curCode != prevCode)
             {
-                // Get code ready to extract
-                while (curCode != prevCode)
+                prevCode = curCode;
+
+                curCode = curCode.Replace(" = ", "=");
+                curCode = curCode.Replace(" =", "=");
+                curCode = curCode.Replace("= ", "=");
+            }
+
+            List<string> splitSql = new List<string>();
+            splitSql.AddRange(curCode.Split(' '));
+
+            for (int i = 0; i < splitSql.Count; i++)
+            {
+                List<string> splitString = new List<string>();
+                splitString.AddRange(splitSql[i].Split('='));
+
+                if (splitString.Count > 1)
                 {
-                    prevCode = curCode;
-
-                    curCode = curCode.Replace(" = ", "=");
-                    curCode = curCode.Replace(" =", "=");
-                    curCode = curCode.Replace("= ", "=");
-                }
-
-                List<string> splitSql = new List<string>();
-                splitSql.AddRange(curCode.Split(' '));
-
-                for (int i = 0; i < splitSql.Count; i++)
-                {
-                    List<string> splitString = new List<string>();
-                    splitString.AddRange(splitSql[i].Split('='));
-
-                    if (splitString.Count > 1)
+                    if (splitString[1].StartsWith("?"))
                     {
-                        parameters.Add(new MySqlParameter(splitString[0], p[parameters.Count]));
+                        if (parameters.Find(x => { return x.ParameterName == splitString[0]; }) == null)
+                        {
+                            parameters.Add(new MySqlParameter(splitString[0], p[parameters.Count]));
+                        }
                     }
                 }
+                else
+                {
+                    if (splitSql[i].Contains("?"))
+                    {
+                        splitString = new List<string>();
+                        splitString.AddRange(splitSql[i].Split('?'));
+                        if (parameters.Find(x => { return x.ParameterName == splitString[1].TrimEnd(',', ')', ';'); }) == null)
+                        {
+                            parameters.Add(new MySqlParameter(splitString[1].TrimEnd(',', ')', ';'), p[parameters.Count]));
+                        }
+                    }
+                }
+            }
 
-                MySqlCommand command = connection.CreateCommand();
-                command.CommandText = curCode;
-                command.Parameters.AddRange(parameters.ToArray());
-                connection.Open();
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = curCode;
+            command.Parameters.AddRange(parameters.ToArray());
+            connection.Open();
 
-                bool hasRead = false;
+            bool hasRead = false;
 
+            if (output != null)
+            {
                 MySqlDataReader r = await command.ExecuteReaderAsync() as MySqlDataReader;
                 while (await r.ReadAsync())
                 {
@@ -283,29 +267,64 @@ namespace IA.Sql
                     {
                         outputdict.Add(r.GetName(i), r.GetValue(i));
                     }
-                    output(outputdict);
+                    output?.Invoke(outputdict);
                     hasRead = true;
                 }
 
-                if(!hasRead)
+                if (!hasRead)
                 {
-                    output(null);
+                    output?.Invoke(null);
                 }
-
-                await connection.CloseAsync();
             }
-            catch (Exception e)
+            else
             {
-                Log.ErrorAt("mysql.query", e.Message);
+                await command.ExecuteNonQueryAsync();
             }
-            finally
-            {
-                await connection.CloseAsync();
-            }
-
+            await connection.CloseAsync();
         }
 
+        [Obsolete("use 'MySQL.Query' instead.")]
+        /// <summary>
+        /// Old Query, doesnt return anything.
+        /// </summary>
+        /// <param name="sqlCode">valid sql code</param>
+        public void SendToSQL(string sqlCode)
+        {
+            if (info == null) return;
 
+            MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = sqlCode;
+            connection.Open();
+            MySqlDataReader r = command.ExecuteReader();
+            connection.Close();
+        }
+
+        /// <summary>
+        /// Sets the prefix of the server's id to prefix
+        /// </summary>
+        /// <param name="prefix">st</param>
+        /// <param name="server_id"></param>
+        public async void SetIdentifier(string prefix, ulong server_id)
+        {
+            await MySQL.QueryAsync("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server_id, prefix);
+        }
+
+        /// <summary>
+        /// Ignores this code if table exists.
+        /// </summary>
+        /// <param name="sqlCode">valid sql code</param>
+        public static void TryCreateTable(string sqlCode)
+        {
+            if (instance.info == null) return;
+
+            MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = $"CREATE TABLE IF NOT EXISTS {sqlCode}";
+            connection.Open();
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
     }
 }
 

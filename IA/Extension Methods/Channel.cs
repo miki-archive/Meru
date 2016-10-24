@@ -1,4 +1,5 @@
 ﻿using IA;
+using System;
 using System.Threading.Tasks;
 
 namespace Discord
@@ -23,9 +24,9 @@ namespace Discord
                 IUserMessage m = await channel.SendMessageAsync(message);
                 return m;
             }
-            catch
+            catch(Exception e)
             {
-
+                Log.ErrorAt("msg", e.Message);
             }
             return null;
         }

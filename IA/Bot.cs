@@ -7,11 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using IA.Events;
 using IA.FileHandling;
-using IA.Sql;
+using IA.SQL;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using static IA.BotWin32Window;
 using IA.Internal;
 
 namespace IA
@@ -22,21 +21,18 @@ namespace IA
 
         public DiscordSocketClient Client { private set; get; }
         public EventSystem Events { private set; get; }
-        public SQL Sql { private set; get; }
-
-        AppDomain app = AppDomain.CurrentDomain;
-        List<Shard> shard = new List<Shard>();
+        public MySQL Sql { private set; get; }
 
         public const string VersionText = "IA v" + VersionNumber;
-        public const string VersionNumber = "1.4.1";
+        public const string VersionNumber = "1.4.4";
+
+        public static Bot instance;
 
         public int shardId = -1;
 
         string currentPath = Directory.GetCurrentDirectory();
 
         bool isManager = false;
-
-
 
         public Bot()
         {
@@ -50,32 +46,11 @@ namespace IA
             }
             InitializeBot().GetAwaiter().GetResult();
         }
-
         public Bot(Action<ClientInformation> info)
         {
-            Log.Message("Running " + VersionText);
             clientInformation = new ClientInformation();
             info.Invoke(clientInformation);
             InitializeBot().GetAwaiter().GetResult();
-        }
-
-        public void Connect()
-        {
-            if (!isManager)
-            {
-                Client.LoginAsync(TokenType.Bot, clientInformation.botToken);
-                Client.ConnectAsync();
-            }
-        }
-
-        public async Task ConnectAsync()
-        {
-            if (!isManager)
-            {
-                Log.Message("Connecting...");
-                await Client.LoginAsync(TokenType.Bot, clientInformation.botToken);
-                await Client.ConnectAsync();
-            }
         }
 
         public void AddDeveloper(ulong developerId)
@@ -85,6 +60,26 @@ namespace IA
         public void AddDeveloper(IUser user)
         {
             Events.developers.Add(user.Id);
+        }
+
+        public void Connect()
+        {
+            if (!isManager)
+            {
+                Log.Message("Connecting...");
+                Client.LoginAsync(TokenType.Bot, clientInformation.Token);
+                Client.ConnectAsync();
+            }
+        }
+
+        public async Task ConnectAsync()
+        {
+            if (!isManager)
+            {
+                Log.Message("Connecting...");
+                await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
+                await Client.ConnectAsync();
+            }
         }
 
         public void Dispose()
@@ -102,31 +97,12 @@ namespace IA
             return shardId;
         }
 
-        private async Task Heartbeat()
-        {
-            for (int i = 0; i < shard.Count; i++)
-            {
-                if (!shard[i].shardProcess.Responding)
-                {
-                    Log.Error("[Shard " + i + "] has stopped responding.");
-                    shard[i].shardProcess.Kill();
-                    shard[i] = new Shard(i);
-                }
-
-                if (shard[i].shardProcess.HasExited)
-                {
-                    Log.Error("[Shard " + i + "] has crashed.");
-                    shard[i] = new Shard(i);
-                }
-            }
-
-            await Task.Delay(1000);
-            await Heartbeat();
-        }
-
-        async Task InitializeBot()
+        private async Task InitializeBot()
         {
             int id = 0;
+            instance = this;
+
+            Log.InitializeLogging(clientInformation);
 
             if (Environment.GetCommandLineArgs().Length > 1)
             {
@@ -136,15 +112,14 @@ namespace IA
             }
             else
             {
-                if (Debugger.IsAttached)
+                Console.Title = "Miki " + clientInformation.Version;
+                if(Debugger.IsAttached)
                 {
-                    id = 1;
+                    isManager = false;
                     clientInformation.shardCount = 1;
-                    Log.Warning("Set shardcount to 1 for debugging purposes.");
                 }
                 else
                 {
-                    Console.Title = "Miki " + clientInformation.botVersion;
                     isManager = true;
                 }
             }
@@ -156,16 +131,16 @@ namespace IA
                 {
                     ShardId = id,
                     LogLevel = LogSeverity.Info,
-                    TotalShards = clientInformation.shardCount,   
+                    TotalShards = clientInformation.shardCount  
                 });
 
                 Events = new EventSystem(x =>
                 {
-                    x.Name = clientInformation.botName;
-                    x.Identifier = clientInformation.botIdentifier;
+                    x.Name = clientInformation.Name;
+                    x.Identifier = clientInformation.Prefix;
                     x.SqlInformation = clientInformation.sqlInformation;
                 });
-                Sql = new SQL(clientInformation.sqlInformation, clientInformation.botIdentifier);
+                Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
 
                 APIModule.LoadEvents(this);
 
@@ -173,92 +148,31 @@ namespace IA
                 Client.JoinedGuild += Client_JoinedGuild;
                 Client.LeftGuild += Client_LeftGuild;
                 Client.Ready += Client_Ready;
-            }
-            else
-            {
-                app.UnhandledException += App_UnhandledException;
-                app.ProcessExit += App_ProcessExit;
-                SetConsoleCtrlHandler(new HandlerRoutine(App_OnConsoleWindowClose), true);
-
-                Process[] p = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
-                foreach(Process px in p)
-                {
-                    if(px.Id != Process.GetCurrentProcess().Id)
-                    {
-                        px.Kill();
-                    }
-                }
-
-                for (int i = 0; i < clientInformation.shardCount; i++)
-                {
-                    shard.Add(new Shard(i));
-                }
-                await ICMPListener.Listen();
-                await Task.Run(async () => await Heartbeat());
-                await Task.Delay(-1);
+                Client.Disconnected += Client_Disconnected;
+                await Task.CompletedTask;
             }
         }
 
         private async Task Client_JoinedGuild(IGuild arg)
         {
-            Events.OnGuildJoin(arg);
-            await Task.Delay(-1);
+            await Events.OnGuildJoin(arg);
         }
 
         private async Task Client_LeftGuild(IGuild arg)
         {
-            Events.OnGuildLeave(arg);
-            await Task.Delay(-1);
+            await Events.OnGuildLeave(arg);
         }
 
         private async Task Client_Disconnected(Exception arg)
         {
-            Log.Message("Disconnected!");
-            await Task.Delay(-1);   
+            Process.GetCurrentProcess().Kill();
+            await Task.CompletedTask;
         }
 
         private async Task Client_Log(LogMessage arg)
         {
-            Log.Message(arg.Message);
-            await Task.Delay(-1);
-        }   
-
-        private bool App_OnConsoleWindowClose(CtrlTypes ctrlType)
-        {
-            foreach (Shard b in shard)
-            {
-                b.shardProcess.Kill();
-            }
-
-            switch (ctrlType)
-            {
-                case CtrlTypes.CTRL_C_EVENT:
-                    Console.WriteLine("CTRL+C received!");
-                    break;
-
-                case CtrlTypes.CTRL_BREAK_EVENT:
-                    Console.WriteLine("CTRL+BREAK received!");
-                    break;
-
-                case CtrlTypes.CTRL_CLOSE_EVENT:
-                    Console.WriteLine("Program being closed!");
-                    break;
-
-                case CtrlTypes.CTRL_LOGOFF_EVENT:
-                case CtrlTypes.CTRL_SHUTDOWN_EVENT:
-                    Console.WriteLine("User is logging off!");
-                    break;
-
-            }
-            return true;
-        }
-
-        private void App_ProcessExit(object sender, EventArgs e)
-        {
-            foreach(Shard b in shard)
-            {
-                b.shardProcess.Kill();
-            }
+            Console.WriteLine(arg.Message);
+            await Task.CompletedTask;
         }
 
         private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -281,13 +195,13 @@ namespace IA
             Console.WriteLine("Enter bot name: ");
             string inputString = Console.ReadLine();
             file.Write(inputString);
-            outputBotInfo.botName = inputString;
+            outputBotInfo.Name = inputString;
 
             file.WriteComment("Bot Token");
             Console.WriteLine("Enter bot token: ");
             inputString = Console.ReadLine();
             file.Write(inputString);
-            outputBotInfo.botToken = inputString;
+            outputBotInfo.Token = inputString;
 
             file.WriteComment("Shard count");
             Console.WriteLine("Shards [1-25565]:");
@@ -303,8 +217,8 @@ namespace IA
         {
             ClientInformation outputBotInfo = new ClientInformation();
             FileReader file = new FileReader("preferences", "config");
-            outputBotInfo.botName = file.ReadLine();
-            outputBotInfo.botToken = file.ReadLine();
+            outputBotInfo.Name = file.ReadLine();
+            outputBotInfo.Token = file.ReadLine();
             file.Finish();
             return outputBotInfo;
         }
