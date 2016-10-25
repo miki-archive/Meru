@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Discord;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,8 @@ namespace IA.Events
         public ModuleInformation defaultInfo;
 
         Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
+
+        bool isInstalled = false;
 
         public Module(string name, bool enabled = true)
         {
@@ -33,14 +36,36 @@ namespace IA.Events
             return Task.CompletedTask;
         }
 
-        public Task Install()
+        public Task Install(Bot bot)
         {
+            if(defaultInfo.messageEvent != null)
+            {
+                bot.Client.MessageReceived += Client_MessageReceived;
+            }
+
+            isInstalled = true;
             return Task.CompletedTask;
         }
 
-        public Task Uninstall()
+        public Task Uninstall(Bot bot)
         {
+            if (!isInstalled)
+            {
+                return Task.CompletedTask;
+            }
+
+            if(defaultInfo.messageEvent != null)
+            {
+                bot.Client.MessageReceived -= Client_MessageReceived;
+            }
+
+            isInstalled = false;
             return Task.CompletedTask;
+        }
+
+        private async Task Client_MessageReceived(IMessage message)
+        {
+            await defaultInfo.messageEvent(message, null);
         }
     }
 }

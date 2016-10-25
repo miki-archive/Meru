@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IA.SQL;
 using Discord.Net.Rest;
 using IA.Rest;
+using IA.Events;
 
 namespace IA.Modules
 {
