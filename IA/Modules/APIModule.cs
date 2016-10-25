@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IA.SQL;
+using Discord.Net.Rest;
+using IA.Rest;
 
-namespace IA.Internal
+namespace IA.Modules
 {
     public class APIModule
     {
@@ -80,6 +82,88 @@ namespace IA.Internal
                     }, bot.GetShardId());
                 };
             });
+
+            // carbon api call
+            if (bot.clientInformation.CarbonitexKey != "")
+            {
+                // leave api call
+                bot.Events.AddLeaveEvent(x =>
+                {
+                    x.name = "carbon-leave";
+                    x.canBeDisabled = false;
+                    x.processCommand = async (e) =>
+                    {
+                        RestClient r = new RestClient("https://www.carbonitex.net/discord/data/botdata.php");
+
+                        r.AddHeader("key", bot.clientInformation.CarbonitexKey);
+                        r.AddHeader("servercount", (bot.Client.Guilds).Count.ToString());
+                        r.AddHeader("shardid", bot.GetShardId().ToString());
+                        r.AddHeader("shardcount", bot.clientInformation.ShardCount.ToString());
+                        r.AsJson();
+
+                        await r.PostAsync();
+                    };
+                });
+
+                // leave api call
+                bot.Events.AddJoinEvent(x =>
+                {
+                    x.name = "carbon-join";
+                    x.canBeDisabled = false;
+                    x.processCommand = async (e) =>
+                    {
+                        RestClient r = new RestClient("https://www.carbonitex.net/discord/data/botdata.php");
+
+                        r.AddHeader("key", bot.clientInformation.CarbonitexKey);
+                        r.AddHeader("servercount", (bot.Client.Guilds).Count.ToString());
+                        r.AddHeader("shardid", bot.GetShardId().ToString());
+                        r.AddHeader("shardcount", bot.clientInformation.ShardCount.ToString());
+                        r.AsJson();
+
+                        await r.PostAsync();
+                    };
+                });
+            }
+
+            // discord.pw
+            if (bot.clientInformation.DiscordPwKey != "")
+            {
+                // leave api call
+                bot.Events.AddLeaveEvent(x =>
+                {
+                    x.name = "discordpw-leave";
+                    x.canBeDisabled = false;
+                    x.processCommand = async (e) =>
+                    {
+                        RestClient r = new RestClient("https://bots.discord.pw/api/bots/" + bot.Client.CurrentUser.Id + "/stats");
+
+                        r.SetAuthorisation("", bot.clientInformation.DiscordPwKey);
+                        r.AddHeader("server_count", (bot.Client.Guilds).Count.ToString());
+                        r.AddHeader("shard_id", bot.GetShardId().ToString());
+                        r.AddHeader("shard_count", bot.clientInformation.ShardCount.ToString());
+
+                        await r.PostAsync();
+                    };
+                });
+
+                // join api call
+                bot.Events.AddJoinEvent(x =>
+                {
+                    x.name = "discordpw-join";
+                    x.canBeDisabled = false;
+                    x.processCommand = async (e) =>
+                    {
+                        RestClient r = new RestClient("https://bots.discord.pw/api/bots/" + bot.Client.CurrentUser.Id + "/stats");
+
+                        r.SetAuthorisation("", bot.clientInformation.DiscordPwKey);
+                        r.AddHeader("server_count", (bot.Client.Guilds).Count.ToString());
+                        r.AddHeader("shard_id", bot.GetShardId().ToString());
+                        r.AddHeader("shard_count", bot.clientInformation.ShardCount.ToString());
+
+                        await r.PostAsync();
+                    };
+                });
+            }
         }
     }
 }
