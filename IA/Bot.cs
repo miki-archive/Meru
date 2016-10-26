@@ -236,9 +236,13 @@ namespace IA
             {
                 if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
                 {
-                    await Events.OnMention(arg, guild);
+                    await Task.Run(async () => await Events.OnMention(arg, guild));
                 }
-                await Events.OnMessageRecieved(arg, guild);
+                await Task.Run(async () => await Events.OnMessageRecieved(arg, guild));
+            }
+            else
+            {
+                Log.Message("Private Message?");
             }
         }
     }
