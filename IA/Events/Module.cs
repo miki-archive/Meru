@@ -49,6 +49,10 @@ namespace IA.Events
 
             foreach(CommandEvent e in defaultInfo.events)
             {
+                if(defaultInfo.eventSystem == null)
+                {
+                    defaultInfo.eventSystem = bot.Events;
+                }
                 defaultInfo.eventSystem.events.CommandEvents.Add(e.name, e);
             }
 
