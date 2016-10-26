@@ -54,11 +54,11 @@ namespace IA
 
         public void AddDeveloper(ulong developerId)
         {
-            Events.developers.Add(developerId);
+            Events.Developers.Add(developerId);
         }
         public void AddDeveloper(IUser user)
         {
-            Events.developers.Add(user.Id);
+            Events.Developers.Add(user.Id);
         }
 
         public void Connect()

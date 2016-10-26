@@ -27,6 +27,11 @@ namespace IA.Events
         {
             CommandUsed = 0;
         }
+        public CommandEvent(Action<CommandEvent> info)
+        {
+            info.Invoke(this);
+            CommandUsed = 0;
+        }
 
         public async Task Check(IMessage e, string identifier = "")
         {

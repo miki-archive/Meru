@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Events\Event Objects\CommandDoneEvent.cs" />
     <Compile Include="Events\Event Objects\ContinuousEvent.cs" />
+    <Compile Include="Events\Event Objects\MessageEvent.cs" />
     <Compile Include="Modules\APIModule.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Internal\ICMPListener.cs" />

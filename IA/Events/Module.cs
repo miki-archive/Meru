@@ -9,12 +9,16 @@ namespace IA.Events
 {
     public class Module
     {
-        public ModuleInformation defaultInfo;
+        public ModuleInformation defaultInfo = new ModuleInformation();
 
         Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
 
         bool isInstalled = false;
 
+        public Module()
+        {
+
+        }
         public Module(string name, bool enabled = true)
         {
             defaultInfo = new ModuleInformation();
@@ -43,6 +47,11 @@ namespace IA.Events
                 bot.Client.MessageReceived += Client_MessageReceived;
             }
 
+            foreach(CommandEvent e in defaultInfo.events)
+            {
+                defaultInfo.eventSystem.events.CommandEvents.Add(e.name, e);
+            }
+
             isInstalled = true;
             return Task.CompletedTask;
         }
@@ -54,7 +63,12 @@ namespace IA.Events
                 return Task.CompletedTask;
             }
 
-            if(defaultInfo.messageEvent != null)
+            foreach (CommandEvent e in defaultInfo.events)
+            {
+                defaultInfo.eventSystem.events.CommandEvents.Remove(e.name);
+            }
+
+            if (defaultInfo.messageEvent != null)
             {
                 bot.Client.MessageReceived -= Client_MessageReceived;
             }
