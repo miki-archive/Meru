@@ -12,7 +12,8 @@ namespace IA.Events
 {
     public class EventSystem
     {
-        public List<ulong> developers = new List<ulong>();
+        public List<ulong> Developers = new List<ulong>();
+        public Dictionary<string, Module> Modules { get; internal set; } = new Dictionary<string, Module>();
 
         Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
         Dictionary<string, string> aliases = new Dictionary<string, string>();
@@ -24,7 +25,7 @@ namespace IA.Events
         /// </summary>
         static BotInformation bot;
 
-        EventContainer events;
+        internal EventContainer events { private set; get; }
         static MySQL sql;
 
         public string DefaultIdentifier { private set; get; }
@@ -153,18 +154,21 @@ namespace IA.Events
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
             events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
-
+            
             MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
-        /// <summary>
-        /// Gets event and returns as base value.
-        /// </summary>
-        /// <param name="id">event id</param>
-        /// <returns>Event from local database</returns>
-        public Event GetEvent(string id)
+        public Module CreateModule(Action<ModuleInformation> info)
         {
-            return events.GetEvent(id);
+            Module newModule = new Module(info);
+            foreach(Event e in newModule.defaultInfo.events)
+            {
+                e.eventSystem = this;
+                e.module = newModule;
+            }
+            newModule.defaultInfo.eventSystem = this;
+            Modules.Add(newModule.defaultInfo.name, newModule);
+            return newModule;
         }
 
         /// <summary>
@@ -178,6 +182,27 @@ namespace IA.Events
             {
                 return events.CommandEvents[id];
             }
+            return null;
+        }
+
+
+        /// <summary>
+        /// Gets event and returns as base value.
+        /// </summary>
+        /// <param name="id">event id</param>
+        /// <returns>Event from local database</returns>
+        public Event GetEvent(string id)
+        {
+            return events.GetEvent(id);
+        }
+
+        public Module GetModuleByName(string name)
+        {
+            if(Modules.ContainsKey(name.ToLower()))
+            {
+                return Modules[name.ToLower()];
+            }
+            Log.Warning($"Could not find Module with name '{name}'");
             return null;
         }
 
@@ -336,7 +361,7 @@ namespace IA.Events
             IGuildChannel channel = (e.Channel as IGuildChannel);
             if (channel == null) return EventAccessibility.PUBLIC;
 
-            if (developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
+            if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
             if ((e.Author as IGuildUser).GetPermissions(channel).Has(ChannelPermission.ManagePermissions)) return EventAccessibility.ADMINONLY;
             return EventAccessibility.PUBLIC;
         }

@@ -21,7 +21,7 @@ namespace IA.Events
         public bool defaultEnabled = true;
 
         public Module module;
-        public EventSystem eventSystem;
+        internal EventSystem eventSystem;
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
 

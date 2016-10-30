@@ -7,31 +7,35 @@ using System.Threading.Tasks;
 
 namespace IA
 {
-    public  class ClientInformation
+    public class ClientInformation
     {
-        public string Name = "IABot";
-        public string Version = "1.0.0";
+        public string Name { get; set; } = "IABot";
+        public string Version { get; set; } = "1.0.0";
 
-        public string Token = "";
-        public string Prefix = ">";
+        public string Token { get; set; } = "";
+        public string Prefix { get; set; } = ">";
 
-        public int shardCount = 1;
+        public string CarbonitexKey { get; set; } = "";
+        public string DiscordPwKey { get; set; } = "";
 
-        public LogLevel logLevel = LogLevel.ALL;
+        public int ShardCount { get; set; } = 1;
+        public int ShardId { get; internal set; } = -1;
+
+        public LogLevel ConsoleLogLevel = LogLevel.ALL;
         /// <summary>
         /// Saves logs to ./logs/xxxxx.log
         /// </summary>
-        public LogLevel fileLogLevel = LogLevel.ERROR;
+        public LogLevel FileLogLevel = LogLevel.ERROR;
 
         public SQLInformation sqlInformation;
 
         public bool CanLog(LogLevel level)
         {
-            return logLevel <= level;
+            return ConsoleLogLevel <= level;
         }
         public bool CanFileLog(LogLevel level)
         {
-            return fileLogLevel <= level;
+            return FileLogLevel <= level;
         }
 
         public string GetSQLConnectionString()

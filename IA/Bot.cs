@@ -12,6 +12,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using IA.Internal;
+using IA.Modules;
 
 namespace IA
 {
@@ -27,8 +28,6 @@ namespace IA
         public const string VersionNumber = "1.4.4";
 
         public static Bot instance;
-
-        public int shardId = -1;
 
         string currentPath = Directory.GetCurrentDirectory();
 
@@ -55,11 +54,11 @@ namespace IA
 
         public void AddDeveloper(ulong developerId)
         {
-            Events.developers.Add(developerId);
+            Events.Developers.Add(developerId);
         }
         public void AddDeveloper(IUser user)
         {
-            Events.developers.Add(user.Id);
+            Events.Developers.Add(user.Id);
         }
 
         public void Connect()
@@ -94,7 +93,7 @@ namespace IA
 
         public int GetShardId()
         {
-            return shardId;
+            return clientInformation.ShardId;
         }
 
         private async Task InitializeBot()
@@ -116,7 +115,7 @@ namespace IA
                 if(Debugger.IsAttached)
                 {
                     isManager = false;
-                    clientInformation.shardCount = 1;
+                    clientInformation.ShardCount = 1;
                 }
                 else
                 {
@@ -126,12 +125,12 @@ namespace IA
 
             if (!isManager)
             {
-                shardId = id;
+                clientInformation.ShardId = id;
                 Client = new DiscordSocketClient(new DiscordSocketConfig()
                 {
                     ShardId = id,
                     LogLevel = LogSeverity.Info,
-                    TotalShards = clientInformation.shardCount  
+                    TotalShards = clientInformation.ShardCount  
                 });
 
                 Events = new EventSystem(x =>
@@ -202,11 +201,12 @@ namespace IA
             inputString = Console.ReadLine();
             file.Write(inputString);
             outputBotInfo.Token = inputString;
-
+            
             file.WriteComment("Shard count");
             Console.WriteLine("Shards [1-25565]:");
             inputString = Console.ReadLine();
-            outputBotInfo.shardCount = int.Parse(inputString);               
+            outputBotInfo.ShardCount = int.Parse(inputString);    
+                       
 
             file.Finish();
 
@@ -236,9 +236,13 @@ namespace IA
             {
                 if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
                 {
-                    await Events.OnMention(arg, guild);
+                    await Task.Run(async () => await Events.OnMention(arg, guild));
                 }
-                await Events.OnMessageRecieved(arg, guild);
+                await Task.Run(async () => await Events.OnMessageRecieved(arg, guild));
+            }
+            else
+            {
+                Log.Message("Private Message?");
             }
         }
     }
