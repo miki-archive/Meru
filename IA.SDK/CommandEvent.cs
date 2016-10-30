@@ -17,8 +17,7 @@ namespace IA.SDK
 
         public ProcessCommand processCommand = null;
 
-        public CommandEvent(Action<CommandEvent> info) : base(info as Action<Event>) 
-        {
+        public CommandEvent(Action<CommandEvent> info) { 
             info.Invoke(this);
         }
     }

@@ -132,7 +132,7 @@
     <Compile Include="EventInformation.cs" />
     <Compile Include="IAddon.cs" />
     <Compile Include="Module.cs" />
-    <Compile Include="ModuleInformation.cs" />
+    <Compile Include="ModuleData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

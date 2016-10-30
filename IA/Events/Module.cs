@@ -27,7 +27,7 @@ namespace IA.Events
         {
             info.Invoke(defaultInfo);
         }
-        public Module(SDK.Module addon)
+        public Module(SDK.ModuleInstance addon)
         {
             defaultInfo = new ModuleInformation();
             defaultInfo.name = addon.defaultInfo.name;
@@ -39,16 +39,16 @@ namespace IA.Events
                 {
                     x.name = e.name;
                     x.module = this;
-                    x.processCommand = async (ei, args) =>
+                    if (e.processCommand != null)
                     {
-                        await e.processCommand.Invoke(ei, args);
-                    };
+                        x.processCommand = e.processCommand;
+                    }
                     x.requiresPermissions = e.requiresPermissions;
                     x.usage = e.usage;
-                    x.checkCommand = (ei, args, aliases) =>
+                    if (e.checkCommand != null)
                     {
-                        return e.checkCommand.Invoke(ei, args, aliases);
-                    };
+                        x.checkCommand = e.checkCommand;
+                    }
                     x.aliases = e.aliases;
                     x.canBeDisabled = e.canBeDisabled;
                     x.canBeOverridenByDefaultPrefix = e.canBeOverridenByDefaultPrefix;
@@ -70,7 +70,25 @@ namespace IA.Events
             return Task.CompletedTask;
         }
 
-        public Task Install(Bot bot)
+        public void Install(Bot bot)
+        {
+            if (defaultInfo.messageEvent != null)
+            {
+                bot.Client.MessageReceived += Client_MessageReceived;
+            }
+
+            foreach (CommandEvent e in defaultInfo.events)
+            {
+                if (defaultInfo.eventSystem == null)
+                {
+                    defaultInfo.eventSystem = bot.Events;
+                }
+                defaultInfo.eventSystem.events.CommandEvents.Add(e.name, e);
+            }
+
+            isInstalled = true;
+        }
+        public async Task InstallAsync(Bot bot)
         {
             if(defaultInfo.messageEvent != null)
             {
@@ -87,10 +105,10 @@ namespace IA.Events
             }
 
             isInstalled = true;
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
-        public Task Uninstall(Bot bot)
+        public Task UninstallAsync(Bot bot)
         {
             if (!isInstalled)
             {

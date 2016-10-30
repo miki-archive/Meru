@@ -20,10 +20,14 @@ namespace IA.SDK
         public bool canBeDisabled = true;
         public bool defaultEnabled = true;
 
-        public Module module;
+        public ModuleInstance module = new ModuleInstance("");
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
 
+        public Event()
+        {
+
+        }
         public Event(Action<Event> info)
         {
             info.Invoke(this);

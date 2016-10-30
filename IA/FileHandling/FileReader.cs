@@ -15,17 +15,31 @@ namespace IA.FileHandling
 
         public FileReader(string fileName)
         {
-            filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
-            file = new StreamReader(new FileStream(filePath + ".config", FileMode.OpenOrCreate));
+            if (!fileName.Contains("."))
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + fileName + ".config";
+                file = new StreamReader(new FileStream(filePath + ".config", FileMode.Create));
+            }
+            else
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
+                file = new StreamReader(new FileStream(filePath, FileMode.Create));
+            }
         }
-        public FileReader(string fileName, string extension)
+        public FileReader(string fileName, string relativePath)
         {
-            extension = extension.TrimStart('.');
-
-            filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
-            file = new StreamReader(new FileStream(filePath + "." + extension, FileMode.OpenOrCreate));
+            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);
+            if (!fileName.Contains("."))
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
+                file = new StreamReader(new FileStream(filePath + ".config", FileMode.Open));
+            }
+            else
+            {
+                filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
+                file = new StreamReader(new FileStream(filePath, FileMode.Open));
+            }
         }
-
         public void Dispose()
         {
             file.Dispose();
@@ -34,6 +48,18 @@ namespace IA.FileHandling
         public static bool FileExist(string fileName)
         {
             return File.Exists(Directory.GetCurrentDirectory() + "\\" + fileName);
+        }
+        public static bool FileExist(string fileName, string relativePath)
+        {
+            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);
+            if (!fileName.Contains("."))
+            {
+                return File.Exists(Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName + ".config");
+            }
+            else
+            {
+                return File.Exists(Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName);
+            }
         }
 
         public string ReadLine()

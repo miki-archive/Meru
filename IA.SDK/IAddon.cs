@@ -9,6 +9,6 @@ namespace IA.SDK
     public interface IAddon
     {
         void CreateModule();
-        Module GetModule();
+        ModuleInstance GetModule();
     }
 }

@@ -4,19 +4,19 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    public class Module
+    public class ModuleInstance
     {
-        public ModuleInformation defaultInfo;
+        public ModuleData defaultInfo = new ModuleData();
 
         Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
 
-        public Module(string name, bool enabled = true)
+        public ModuleInstance(string name, bool enabled = true)
         {
-            defaultInfo = new ModuleInformation();
+            defaultInfo = new ModuleData();
             defaultInfo.name = name;
             defaultInfo.enabled = enabled;
         }       
-        public Module(Action<ModuleInformation> info)
+        public ModuleInstance(Action<ModuleData> info)
         {
             info.Invoke(defaultInfo);
         }

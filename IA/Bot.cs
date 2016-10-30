@@ -145,7 +145,7 @@ namespace IA
                 Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
 
                 Addons = new AddonManager();
-                Addons.Load();
+                Addons.Load(this);
 
 //                APIModule.LoadEvents(this);
 

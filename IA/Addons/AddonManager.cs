@@ -5,6 +5,7 @@ using IA.SDK;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IA.Events;
 
 namespace IA.Addons
 {
@@ -15,7 +16,7 @@ namespace IA.Addons
         /// <summary>
         /// Loads addons in ./modules folder
         /// </summary>
-        public void Load()
+        public async Task Load(Bot bot)
         {
             if(!Directory.Exists(CurrentDirectory) || Directory.GetFiles(CurrentDirectory).Length == 0)
             {
@@ -26,12 +27,25 @@ namespace IA.Addons
 
             string[] allFiles = Directory.GetFiles(CurrentDirectory);
 
-            foreach(string s in allFiles)
+            foreach (string s in allFiles)
             {
                 System.Reflection.Assembly addon = System.Reflection.Assembly.LoadFile(s);
-                IAddon currentAddon = addon.CreateInstance("Addon") as IAddon;
-                Module m = currentAddon.GetModule();
-                
+
+                string newS = s.Split('/')[s.Split('/').Length -1];
+                newS = newS.Remove(newS.Length - 4);
+
+                IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
+                if (currentAddon != null)
+                {
+                    ModuleInstance m = currentAddon.GetModule();
+                    Module newModule = new Module(m);
+                    await newModule.InstallAsync(bot);
+                    Log.Done($"loaded module \"{newS}\" successfully");
+                }
+                else
+                {
+                    Log.Error($"failed to load module \"{newS}\"");
+                }
             }
         }
     }

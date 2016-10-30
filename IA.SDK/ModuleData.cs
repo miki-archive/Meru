@@ -2,7 +2,7 @@
 
 namespace IA.SDK
 {
-    public class ModuleInformation
+    public class ModuleData
     {
         public string name;
         public bool enabled;

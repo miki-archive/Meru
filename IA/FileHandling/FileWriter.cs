@@ -16,7 +16,6 @@ namespace IA.FileHandling
 
         public FileWriter(string fileName)
         {
-
             if (fileName.Split('.').Length == 1)
             {
                 filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
