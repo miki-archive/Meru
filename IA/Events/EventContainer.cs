@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IA.SDK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,7 @@ namespace IA.Events
         /// <summary>
         /// I use this to store internal events.
         /// </summary>
-        public Dictionary<string, Event> InternalEvents { private set; get; } = new Dictionary<string, Event>();
+        internal Dictionary<string, Event> InternalEvents { private set; get; } = new Dictionary<string, Event>();
 
         public Event GetEvent(string name)
         {

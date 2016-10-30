@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace IA.Events
+namespace IA.SDK
 {
     public class ModuleInformation
     {
         public string name;
         public bool enabled;
 
-        List<CommandEvent> events = new List<CommandEvent>();
+        public List<CommandEvent> events = new List<CommandEvent>();
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IA.Events
+namespace IA.SDK
 {
     public class Module
     {
@@ -19,12 +19,6 @@ namespace IA.Events
         public Module(Action<ModuleInformation> info)
         {
             info.Invoke(defaultInfo);
-        }
-        public Module(SDK.Module addon)
-        {
-            defaultInfo = new ModuleInformation();
-            defaultInfo.name = addon.defaultInfo.name;
-            defaultInfo.enabled = addon.defaultInfo.enabled;
         }
 
         public string GetState()
