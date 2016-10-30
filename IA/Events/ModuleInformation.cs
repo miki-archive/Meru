@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Discord;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace IA.Events
 {
+    public delegate Task ProcessMessageEvent(IMessage e); 
+
     public class ModuleInformation
     {
         public string name;

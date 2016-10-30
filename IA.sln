@@ -5,6 +5,10 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IA", "IA\IA.csproj", "{7266B9CD-A052-4E18-8165-86B8AA2962E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IA.SDK", "IA.SDK\IA.SDK.csproj", "{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IA_Template", "..\IA-template\IA_Template\IA_Template.csproj", "{17299258-943E-4B92-BF94-6138A12C20B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{7266B9CD-A052-4E18-8165-86B8AA2962E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7266B9CD-A052-4E18-8165-86B8AA2962E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7266B9CD-A052-4E18-8165-86B8AA2962E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17299258-943E-4B92-BF94-6138A12C20B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17299258-943E-4B92-BF94-6138A12C20B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17299258-943E-4B92-BF94-6138A12C20B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17299258-943E-4B92-BF94-6138A12C20B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

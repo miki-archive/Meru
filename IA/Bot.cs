@@ -12,7 +12,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using IA.Internal;
-using IA.Modules;
+using IA.Addons;
 
 namespace IA
 {
@@ -20,6 +20,7 @@ namespace IA
     {
         public ClientInformation clientInformation { private set; get; }
 
+        public AddonManager Addons { private set; get; }
         public DiscordSocketClient Client { private set; get; }
         public EventSystem Events { private set; get; }
         public MySQL Sql { private set; get; }
@@ -66,8 +67,9 @@ namespace IA
             if (!isManager)
             {
                 Log.Message("Connecting...");
-                Client.LoginAsync(TokenType.Bot, clientInformation.Token);
-                Client.ConnectAsync();
+                Client.LoginAsync(TokenType.Bot, clientInformation.Token).GetAwaiter().GetResult();
+                Client.ConnectAsync().GetAwaiter().GetResult();
+                Task.Delay(-1).GetAwaiter().GetResult();
             }
         }
 
@@ -78,6 +80,7 @@ namespace IA
                 Log.Message("Connecting...");
                 await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
                 await Client.ConnectAsync();
+                await Task.Delay(-1);
             }
         }
 
@@ -111,7 +114,7 @@ namespace IA
             }
             else
             {
-                Console.Title = "Miki " + clientInformation.Version;
+                Console.Title = clientInformation.Name + " " + clientInformation.Version;
                 if(Debugger.IsAttached)
                 {
                     isManager = false;
@@ -129,8 +132,8 @@ namespace IA
                 Client = new DiscordSocketClient(new DiscordSocketConfig()
                 {
                     ShardId = id,
-                    LogLevel = LogSeverity.Info,
-                    TotalShards = clientInformation.ShardCount  
+                    LogLevel = LogSeverity.Verbose,
+                    TotalShards = clientInformation.ShardCount
                 });
 
                 Events = new EventSystem(x =>
@@ -141,13 +144,17 @@ namespace IA
                 });
                 Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
 
-                APIModule.LoadEvents(this);
+                Addons = new AddonManager();
+                Addons.Load();
+
+//                APIModule.LoadEvents(this);
 
                 Client.MessageReceived += Client_MessageReceived;
                 Client.JoinedGuild += Client_JoinedGuild;
                 Client.LeftGuild += Client_LeftGuild;
                 Client.Ready += Client_Ready;
                 Client.Disconnected += Client_Disconnected;
+                Client.Log += Client_Log;
                 await Task.CompletedTask;
             }
         }
@@ -164,8 +171,7 @@ namespace IA
 
         private async Task Client_Disconnected(Exception arg)
         {
-            Process.GetCurrentProcess().Kill();
-            await Task.CompletedTask;
+            Log.Error("Disconnected!");
         }
 
         private async Task Client_Log(LogMessage arg)
@@ -226,7 +232,6 @@ namespace IA
         private async Task Client_Ready()
         {
             Log.Done("Connected!");
-            await Task.CompletedTask;
         }
 
         private async Task Client_MessageReceived(IMessage arg)

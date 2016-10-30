@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IA.Addons
 {
-    class AddonManager
+    public class AddonManager
     {
         public string CurrentDirectory { get; private set; } = Directory.GetCurrentDirectory() + "/modules/";
 
