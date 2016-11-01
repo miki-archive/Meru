@@ -1,5 +1,4 @@
-﻿using Discord;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +10,7 @@ namespace IA.SDK
     {
         public int cooldown = 1;
 
-        public GuildPermission[] requiresPermissions = new GuildPermission[0];
+        public DiscordGuildPermission[] requiresPermissions = new DiscordGuildPermission[0];
 
         public CheckCommand checkCommand = null;
 

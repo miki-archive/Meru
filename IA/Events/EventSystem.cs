@@ -210,11 +210,11 @@ namespace IA.Events
         {
             if (identifier.ContainsKey(e.Id))
             {
-                identifier[e.Id] = prefix;
+                identifier[e.Id] = prefix.ToLower();
             }
             else
             {
-                identifier.Add(e.Id, prefix);
+                identifier.Add(e.Id, prefix.ToLower());
             }
 
             await Task.Run(() => MySQL.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
@@ -226,7 +226,7 @@ namespace IA.Events
             {
                 if (await IsEnabled(ev, e.Id))
                 {
-                    await ev.Check(e);
+                    await ev.Check(e.ToSDKGuild());
                 }
             }
         }
@@ -237,7 +237,7 @@ namespace IA.Events
             {
                 if (await IsEnabled(ev, e.Id))
                 {
-                    await ev.Check(e);
+                    await ev.Check(e.ToSDKGuild());
                 }
             }
         }
@@ -322,13 +322,13 @@ namespace IA.Events
 
         public async Task OnMessageRecieved(IMessage e, IGuild g)
         {
+            
+
             if (e.Author.IsBot || ignore.Contains(g.Id)) return;
 
             if (!identifier.ContainsKey(g.Id)) LoadIdentifier(g.Id);
 
             string message = e.Content.ToLower();
-
-            if (!message.StartsWith(identifier[g.Id])) return;
 
             if (await CheckIdentifier(message, identifier[g.Id], e))
             {

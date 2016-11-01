@@ -12,7 +12,7 @@ namespace IA.Events
     {
         public int cooldown = 1;
 
-        public GuildPermission[] requiresPermissions = new GuildPermission[0];
+        public DiscordGuildPermission[] requiresPermissions = new SDK.DiscordGuildPermission[0];
 
         public CheckCommand checkCommand = (e, command, aliases) =>
         {
@@ -21,7 +21,7 @@ namespace IA.Events
 
         public ProcessCommand processCommand = async (e, args) =>
         {
-            await e.Channel.SendMessageSafeAsync("This command has not been set up properly.");
+            await e.Channel.SendMessage("This command has not been set up properly.");
         };
 
         public CommandEvent()
@@ -67,25 +67,27 @@ namespace IA.Events
 
             if (IsOnCooldown(e.Author.Id))
             {
-                await e.Channel.SendMessageSafeAsync($"Sorry, this command is still on cooldown for {-GetCooldown(e.Author.Id)} seconds!");
+                await e.Channel.SendMessage($"Sorry, this command is still on cooldown for {-GetCooldown(e.Author.Id)} seconds!");
                 return;
             }
 
             if (requiresPermissions.Length > 0)
             {
-                foreach (GuildPermission g in requiresPermissions)
+                foreach (DiscordGuildPermission g in requiresPermissions)
                 {
                     if (!await hasPermission(e.Channel as IGuildChannel, g))
                     {
-                        await e.Channel.SendMessageSafeAsync($"Please give me `{g}` to use this command.");
+                        await e.Channel.SendMessage($"Please give me `{g}` to use this command.");
                         return;
                     }
                 }
             }
 
-            if (checkCommand(e, command, allAliases))
+            RuntimeMessage m = new RuntimeMessage(e);
+
+            if (checkCommand(m, command, allAliases))
             {
-                if (await TryProcessCommand(e, args))
+                if (await TryProcessCommand(m, args))
                 {
                     Log.Message(name + " called from " + guild.Name + " [" + guild.Id + " # " + e.Channel.Id + "]");
                     await eventSystem.OnCommandDone(e, this);
@@ -94,7 +96,7 @@ namespace IA.Events
             }
         }
 
-        public async Task<bool> TryProcessCommand(IMessage e, string args)
+        public async Task<bool> TryProcessCommand(RuntimeMessage e, string args)
         {
             try
             {
@@ -131,9 +133,9 @@ namespace IA.Events
             }
         }
     
-        async Task<bool> hasPermission(IGuildChannel e, GuildPermission r)
+        async Task<bool> hasPermission(IGuildChannel e, SDK.DiscordGuildPermission r)
         {
-            return (await e.GetUserAsync(Bot.instance.Client.CurrentUser.Id)).GuildPermissions.Has(r);
+            return (await e.GetUserAsync(Bot.instance.Client.CurrentUser.Id)).GuildPermissions.Has((GuildPermission)Enum.Parse(typeof(GuildPermission), r.ToString()));
         }
     }
 }

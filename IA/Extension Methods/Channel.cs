@@ -12,7 +12,7 @@ namespace Discord
         /// <param name="channel">channel</param>
         /// <param name="message">output message</param>
         /// <returns></returns>
-        public static async Task<IUserMessage> SendMessageSafeAsync(this IMessageChannel channel, string message)
+        public static async Task<IUserMessage> SendMessage(this IMessageChannel channel, string message)
         {
             //if ((await (channel as IGuildChannel).Guild.GetCurrentUserAsync()).GetPermissions(channel as IGuildChannel).SendMessages)
             //{
@@ -40,7 +40,7 @@ namespace Discord
         /// <returns></returns>
         public static async Task<IUserMessage> SendMessageAndDeleteAsync(this IMessageChannel channel, string message, int seconds)
         {
-            IUserMessage m = await channel.SendMessageSafeAsync(message);
+            IUserMessage m = await channel.SendMessage(message);
             if(seconds > 0) await Task.Run(() => DeleteMessage(m, seconds));
             return m;
         }

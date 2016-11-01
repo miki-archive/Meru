@@ -12,7 +12,7 @@ namespace IA.Events
     {
         public ProcessServerCommand processCommand = async (e) =>
         {
-            await e.GetDefaultChannelAsync().Result.SendMessageSafeAsync("This server event has not been set up correctly.");
+            await (e.IGuild as IGuild).GetDefaultChannelAsync().Result.SendMessage("This server event has not been set up correctly.");
         };
 
         public GuildEvent()
@@ -20,7 +20,7 @@ namespace IA.Events
             CommandUsed = 0;
         }
 
-        public async Task Check(IGuild e)
+        public async Task Check(DiscordGuild e)
         {
             await Task.Run(() => processCommand(e));
         }

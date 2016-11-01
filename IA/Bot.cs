@@ -145,7 +145,7 @@ namespace IA
                 Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
 
                 Addons = new AddonManager();
-                Addons.Load(this);
+                await Addons.Load(this);
 
 //                APIModule.LoadEvents(this);
 
@@ -172,6 +172,7 @@ namespace IA
         private async Task Client_Disconnected(Exception arg)
         {
             Log.Error("Disconnected!");
+            await Task.CompletedTask;
         }
 
         private async Task Client_Log(LogMessage arg)

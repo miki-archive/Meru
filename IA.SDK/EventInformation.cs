@@ -1,8 +1,4 @@
-﻿using Discord;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using IA.SDK.Interfaces;
 using System.Threading.Tasks;
 
 namespace IA.SDK
@@ -21,7 +17,7 @@ namespace IA.SDK
         SERVER
     }
 
-    public delegate void ProcessServerCommand(IGuild e);
-    public delegate Task ProcessCommand(IMessage e, string args);
-    public delegate bool CheckCommand(IMessage e, string command, string[] allAliases);
+    public delegate void ProcessServerCommand(DiscordGuild e);
+    public delegate Task ProcessCommand(IDiscordMessage e, string args);
+    public delegate bool CheckCommand(IDiscordMessage e, string command, string[] allAliases);
 }
