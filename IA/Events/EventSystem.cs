@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using IA.SDK.Interfaces;
 
 namespace IA.Events
 {
@@ -264,7 +265,7 @@ namespace IA.Events
             return false;
         }
 
-        public async Task<string> ListCommands(IMessage e)
+        public async Task<string> ListCommands(IDiscordMessage e)
         {
             Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
             moduleEvents.Add("Misc", new List<string>());
@@ -320,10 +321,8 @@ namespace IA.Events
             return output;
         }
 
-        public async Task OnMessageRecieved(IMessage e, IGuild g)
+        public async Task OnMessageRecieved(RuntimeMessage e, IGuild g)
         {
-            
-
             if (e.Author.IsBot || ignore.Contains(g.Id)) return;
 
             if (!identifier.ContainsKey(g.Id)) LoadIdentifier(g.Id);
@@ -340,7 +339,7 @@ namespace IA.Events
             }
         }
 
-        public async Task OnCommandDone(IMessage e, CommandEvent commandEvent)
+        public async Task OnCommandDone(RuntimeMessage e, CommandEvent commandEvent)
         {
             foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
             {
@@ -348,7 +347,7 @@ namespace IA.Events
             }
         }
 
-        public async Task OnMention(IMessage e, IGuild g)
+        public async Task OnMention(RuntimeMessage e, IGuild g)
         {
             foreach (CommandEvent ev in events.MentionEvents.Values)
             {
@@ -356,13 +355,13 @@ namespace IA.Events
             }
         }
 
-        public EventAccessibility GetUserAccessibility(IMessage e)
+        public EventAccessibility GetUserAccessibility(IDiscordMessage e)
         {
             IGuildChannel channel = (e.Channel as IGuildChannel);
             if (channel == null) return EventAccessibility.PUBLIC;
 
             if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
-            if ((e.Author as IGuildUser).GetPermissions(channel).Has(ChannelPermission.ManagePermissions)) return EventAccessibility.ADMINONLY;
+            if (e.Author.GetPermissions(channel).Has(ChannelPermission.ManagePermissions)) return EventAccessibility.ADMINONLY;
             return EventAccessibility.PUBLIC;
         }
 
@@ -413,7 +412,7 @@ namespace IA.Events
             }
         }
 
-        async Task<bool> CheckIdentifier(string message, string identifier, IMessage e, bool doRunCommand = true)
+        async Task<bool> CheckIdentifier(string message, string identifier, RuntimeMessage e, bool doRunCommand = true)
         {
             if (message.StartsWith(identifier))
             {

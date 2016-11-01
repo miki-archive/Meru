@@ -17,6 +17,14 @@ namespace IA.SDK
             }
         }
 
+        public virtual bool IsBot
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public virtual string Username
         {
             get

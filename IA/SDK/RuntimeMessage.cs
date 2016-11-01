@@ -93,5 +93,10 @@ namespace IA.SDK
         {
             await (messageData as IUserMessage)?.UnpinAsync();
         }
+
+        public IMessage ToIMessage()
+        {
+            return messageData;
+        }
     }
 }

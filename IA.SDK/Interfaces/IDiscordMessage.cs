@@ -11,12 +11,15 @@ namespace IA.SDK.Interfaces
     {
         IDiscordUser Author { get; }
         IDiscordChannel Channel { get; }
+        DiscordGuild Guild { get; }
 
         string Content { get; }
         DateTimeOffset Timestamp { get; }
 
         IReadOnlyCollection<ulong> MentionedUserIds { get; }
         IReadOnlyCollection<ulong> MentionedRoleIds { get; }
+
+
 
         Task DeleteAsync();
         Task ModifyAsync(string message);

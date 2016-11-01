@@ -1,7 +1,15 @@
-﻿namespace IA.SDK
+﻿using IA.SDK.Interfaces;
+
+namespace IA.SDK
 {
-    public class DiscordGuild
+    public class DiscordGuild : IDiscordEntity
     {
-        public object IGuild;
+        public ulong Id
+        {
+            get
+            {
+                return 0;
+            }
+        }
     }
 }

@@ -37,7 +37,7 @@ namespace IA.Addons
                 IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
                 if (currentAddon != null)
                 {
-                    ModuleInstance m = currentAddon.GetModule();
+                    AddonInstance m = currentAddon.GetModule();
                     Module newModule = new Module(m);
                     await newModule.InstallAsync(bot);
                     Log.Done($"loaded module \"{newS}\" successfully");

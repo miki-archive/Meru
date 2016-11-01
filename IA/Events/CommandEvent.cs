@@ -1,5 +1,6 @@
 ﻿using Discord;
 using IA.SDK;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace IA.Events
             CommandUsed = 0;
         }
 
-        public async Task Check(IMessage e, string identifier = "")
+        public async Task Check(RuntimeMessage e, string identifier = "")
         {
             IGuildChannel guild = (e.Channel as IGuildChannel);
 
@@ -83,11 +84,9 @@ namespace IA.Events
                 }
             }
 
-            RuntimeMessage m = new RuntimeMessage(e);
-
-            if (checkCommand(m, command, allAliases))
+            if (checkCommand(e, command, allAliases))
             {
-                if (await TryProcessCommand(m, args))
+                if (await TryProcessCommand(e, args))
                 {
                     Log.Message(name + " called from " + guild.Name + " [" + guild.Id + " # " + e.Channel.Id + "]");
                     await eventSystem.OnCommandDone(e, this);

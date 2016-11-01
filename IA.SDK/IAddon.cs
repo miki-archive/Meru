@@ -8,7 +8,7 @@ namespace IA.SDK
 {
     public interface IAddon
     {
-        void CreateModule();
-        ModuleInstance GetModule();
+        void Create();
+        AddonInstance GetModule();
     }
 }
