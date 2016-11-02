@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using IA.Internal;
 using IA.Addons;
+using IA.SDK;
 
 namespace IA
 {
@@ -89,7 +90,7 @@ namespace IA
             GC.SuppressFinalize(this);
         }
 
-        public Event GetEvent(string id)
+        public IA.Events.Event GetEvent(string id)
         {
             return Events.GetEvent(id);
         }
@@ -237,14 +238,16 @@ namespace IA
 
         private async Task Client_MessageReceived(IMessage arg)
         {
+            RuntimeMessage r = new RuntimeMessage(arg);
+
             IGuild guild = (arg.Channel as IGuildChannel)?.Guild;
             if (guild != null)
             {
                 if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
                 {
-                    await Task.Run(async () => await Events.OnMention(arg, guild));
+                    await Task.Run(async () => await Events.OnMention(r, guild));
                 }
-                await Task.Run(async () => await Events.OnMessageRecieved(arg, guild));
+                await Task.Run(async () => await Events.OnMessageRecieved(r, guild));
             }
             else
             {

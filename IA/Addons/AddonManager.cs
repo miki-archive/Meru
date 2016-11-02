@@ -38,9 +38,12 @@ namespace IA.Addons
                 if (currentAddon != null)
                 {
                     AddonInstance m = currentAddon.GetModule();
-                    Module newModule = new Module(m);
-                    await newModule.InstallAsync(bot);
-                    Log.Done($"loaded module \"{newS}\" successfully");
+                    foreach (ModuleInstance nm in m.modules)
+                    {
+                        Module newModule = new Module(nm);
+                        await newModule.InstallAsync(bot);
+                    }
+                    Log.Done($"loaded Add-On \"{newS}\" successfully");
                 }
                 else
                 {

@@ -2,7 +2,7 @@
 
 namespace IA.SDK
 {
-    public class Event
+    public class EventInstance
     {
         public string name = "name not set";
         public string[] aliases = new string[0];
@@ -19,11 +19,11 @@ namespace IA.SDK
 
         public EventAccessibility accessibility = EventAccessibility.PUBLIC;
 
-        public Event()
+        public EventInstance()
         {
 
         }
-        public Event(Action<Event> info)
+        public EventInstance(Action<EventInstance> info)
         {
             info.Invoke(this);
         }

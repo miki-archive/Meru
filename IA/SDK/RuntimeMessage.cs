@@ -20,7 +20,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordUser Author {
+        public override DiscordUser Author {
             get
             {
                 return new RuntimeUser(messageData.Author);

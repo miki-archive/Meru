@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    public class CommandEvent : Event
+    public class CommandEvent : EventInstance
     {
         public int cooldown = 1;
 

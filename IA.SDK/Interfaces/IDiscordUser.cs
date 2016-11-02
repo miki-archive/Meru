@@ -9,7 +9,8 @@ namespace IA.SDK.Interfaces
         string Username { get; }
         string Discriminator { get; }
 
-        Task<DiscordChannelPermission> GetPermissions(IDiscordChannel channel);
+        bool HasPermissions(params DiscordChannelPermission[] permissions);
+        bool HasPermissions(params DiscordGuildPermission[] permissions);
 
         Task<DiscordMessage> SendMessage(string text);
         Task SendFile(string path);

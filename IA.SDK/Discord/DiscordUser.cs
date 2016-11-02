@@ -48,6 +48,15 @@ namespace IA.SDK
             }
         }
 
+        public virtual bool HasPermissions(params DiscordChannelPermission[] permissions)
+        {
+            throw new NotImplementedException();
+        }
+        public virtual bool HasPermissions(params DiscordGuildPermission[] permissions)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual async Task SendFile(string path)
         {
             await Task.CompletedTask;
