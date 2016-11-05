@@ -76,6 +76,7 @@
     <Compile Include="Node\Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SDK\RuntimeChannel.cs" />
+    <Compile Include="SDK\RuntimeGuild.cs" />
     <Compile Include="SDK\RuntimeMessage.cs" />
     <Compile Include="SDK\RuntimeUser.cs" />
     <Compile Include="SQL\SQLInformation.cs" />
@@ -113,6 +114,14 @@
     </Reference>
     <Reference Include="Discord.Net.WebSocket, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Discord.Net.WebSocket.1.0.0-beta2-00451\lib\netstandard1.3\Discord.Net.WebSocket.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="jint, Version=2.10.1.0, Culture=neutral, PublicKeyToken=2e92ba9c8d81157f, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\jint.2.10.1\lib\net45\jint.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Jurassic, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\Jurassic.2.2.1\lib\net35\Jurassic.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">

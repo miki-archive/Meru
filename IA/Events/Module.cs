@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Jint.Native.Object;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace IA.Events
 
         }
         public Module(string name, bool enabled = true)
-        {
+        { 
             defaultInfo = new ModuleInformation();
             defaultInfo.name = name;
             defaultInfo.enabled = enabled;

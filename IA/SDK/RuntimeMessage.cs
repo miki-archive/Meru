@@ -27,7 +27,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordChannel Channel
+        public override DiscordChannel Channel
         {
             get
             {

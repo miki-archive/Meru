@@ -6,6 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IA.Events;
+using Jint;
+using System.Reflection;
+using Discord;
+using Jurassic;
+using Jurassic.Library;
 
 namespace IA.Addons
 {
@@ -40,7 +45,7 @@ namespace IA.Addons
                     AddonInstance m = currentAddon.GetModule();
                     foreach (ModuleInstance nm in m.modules)
                     {
-                        Module newModule = new Module(nm);
+                        Events.Module newModule = new Events.Module(nm);
                         await newModule.InstallAsync(bot);
                     }
                     Log.Done($"loaded Add-On \"{newS}\" successfully");
@@ -49,6 +54,39 @@ namespace IA.Addons
                 {
                     Log.Error($"failed to load module \"{newS}\"");
                 }
+            }
+        }
+        public async Task LoadJS(Bot bot)
+        {
+            if (!Directory.Exists(CurrentDirectory + "js/") || Directory.GetFiles(CurrentDirectory + "js/").Length == 0)
+            {
+                Log.Warning("No modules found, ignoring...");
+                Directory.CreateDirectory(CurrentDirectory);
+                return;
+            }
+
+            string[] allFiles = Directory.GetFiles(CurrentDirectory + "js/");
+
+            foreach (string s in allFiles)
+            {
+                StreamReader sr = new StreamReader(s);
+                string jscode = sr.ReadToEnd();
+                sr.Close();
+
+                var engine = new ScriptEngine();
+                engine.EnableExposedClrTypes = true;
+
+                engine.SetGlobalValue("addon", new ModuleInformation());
+
+                engine.Execute(jscode);
+
+                ClrInstanceWrapper output = (ClrInstanceWrapper)engine.CallGlobalFunction("create");
+
+                Events.Module m = new Events.Module();
+                m.defaultInfo = (ModuleInformation)output.WrappedInstance;
+            
+
+                await m.InstallAsync(bot);
             }
         }
     }

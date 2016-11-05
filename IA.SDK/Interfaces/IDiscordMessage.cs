@@ -9,8 +9,8 @@ namespace IA.SDK.Interfaces
 {
     public interface IDiscordMessage : IDiscordEntity
     {
-        IDiscordUser Author { get; }
-        IDiscordChannel Channel { get; }
+        DiscordUser Author { get; }
+        DiscordChannel Channel { get; }
         DiscordGuild Guild { get; }
 
         string Content { get; }

@@ -361,7 +361,7 @@ namespace IA.Events
             if (channel == null) return EventAccessibility.PUBLIC;
 
             if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
-            if (await e.Author.HasPermissions(DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
+            if (e.Author.HasPermissions(e.Guild, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
             return EventAccessibility.PUBLIC;
         }
 

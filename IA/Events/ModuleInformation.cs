@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Jint.Native.Object;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,10 +9,16 @@ namespace IA.Events
 
     public class ModuleInformation
     {
-        public string name;
-        public bool enabled;
+        Jint.Engine _engine;
 
-        internal EventSystem eventSystem;
+        public ModuleInformation()
+        {
+        }
+
+        public string name = "";
+        public bool enabled = true;
+
+        internal EventSystem eventSystem = null;
 
         public ProcessMessageEvent messageEvent; 
 
@@ -19,5 +26,10 @@ namespace IA.Events
         public GuildEvent guildLeaveEvent;
 
         public List<CommandEvent> events = new List<CommandEvent>();
+
+        public void SetName(string name)
+        {
+            this.name = name;
+        }
     }
 }

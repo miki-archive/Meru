@@ -39,8 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddonInstance.cs" />
+    <Compile Include="BaseAddon.cs" />
     <Compile Include="CommandEvent.cs" />
     <Compile Include="Discord\DiscordChannel.cs" />
+    <Compile Include="Discord\DiscordChannelPermission.cs" />
     <Compile Include="Discord\DiscordGuild.cs" />
     <Compile Include="Discord\DiscordMessage.cs" />
     <Compile Include="Discord\DiscordUser.cs" />
@@ -49,7 +52,7 @@
     <Compile Include="Interfaces\IDiscordChannel.cs" />
     <Compile Include="Interfaces\IDiscordUser.cs" />
     <Compile Include="Interfaces\IDiscordMessage.cs" />
-    <Compile Include="Event.cs" />
+    <Compile Include="EventInstance.cs" />
     <Compile Include="EventInformation.cs" />
     <Compile Include="Discord\DiscordGuildPermission.cs" />
     <Compile Include="IAddon.cs" />

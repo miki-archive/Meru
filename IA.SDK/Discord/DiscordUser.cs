@@ -48,11 +48,21 @@ namespace IA.SDK
             }
         }
 
-        public virtual bool HasPermissions(params DiscordChannelPermission[] permissions)
+        public virtual bool HasPermissions(DiscordChannel channel, params DiscordChannelPermission[] permissions)
         {
             throw new NotImplementedException();
         }
-        public virtual bool HasPermissions(params DiscordGuildPermission[] permissions)
+        public virtual bool HasPermissions(DiscordGuild guild, params DiscordGuildPermission[] permissions)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual Task Ban(DiscordGuild guild)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual Task Kick()
         {
             throw new NotImplementedException();
         }

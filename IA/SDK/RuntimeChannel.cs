@@ -11,7 +11,7 @@ namespace IA.SDK
 {
     class RuntimeChannel : DiscordChannel
     {
-        IChannel channel;
+        public IChannel channel;
 
         public RuntimeChannel(IChannel c)
         {
@@ -31,9 +31,9 @@ namespace IA.SDK
             await (channel as IMessageChannel).SendFileAsync(path);
         }
 
-        public override Task SendFileAsync(MemoryStream stream, string extension)
+        public override async Task SendFileAsync(MemoryStream stream, string extension)
         {
-            throw new NotImplementedException();
+            await (channel as IMessageChannel)?.SendFileAsync(stream, extension);
         }
 
         public override async Task<DiscordMessage> SendMessage(string message)

@@ -48,6 +48,16 @@ namespace IA.SDK
             }
         }
 
+        public override async Task Kick()
+        {
+            await (user as IGuildUser).KickAsync();
+        }
+
+        public override async Task Ban(DiscordGuild g)
+        {
+            await (g as RuntimeGuild).guild.AddBanAsync(user);
+        }
+
         public override async Task SendFile(string path)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
@@ -61,6 +71,29 @@ namespace IA.SDK
 
             RuntimeMessage m = new RuntimeMessage(await c.SendMessageAsync(message));
             return m;
+        }
+
+        public override bool HasPermissions(DiscordChannel channel, params DiscordChannelPermission[] permissions)
+        {
+            foreach (DiscordChannelPermission p in permissions)
+            {
+                if (!(user as IGuildUser).GetPermissions((channel as RuntimeChannel).channel as IGuildChannel).Has((ChannelPermission)Enum.Parse(typeof(ChannelPermission), p.ToString())))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public override bool HasPermissions(DiscordGuild guild, params DiscordGuildPermission[] permissions)
+        {
+            foreach (DiscordGuildPermission p in permissions)
+            {
+                if (!(user as IGuildUser).GetPermissions((guild as RuntimeGuild).guild as IGuildChannel).Has((ChannelPermission)Enum.Parse(typeof(ChannelPermission), p.ToString())))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

@@ -148,8 +148,6 @@ namespace IA
                 Addons = new AddonManager();
                 await Addons.Load(this);
 
-//                APIModule.LoadEvents(this);
-
                 Client.MessageReceived += Client_MessageReceived;
                 Client.JoinedGuild += Client_JoinedGuild;
                 Client.LeftGuild += Client_LeftGuild;
