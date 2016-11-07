@@ -8,7 +8,7 @@ namespace IA.SDK
 {
     public class BaseAddon : IAddon
     {
-        protected AddonInstance instance = new AddonInstance();
+        protected AddonInstance addon = new AddonInstance();
 
         public virtual void Create()
         {
@@ -17,7 +17,7 @@ namespace IA.SDK
 
         public AddonInstance GetModule()
         {
-            return instance;
+            return addon;
         }
     }
 }

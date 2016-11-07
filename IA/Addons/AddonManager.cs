@@ -34,14 +34,14 @@ namespace IA.Addons
 
             foreach (string s in allFiles)
             {
-                System.Reflection.Assembly addon = System.Reflection.Assembly.LoadFile(s);
+                Assembly addon = Assembly.LoadFile(s);
 
                 string newS = s.Split('/')[s.Split('/').Length -1];
                 newS = newS.Remove(newS.Length - 4);
-
                 IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
                 if (currentAddon != null)
                 {
+                    currentAddon.Create();
                     AddonInstance m = currentAddon.GetModule();
                     foreach (ModuleInstance nm in m.modules)
                     {
