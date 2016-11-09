@@ -19,8 +19,6 @@ namespace IA.SDK.Interfaces
         IReadOnlyCollection<ulong> MentionedUserIds { get; }
         IReadOnlyCollection<ulong> MentionedRoleIds { get; }
 
-
-
         Task DeleteAsync();
         Task ModifyAsync(string message);
         Task PinAsync();

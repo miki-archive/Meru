@@ -13,7 +13,7 @@ namespace IA.SQL
 
         SQLInformation info;
 
-        string defaultIdentifier;
+        PrefixValue defaultIdentifier;
 
         public MySQL()
         {
@@ -26,10 +26,17 @@ namespace IA.SQL
             info = instance.info;
             defaultIdentifier = instance.defaultIdentifier;
         }
-        public MySQL(SQLInformation info, string defaultIdentifier = ">")
+        public MySQL(SQLInformation info, PrefixValue defaultIdentifier)
         {
             this.info = info;
-            this.defaultIdentifier = defaultIdentifier;
+            if(defaultIdentifier == null)
+            {
+                this.defaultIdentifier = new PrefixValue(">");
+            }
+            else
+            {
+                this.defaultIdentifier = defaultIdentifier;
+            }
             instance = this;
         }
 
@@ -74,7 +81,7 @@ namespace IA.SQL
         /// <returns></returns>
         public string GetIdentifier(ulong server_id)
         {
-            if (info == null) return defaultIdentifier;
+            if (info == null) return defaultIdentifier.Value;
 
             string output = "";
 

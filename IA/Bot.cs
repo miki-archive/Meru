@@ -140,7 +140,7 @@ namespace IA
                 Events = new EventSystem(x =>
                 {
                     x.Name = clientInformation.Name;
-                    x.Identifier = clientInformation.Prefix;
+                    x.Identifier = clientInformation.Prefix.Value;
                     x.SqlInformation = clientInformation.sqlInformation;
                 });
                 Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
