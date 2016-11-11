@@ -27,10 +27,10 @@ namespace IA.Events
         static BotInformation bot;
 
         internal EventContainer events { private set; get; }
-        static MySQL sql;
+        MySQL sql;
 
-        public string DefaultIdentifier { private set; get; }
-        public string OverrideIdentifier { private set; get; }
+        public PrefixValue DefaultIdentifier { private set; get; }
+        public PrefixValue OverrideIdentifier { private set; get; }
 
         /// <summary>
         /// Constructor for EventSystem.
@@ -50,7 +50,7 @@ namespace IA.Events
 
             MySQL.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 
-            OverrideIdentifier = bot.Name.ToLower() + ".";
+            OverrideIdentifier = PrefixValue.Set(bot.Name.ToLower() + ".");
             DefaultIdentifier = bot.Identifier;
         }    
 
@@ -333,7 +333,7 @@ namespace IA.Events
             {
                 return;
             }
-            else if (await CheckIdentifier(message, OverrideIdentifier, e))
+            else if (await CheckIdentifier(message, OverrideIdentifier.Value, e))
             {
                 return;
             }
@@ -387,8 +387,8 @@ namespace IA.Events
                 string instanceIdentifier = sql.GetIdentifier(server);
                 if (instanceIdentifier == "ERROR")
                 {
-                    sql.SetIdentifier(bot.Identifier, server);
-                    identifier.Add(server, bot.Identifier);
+                    sql.SetIdentifier(bot.Identifier.Value, server);
+                    identifier.Add(server, bot.Identifier.Value);
                 }
                 else
                 {
@@ -397,9 +397,10 @@ namespace IA.Events
             }
             else
             {
-                identifier.Add(server, bot.Identifier);
+                identifier.Add(server, bot.Identifier.Value);
             }
         }
+
         public string GetIdentifier(ulong server_id)
         {
             if (identifier.ContainsKey(server_id))

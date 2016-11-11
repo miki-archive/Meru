@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Jint.Native.Object;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,8 +8,6 @@ namespace IA.Events
 
     public class ModuleInformation
     {
-        Jint.Engine _engine;
-
         public ModuleInformation()
         {
         }

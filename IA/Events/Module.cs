@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Jint.Native.Object;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -31,10 +30,10 @@ namespace IA.Events
         public Module(SDK.ModuleInstance addon)
         {
             defaultInfo = new ModuleInformation();
-            defaultInfo.name = addon.defaultInfo.name;
-            defaultInfo.enabled = addon.defaultInfo.enabled;
+            defaultInfo.name = addon.data.name;
+            defaultInfo.enabled = addon.data.enabled;
             defaultInfo.events = new List<CommandEvent>();
-            foreach (SDK.CommandEvent e in addon.defaultInfo.events)
+            foreach (SDK.CommandEvent e in addon.data.events)
             {
                 defaultInfo.events.Add(new CommandEvent(x =>
                 {

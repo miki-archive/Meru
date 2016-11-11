@@ -2,7 +2,7 @@
 
 namespace IA.SDK
 {
-    public class DiscordGuild : IDiscordEntity
+    public class DiscordGuild : IDiscordGuild
     {
         public ulong Id
         {

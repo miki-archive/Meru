@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace IA.SDK.Interfaces
 {
-    class IDiscordGuild
+    interface IDiscordGuild : IDiscordEntity
     {
-        public virtual 
+    
     }
 }

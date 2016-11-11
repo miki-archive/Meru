@@ -13,14 +13,14 @@ namespace IA.Addon.Happy
         {
             base.Create();
 
-            addon.CreateModule(x =>
+            instance.CreateModule(x =>
             {
                 x.name = "happy module";
                 x.events = new List<CommandEvent>()
                 {
                     new CommandEvent(cmd =>
                     {
-                        cmd.name = "happy";
+                        cmd.name = "test";
                         cmd.processCommand = async (msg, args) =>
                         {
                             await msg.Channel.SendMessage("Hello!");

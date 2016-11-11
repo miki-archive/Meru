@@ -6,11 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IA.Events;
-using Jint;
 using System.Reflection;
 using Discord;
-using Jurassic;
-using Jurassic.Library;
 
 namespace IA.Addons
 {
@@ -23,7 +20,7 @@ namespace IA.Addons
         /// </summary>
         public async Task Load(Bot bot)
         {
-            if(!Directory.Exists(CurrentDirectory) || Directory.GetFiles(CurrentDirectory).Length == 0)
+            if (!Directory.Exists(CurrentDirectory) || Directory.GetFiles(CurrentDirectory).Length == 0)
             {
                 Log.Warning("No modules found, ignoring...");
                 Directory.CreateDirectory(CurrentDirectory);
@@ -36,9 +33,11 @@ namespace IA.Addons
             {
                 Assembly addon = Assembly.LoadFile(s);
 
-                string newS = s.Split('/')[s.Split('/').Length -1];
+                string newS = s.Split('/')[s.Split('/').Length - 1];
                 newS = newS.Remove(newS.Length - 4);
-                IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
+
+                BaseAddon currentAddon = addon.CreateInstance(newS + ".Addon") as BaseAddon;
+
                 if (currentAddon != null)
                 {
                     currentAddon.Create();
@@ -54,39 +53,6 @@ namespace IA.Addons
                 {
                     Log.Error($"failed to load module \"{newS}\"");
                 }
-            }
-        }
-        public async Task LoadJS(Bot bot)
-        {
-            if (!Directory.Exists(CurrentDirectory + "js/") || Directory.GetFiles(CurrentDirectory + "js/").Length == 0)
-            {
-                Log.Warning("No modules found, ignoring...");
-                Directory.CreateDirectory(CurrentDirectory);
-                return;
-            }
-
-            string[] allFiles = Directory.GetFiles(CurrentDirectory + "js/");
-
-            foreach (string s in allFiles)
-            {
-                StreamReader sr = new StreamReader(s);
-                string jscode = sr.ReadToEnd();
-                sr.Close();
-
-                var engine = new ScriptEngine();
-                engine.EnableExposedClrTypes = true;
-
-                engine.SetGlobalValue("addon", new ModuleInformation());
-
-                engine.Execute(jscode);
-
-                ClrInstanceWrapper output = (ClrInstanceWrapper)engine.CallGlobalFunction("create");
-
-                Events.Module m = new Events.Module();
-                m.defaultInfo = (ModuleInformation)output.WrappedInstance;
-            
-
-                await m.InstallAsync(bot);
             }
         }
     }

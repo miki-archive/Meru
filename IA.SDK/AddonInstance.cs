@@ -8,7 +8,17 @@ namespace IA.SDK
 {
     public class AddonInstance
     {
-        public List<ModuleInstance> modules = new List<ModuleInstance>();
+        public List<ModuleInstance> modules;
+
+        public AddonInstance()
+        {
+            modules = new List<ModuleInstance>();
+        }
+
+        public void AddCommandEventTo(ModuleInstance selectedModule, Action<CommandEvent> command)
+        {
+            selectedModule.AddCommand(command);
+        }
 
         public void CreateModule(Action<ModuleData> x)
         {

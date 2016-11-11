@@ -90,7 +90,8 @@ namespace IA
             GC.SuppressFinalize(this);
         }
 
-        public IA.Events.Event GetEvent(string id)
+        [Obsolete("Use Events.(their respective event)(); for more performance.")]
+        public Event GetEvent(string id)
         {
             return Events.GetEvent(id);
         }
@@ -140,7 +141,7 @@ namespace IA
                 Events = new EventSystem(x =>
                 {
                     x.Name = clientInformation.Name;
-                    x.Identifier = clientInformation.Prefix.Value;
+                    x.Identifier.Value = clientInformation.Prefix.Value;
                     x.SqlInformation = clientInformation.sqlInformation;
                 });
                 Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
@@ -232,6 +233,7 @@ namespace IA
         private async Task Client_Ready()
         {
             Log.Done("Connected!");
+            await Task.CompletedTask;
         }
 
         private async Task Client_MessageReceived(IMessage arg)

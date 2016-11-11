@@ -6,24 +6,31 @@ namespace IA.SDK
 {
     public class ModuleInstance
     {
-        public ModuleData defaultInfo = new ModuleData();
+        public ModuleData data = new ModuleData();
 
         Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
 
         public ModuleInstance(string name, bool enabled = true)
         {
-            defaultInfo = new ModuleData();
-            defaultInfo.name = name;
-            defaultInfo.enabled = enabled;
+            data = new ModuleData();
+            data.name = name;
+            data.enabled = enabled;
         }       
         public ModuleInstance(Action<ModuleData> info)
         {
-            info.Invoke(defaultInfo);
+            info.Invoke(data);
+        }
+
+        public Task AddCommand(Action<CommandEvent> x)
+        {
+            CommandEvent y = new CommandEvent(x);
+            data.events.Add(y);
+            return Task.CompletedTask;
         }
 
         public string GetState()
         {
-            return defaultInfo.name + ": " + "ACTIVE";
+            return data.name + ": " + "ACTIVE";
         }
 
         public Task Initialize()
