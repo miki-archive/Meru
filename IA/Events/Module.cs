@@ -1,4 +1,5 @@
 ﻿using Discord;
+using IA.SDK;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace IA.Events
         {
             info.Invoke(defaultInfo);
         }
-        public Module(SDK.ModuleInstance addon)
+        public Module(ModuleInstance addon)
         {
             defaultInfo = new ModuleInformation();
             defaultInfo.name = addon.data.name;
@@ -131,12 +132,20 @@ namespace IA.Events
 
         private async Task Client_MessageReceived(IMessage message)
         {
-            await defaultInfo.messageEvent(message);
+            RuntimeMessage msg = new RuntimeMessage(message);
+            await defaultInfo.messageEvent(msg);
         }
 
         private async Task Module_GuildJoin(IGuild guild)
         {
-            await defaultInfo.guildJoinEvent(guild);
+            RuntimeGuild g = new RuntimeGuild(guild);
+            await defaultInfo.guildJoinEvent.processCommand(g);   
+        }
+
+        private async Task Module_GuildLeave(IGuild guild)
+        {
+            RuntimeGuild g = new RuntimeGuild(guild);
+            await defaultInfo.guildLeaveEvent.processCommand(g);
         }
     }
 }

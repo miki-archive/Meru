@@ -12,7 +12,7 @@ namespace IA.Events
     {
         public ProcessServerCommand processCommand = async (e) =>
         {
-           // await ().GetDefaultChannelAsync().Result.SendMessage("This server event has not been set up correctly.");
+            await (await e.GetDefaultChannel()).SendMessage("This server event has not been set up correctly.");
         };
 
         public GuildEvent()

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    class RuntimeGuild : DiscordGuild
+    public class RuntimeGuild : DiscordGuild
     {
         public IGuild guild;
 
@@ -16,6 +16,9 @@ namespace IA.SDK
             guild = g;
         }
 
-
+        public override async Task<DiscordChannel> GetDefaultChannel()
+        {
+            return new RuntimeChannel(await guild.GetDefaultChannelAsync());
+        }
     }
 }

@@ -1,14 +1,16 @@
 ﻿using Discord;
+using IA.SDK;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public delegate Task ProcessMessageEvent(IMessage e); 
+    public delegate Task ProcessMessageEvent(RuntimeMessage e);
+    public delegate Task ProcessGuildEvent(RuntimeGuild g);
 
     public class ModuleInformation
     {
-        public ModuleInformation()
+        internal ModuleInformation()
         {
         }
 
