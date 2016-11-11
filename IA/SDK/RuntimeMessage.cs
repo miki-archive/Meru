@@ -35,6 +35,14 @@ namespace IA.SDK
             }
         }
 
+        public override DiscordGuild Guild
+        {
+            get
+            {
+                return new RuntimeGuild((messageData.Author as IGuildUser).Guild);
+            }
+        }
+
         public override string Content
         {
             get

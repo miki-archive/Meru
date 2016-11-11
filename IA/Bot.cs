@@ -240,18 +240,17 @@ namespace IA
         {
             RuntimeMessage r = new RuntimeMessage(arg);
 
-            IGuild guild = (arg.Channel as IGuildChannel)?.Guild;
-            if (guild != null)
+            if (r.Guild != null)
             {
                 if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
                 {
-                    await Task.Run(async () => await Events.OnMention(r, guild));
+                    await Task.Run(async () => await Events.OnMention(r));
                 }
-                await Task.Run(async () => await Events.OnMessageRecieved(r, guild));
+                await Task.Run(async () => await Events.OnMessageRecieved(r));
             }
             else
             {
-                Log.Message("Private Message?");
+                await Task.Run(async () => await Events.OnPrivateMessage(r));
             }
         }
     }

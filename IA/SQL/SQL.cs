@@ -316,16 +316,6 @@ namespace IA.SQL
         }
 
         /// <summary>
-        /// Sets the prefix of the server's id to prefix
-        /// </summary>
-        /// <param name="prefix">st</param>
-        /// <param name="server_id"></param>
-        public async void SetIdentifier(string prefix, ulong server_id)
-        {
-            await MySQL.QueryAsync("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server_id, prefix);
-        }
-
-        /// <summary>
         /// Ignores this code if table exists.
         /// </summary>
         /// <param name="sqlCode">valid sql code</param>

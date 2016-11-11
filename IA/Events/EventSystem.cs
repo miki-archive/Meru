@@ -54,7 +54,7 @@ namespace IA.Events
             DefaultIdentifier = bot.Identifier;
         }    
 
-        public async Task OnPrivateMessage(IMessage arg)
+        public async Task OnPrivateMessage(RuntimeMessage arg)
         {
             await Task.CompletedTask;
         }
@@ -244,8 +244,7 @@ namespace IA.Events
         }
 
         public async Task<bool> SetEnabled(string eventName, ulong channelId, bool enabled)
-        {
-           
+        {        
             Event setEvent = GetEvent(eventName);
 
             if(!setEvent.canBeDisabled && !enabled|| setEvent == null)
@@ -321,19 +320,19 @@ namespace IA.Events
             return output;
         }
 
-        public async Task OnMessageRecieved(RuntimeMessage e, IGuild g)
+        public async Task OnMessageRecieved(RuntimeMessage _message)
         {
-            if (e.Author.IsBot || ignore.Contains(g.Id)) return;
+            if (_message.Author.IsBot || ignore.Contains(_message.Guild.Id)) return;
 
-            if (!identifier.ContainsKey(g.Id)) LoadIdentifier(g.Id);
+            if (!identifier.ContainsKey(_message.Guild.Id)) await LoadIdentifier(_message.Guild.Id);
 
-            string message = e.Content.ToLower();
+            string message = _message.Content.ToLower();
 
-            if (await CheckIdentifier(message, identifier[g.Id], e))
+            if (await CheckIdentifier(message, identifier[_message.Guild.Id], _message))
             {
                 return;
             }
-            else if (await CheckIdentifier(message, OverrideIdentifier.Value, e))
+            else if (await CheckIdentifier(message, OverrideIdentifier.Value, _message))
             {
                 return;
             }
@@ -347,7 +346,7 @@ namespace IA.Events
             }
         }
 
-        public async Task OnMention(RuntimeMessage e, IGuild g)
+        public async Task OnMention(RuntimeMessage e)
         {
             foreach (CommandEvent ev in events.MentionEvents.Values)
             {
@@ -380,20 +379,22 @@ namespace IA.Events
             return events.GetEvent(eventName).CommandUsed;
         }
 
-        public void LoadIdentifier(ulong server)
+        public async Task LoadIdentifier(ulong server)
         {
             if (bot.SqlInformation != null)
             {
-                string instanceIdentifier = sql.GetIdentifier(server);
-                if (instanceIdentifier == "ERROR")
+                await MySQL.QueryAsync("SELECT i FROM identifier WHERE id=?id", output => 
                 {
-                    sql.SetIdentifier(bot.Identifier.Value, server);
-                    identifier.Add(server, bot.Identifier.Value);
-                }
-                else
-                {
-                    identifier.Add(server, instanceIdentifier);
-                }
+                    if (output.Count == 0)
+                    {
+                        MySQL.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
+                        identifier.Add(server, bot.Identifier.Value);
+                    }
+                    else
+                    {
+                        identifier.Add(server, output["i"].ToString());
+                    }
+                }, server);
             }
             else
             {
