@@ -9,6 +9,9 @@ namespace IA.Addon.Happy
 {
     public class Addon : BaseAddon
     {
+        /// <summary>
+        /// This is your entry point.
+        /// </summary>
         public override void Create()
         {
             base.Create();
