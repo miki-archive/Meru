@@ -117,7 +117,7 @@ namespace IA.SQL
         /// <summary>
         /// Queries the sqlCode to output
         /// </summary>
-        /// <param name="sqlCode">valid sql code</param>
+        /// <param name="sqlCode">use this format: UPDATE table.row SET var=?var WHERE var2=?var2</param>
         /// <param name="output"></param>
         public static void Query(string sqlCode, QueryOutput output, params object[] p)
         {
@@ -204,6 +204,14 @@ namespace IA.SQL
             }
             connection.Close();
         }
+
+        /// <summary>
+        /// Asynchronously queries the sqlCode to output
+        /// </summary>
+        /// <param name="sqlCode">use this format: UPDATE table.row SET var=?var WHERE var2=?var2</param>
+        /// <param name="output"></param>
+        /// <param name="p"></param>
+        /// <returns></returns>
         public static async Task QueryAsync(string sqlCode, QueryOutput output, params object[] p)
         {
             if (instance.info == null) return;
