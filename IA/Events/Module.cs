@@ -13,9 +13,8 @@ namespace IA.Events
 
         bool isInstalled = false;
 
-        public Module()
+        internal Module()
         {
-
         }
         public Module(string name, bool enabled = true)
         { 
@@ -88,6 +87,7 @@ namespace IA.Events
 
             isInstalled = true;
         }
+
         public async Task InstallAsync(Bot bot)
         {
             if(defaultInfo.messageEvent != null)
@@ -132,6 +132,11 @@ namespace IA.Events
         private async Task Client_MessageReceived(IMessage message)
         {
             await defaultInfo.messageEvent(message);
+        }
+
+        private async Task Module_GuildJoin(IGuild guild)
+        {
+            await defaultInfo.guildJoinEvent(guild);
         }
     }
 }
