@@ -11,6 +11,14 @@ namespace IA.SDK
     {
         public IGuild guild;
 
+        public override ulong Id
+        {
+            get
+            {
+                return guild.Id;
+            }
+        }
+
         public RuntimeGuild(IGuild g)
         {
             guild = g;
@@ -19,6 +27,11 @@ namespace IA.SDK
         public override async Task<DiscordChannel> GetDefaultChannel()
         {
             return new RuntimeChannel(await guild.GetDefaultChannelAsync());
+        }
+
+        public override async Task<DiscordUser> GetUserAsync(ulong user_id)
+        {
+            return new RuntimeUser(await guild.GetUserAsync(user_id));
         }
     }
 }

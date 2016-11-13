@@ -134,7 +134,7 @@ namespace IA
                 Client = new DiscordSocketClient(new DiscordSocketConfig()
                 {
                     ShardId = id,
-                    LogLevel = LogSeverity.Verbose,
+                    LogLevel = LogSeverity.Critical,
                     TotalShards = clientInformation.ShardCount
                 });
 

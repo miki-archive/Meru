@@ -37,8 +37,6 @@ namespace IA.Events
 
         public async Task Check(RuntimeMessage e, string identifier = "")
         {
-            IGuildChannel guild = (e.Channel as IGuildChannel);
-
             // declaring variables
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
@@ -76,7 +74,7 @@ namespace IA.Events
             {
                 foreach (DiscordGuildPermission g in requiresPermissions)
                 {
-                    if (!await hasPermission(e.Channel as IGuildChannel, g))
+                    if (!e.Author.HasPermissions(e.Channel, g))
                     {
                         await e.Channel.SendMessage($"Please give me `{g}` to use this command.");
                         return;
@@ -88,7 +86,8 @@ namespace IA.Events
             {
                 if (await TryProcessCommand(e, args))
                 {
-                    Log.Message(name + " called from " + guild.Name + " [" + guild.Id + " # " + e.Channel.Id + "]");
+                    Log.Message($"{name} called from {/* name here */ name } [{ e.Guild.Id } # { e.Channel.Id }]");
+
                     await eventSystem.OnCommandDone(e, this);
                     CommandUsed++;
                 }
@@ -130,11 +129,6 @@ namespace IA.Events
                 lastTimeUsed.Add(id, DateTime.Now);
                 return false;
             }
-        }
-    
-        async Task<bool> hasPermission(IGuildChannel e, SDK.DiscordGuildPermission r)
-        {
-            return (await e.GetUserAsync(Bot.instance.Client.CurrentUser.Id)).GuildPermissions.Has((GuildPermission)Enum.Parse(typeof(GuildPermission), r.ToString()));
         }
     }
 }

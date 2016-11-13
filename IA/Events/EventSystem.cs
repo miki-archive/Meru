@@ -361,7 +361,7 @@ namespace IA.Events
             if (channel == null) return EventAccessibility.PUBLIC;
 
             if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
-            if (e.Author.HasPermissions(e.Guild, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
+            if (e.Author.HasPermissions(e.Channel, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
             return EventAccessibility.PUBLIC;
         }
 
@@ -384,11 +384,11 @@ namespace IA.Events
         {
             if (bot.SqlInformation != null)
             {
-                await MySQL.QueryAsync("SELECT i FROM identifier WHERE id=?id", output => 
+                await MySQL.QueryAsync("SELECT i FROM identifier WHERE id=?id", async output => 
                 {
-                    if (output.Count == 0)
+                    if (output == null)
                     {
-                        MySQL.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
+                        await MySQL.QueryAsync("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
                         identifier.Add(server, bot.Identifier.Value);
                     }
                     else

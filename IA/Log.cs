@@ -201,6 +201,12 @@ namespace IA
             }
         }
 
+        /// <summary>
+        /// Logs custom messages
+        /// </summary>
+        /// <param name="message">message that appears.</param>
+        /// <param name="color">the color the message appears in</param>
+        /// <param name="logLevel">the level the message will be filterd on</param>
         public static void Print(string message, ConsoleColor color = ConsoleColor.White, LogLevel logLevel = LogLevel.MESSAGE)
         {
             if (client == null)
