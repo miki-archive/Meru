@@ -8,7 +8,7 @@ namespace IA.Events
 {
     class EventContainer
     {
-        public Dictionary<string, CommandEvent> CommandEvents { private set; get; } = new Dictionary<string, CommandEvent>();
+        public Dictionary<string, RuntimeCommandEvent> CommandEvents { private set; get; } = new Dictionary<string, RuntimeCommandEvent>();
         public Dictionary<string, CommandDoneEvent> CommandDoneEvents { private set; get; } = new Dictionary<string, CommandDoneEvent>();
 
         public Dictionary<string, Event> MentionEvents { private set; get; } = new Dictionary<string, Event>();

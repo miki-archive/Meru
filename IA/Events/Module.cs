@@ -1,5 +1,6 @@
 ﻿using Discord;
 using IA.SDK;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -32,10 +33,10 @@ namespace IA.Events
             defaultInfo = new ModuleInformation();
             defaultInfo.name = addon.data.name;
             defaultInfo.enabled = addon.data.enabled;
-            defaultInfo.events = new List<CommandEvent>();
-            foreach (SDK.CommandEvent e in addon.data.events)
+            defaultInfo.events = new List<RuntimeCommandEvent>();
+            foreach (CommandEvent e in addon.data.events)
             {
-                defaultInfo.events.Add(new CommandEvent(x =>
+                defaultInfo.events.Add(new RuntimeCommandEvent(x =>
                 {
                     x.name = e.name;
                     x.module = this;
@@ -77,7 +78,7 @@ namespace IA.Events
                 bot.Client.MessageReceived += Client_MessageReceived;
             }
 
-            foreach (CommandEvent e in defaultInfo.events)
+            foreach (RuntimeCommandEvent e in defaultInfo.events)
             {
                 if (defaultInfo.eventSystem == null)
                 {
@@ -96,7 +97,7 @@ namespace IA.Events
                 bot.Client.MessageReceived += Client_MessageReceived;
             }
 
-            foreach(CommandEvent e in defaultInfo.events)
+            foreach(RuntimeCommandEvent e in defaultInfo.events)
             {
                 if(defaultInfo.eventSystem == null)
                 {
@@ -116,7 +117,7 @@ namespace IA.Events
                 return Task.CompletedTask;
             }
 
-            foreach (CommandEvent e in defaultInfo.events)
+            foreach (RuntimeCommandEvent e in defaultInfo.events)
             {
                 defaultInfo.eventSystem.events.CommandEvents.Remove(e.name);
             }

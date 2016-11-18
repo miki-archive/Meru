@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using IA.Internal;
 using IA.Addons;
 using IA.SDK;
+using IA.SDK.Interfaces;
 
 namespace IA
 {

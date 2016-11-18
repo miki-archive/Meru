@@ -54,15 +54,15 @@ namespace IA.Events
             DefaultIdentifier = bot.Identifier;
         }    
 
-        public async Task OnPrivateMessage(RuntimeMessage arg)
+        public async Task OnPrivateMessage(IDiscordMessage arg)
         {
 
             await Task.CompletedTask;
         }
 
-        public void AddMentionEvent(Action<CommandEvent> info)
+        public void AddMentionEvent(Action<RuntimeCommandEvent> info)
         {
-            CommandEvent newEvent = new CommandEvent();
+            RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
             if (newEvent.aliases.Length > 0)
@@ -77,9 +77,9 @@ namespace IA.Events
             MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
-        public void AddCommandEvent(Action<CommandEvent> info)
+        public void AddCommandEvent(Action<RuntimeCommandEvent> info)
         {
-            CommandEvent newEvent = new CommandEvent();
+            RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
             if(newEvent.usage[0] == "usage not set!")
@@ -178,7 +178,7 @@ namespace IA.Events
         /// </summary>
         /// <param name="id">event id</param>
         /// <returns>CommandEvent from local database</returns>
-        public CommandEvent GetCommandEvent(string id)
+        public RuntimeCommandEvent GetCommandEvent(string id)
         {
             if (events.CommandEvents.ContainsKey(id))
             {
@@ -265,7 +265,7 @@ namespace IA.Events
             return false;
         }
 
-        public async Task<string> ListCommands(IDiscordMessage e)
+        public async Task<string> ListCommands(SDK.Interfaces.IDiscordMessage e)
         {
             Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
             moduleEvents.Add("Misc", new List<string>());
@@ -321,7 +321,7 @@ namespace IA.Events
             return output;
         }
 
-        public async Task OnMessageRecieved(RuntimeMessage _message)
+        public async Task OnMessageRecieved(IDiscordMessage _message)
         {
             if (_message.Author.IsBot || ignore.Contains(_message.Guild.Id)) return;
 
@@ -339,7 +339,7 @@ namespace IA.Events
             }
         }
 
-        public async Task OnCommandDone(RuntimeMessage e, CommandEvent commandEvent)
+        public async Task OnCommandDone(IDiscordMessage e, RuntimeCommandEvent commandEvent)
         {
             foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
             {
@@ -347,15 +347,15 @@ namespace IA.Events
             }
         }
 
-        public async Task OnMention(RuntimeMessage e)
+        public async Task OnMention(IDiscordMessage e)
         {
-            foreach (CommandEvent ev in events.MentionEvents.Values)
+            foreach (RuntimeCommandEvent ev in events.MentionEvents.Values)
             {
                 await ev.Check(e);
             }
         }
 
-        public EventAccessibility GetUserAccessibility(IDiscordMessage e)
+        public EventAccessibility GetUserAccessibility(SDK.Interfaces.IDiscordMessage e)
         {
             IGuildChannel channel = (e.Channel as IGuildChannel);
             if (channel == null) return EventAccessibility.PUBLIC;
@@ -415,7 +415,7 @@ namespace IA.Events
             }
         }
 
-        async Task<bool> CheckIdentifier(string message, string identifier, RuntimeMessage e, bool doRunCommand = true)
+        async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e, bool doRunCommand = true)
         {
             if (message.StartsWith(identifier))
             {

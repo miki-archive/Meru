@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public class CommandEvent : Event
+    public class RuntimeCommandEvent : Event
     {
         public int cooldown = 1;
 
@@ -25,17 +25,17 @@ namespace IA.Events
             await e.Channel.SendMessage("This command has not been set up properly.");
         };
 
-        public CommandEvent()
+        public RuntimeCommandEvent()
         {
             CommandUsed = 0;
         }
-        public CommandEvent(Action<CommandEvent> info)
+        public RuntimeCommandEvent(Action<RuntimeCommandEvent> info)
         {
             info.Invoke(this);
             CommandUsed = 0;
         }
 
-        public async Task Check(RuntimeMessage e, string identifier = "")
+        public async Task Check(IDiscordMessage e, string identifier = "")
         {
             // declaring variables
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
@@ -94,7 +94,7 @@ namespace IA.Events
             }
         }
 
-        public async Task<bool> TryProcessCommand(RuntimeMessage e, string args)
+        public async Task<bool> TryProcessCommand(IDiscordMessage e, string args)
         {
             try
             {

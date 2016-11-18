@@ -9,10 +9,14 @@ using System.IO;
 
 namespace IA.SDK
 {
-    class RuntimeChannel : DiscordChannel
+    class RuntimeChannel : DiscordChannel, IDiscordChannel
     {
         public IChannel channel;
 
+        private RuntimeChannel()
+        {
+
+        }
         public RuntimeChannel(IChannel c)
         {
             channel = c;
@@ -24,6 +28,19 @@ namespace IA.SDK
             {
                 return channel.Id;
             }
+        }
+
+        public async override Task<IEnumerable<IDiscordUser>> GetUsersAsync()
+        {
+            IEnumerable<IUser> users = await channel.GetUsersAsync().Flatten();
+            List<RuntimeUser> outputUsers = new List<RuntimeUser>();
+
+            foreach (IUser u in users)
+            {
+                outputUsers.Add(new RuntimeUser(u));
+            }
+
+            return outputUsers;
         }
 
         public override async Task SendFileAsync(string path)
