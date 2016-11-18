@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    public class RuntimeMessage : DiscordMessage
+    public class RuntimeMessage : DiscordMessage, IDiscordMessage
     {
         IMessage messageData;
 
