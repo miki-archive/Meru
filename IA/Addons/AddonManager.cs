@@ -55,5 +55,36 @@ namespace IA.Addons
                 }
             }
         }
+        
+        public async Task Reload(Bot bot, string module)
+        {
+            string s = CurrentDirectory + module;
+
+            Assembly addon = Assembly.LoadFile(s);
+
+            string newS = s.Split('/')[s.Split('/').Length - 1];
+            newS = newS.Remove(newS.Length - 4);
+
+            BaseAddon currentAddon = addon.CreateInstance(newS + ".Addon") as BaseAddon;
+
+            if (currentAddon != null)
+            {
+                currentAddon.Create();
+                AddonInstance m = currentAddon.GetModule();
+
+                foreach (ModuleInstance nm in m.modules)
+                {
+                    await bot.Events.GetModuleByName(nm.data.name).UninstallAsync(bot);
+
+                    Events.Module newModule = new Events.Module(nm);
+                    await newModule.InstallAsync(bot);
+                }
+                Log.Done($"Reloaded Add-On \"{newS}\" successfully");
+            }
+            else
+            {
+                Log.Error($"failed to reload module \"{newS}\"");
+            }
+        }
     }
 }

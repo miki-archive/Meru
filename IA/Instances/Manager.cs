@@ -1,4 +1,5 @@
-﻿using IA.Internal;
+﻿using IA.Forms;
+using IA.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace IA
 {
@@ -24,6 +27,8 @@ namespace IA
         {
             shardCount = shard_count;
             OpenManager().GetAwaiter().GetResult();
+
+            new Thread(new ThreadStart(StartForm)).Start();
         }
 
         private async Task Heartbeat()
@@ -68,6 +73,14 @@ namespace IA
             await Task.Run(async () => await Heartbeat());
             await Task.Delay(-1);
         }
+
+        [STAThread]
+        private void StartForm()
+        {
+            Application.EnableVisualStyles();
+            Application.Run(new ManagerForm());
+        }
+
 
         #region events
 

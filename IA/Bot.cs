@@ -15,6 +15,9 @@ using IA.Internal;
 using IA.Addons;
 using IA.SDK;
 using IA.SDK.Interfaces;
+using System.Windows.Forms;
+using IA.Forms;
+using System.Threading;
 
 namespace IA
 {
@@ -30,11 +33,12 @@ namespace IA
         public const string VersionText = "IA v" + VersionNumber;
         public const string VersionNumber = "1.4.4";
 
+        public bool isManager = false;
+
         public static Bot instance;
 
         string currentPath = Directory.GetCurrentDirectory();
 
-        bool isManager = false;
 
         public Bot()
         {
@@ -109,6 +113,24 @@ namespace IA
 
             Log.InitializeLogging(clientInformation);
 
+            Client = new DiscordSocketClient(new DiscordSocketConfig()
+            {
+                ShardId = id,
+                LogLevel = LogSeverity.Critical,
+                TotalShards = clientInformation.ShardCount
+            });
+
+            Events = new EventSystem(x =>
+            {
+                x.Name = clientInformation.Name;
+                x.Identifier.Value = clientInformation.Prefix.Value;
+                x.SqlInformation = clientInformation.sqlInformation;
+            });
+
+            Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
+
+            Addons = new AddonManager();
+
             if (Environment.GetCommandLineArgs().Length > 1)
             {
                 Log.Message(string.Join(" | ", Environment.GetCommandLineArgs()));
@@ -118,7 +140,7 @@ namespace IA
             else
             {
                 Console.Title = clientInformation.Name + " " + clientInformation.Version;
-                if(Debugger.IsAttached)
+                if (Debugger.IsAttached)
                 {
                     isManager = false;
                     clientInformation.ShardCount = 1;
@@ -126,28 +148,13 @@ namespace IA
                 else
                 {
                     isManager = true;
+                    new Manager(clientInformation.ShardCount);
                 }
             }
 
             if (!isManager)
             {
                 clientInformation.ShardId = id;
-                Client = new DiscordSocketClient(new DiscordSocketConfig()
-                {
-                    ShardId = id,
-                    LogLevel = LogSeverity.Critical,
-                    TotalShards = clientInformation.ShardCount
-                });
-
-                Events = new EventSystem(x =>
-                {
-                    x.Name = clientInformation.Name;
-                    x.Identifier.Value = clientInformation.Prefix.Value;
-                    x.SqlInformation = clientInformation.sqlInformation;
-                });
-                Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
-
-                Addons = new AddonManager();
                 await Addons.Load(this);
 
                 Client.MessageReceived += Client_MessageReceived;
@@ -156,7 +163,6 @@ namespace IA
                 Client.Ready += Client_Ready;
                 Client.Disconnected += Client_Disconnected;
                 Client.Log += Client_Log;
-                await Task.CompletedTask;
             }
         }
 
@@ -181,6 +187,7 @@ namespace IA
             Console.WriteLine(arg.Message);
             await Task.CompletedTask;
         }
+
 
         private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
@@ -241,7 +248,7 @@ namespace IA
         {
             RuntimeMessage r = new RuntimeMessage(arg);
 
-            if (r.Guild != null)
+            if (r.Guild != null)    
             {
                 if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
                 {

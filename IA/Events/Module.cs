@@ -4,6 +4,7 @@ using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 
 namespace IA.Events
 {
@@ -75,7 +76,7 @@ namespace IA.Events
         {
             if (defaultInfo.messageEvent != null)
             {
-                bot.Client.MessageReceived += Client_MessageReceived;
+                bot.Client.MessageReceived += Module_MessageRecieved;
             }
 
             foreach (RuntimeCommandEvent e in defaultInfo.events)
@@ -92,9 +93,19 @@ namespace IA.Events
 
         public async Task InstallAsync(Bot bot)
         {
+            if(bot.isManager)
+            {
+                return;
+            }
+
             if(defaultInfo.messageEvent != null)
             {
-                bot.Client.MessageReceived += Client_MessageReceived;
+                bot.Client.MessageReceived += Module_MessageRecieved;
+            }
+
+            if(defaultInfo.userUpdateEvent != null)
+            {
+                bot.Client.UserUpdated += Module_UserUpdated;
             }
 
             foreach(RuntimeCommandEvent e in defaultInfo.events)
@@ -110,11 +121,11 @@ namespace IA.Events
             await Task.CompletedTask;
         }
 
-        public Task UninstallAsync(Bot bot)
+        public async Task UninstallAsync(Bot bot)
         {
-            if (!isInstalled)
+            if (!isInstalled || bot.isManager)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             foreach (RuntimeCommandEvent e in defaultInfo.events)
@@ -124,14 +135,25 @@ namespace IA.Events
 
             if (defaultInfo.messageEvent != null)
             {
-                bot.Client.MessageReceived -= Client_MessageReceived;
+                bot.Client.MessageReceived -= Module_MessageRecieved;
+            }
+            if(defaultInfo.userUpdateEvent != null)
+            {
+                bot.Client.UserUpdated -= Module_UserUpdated;
             }
 
             isInstalled = false;
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
-        private async Task Client_MessageReceived(IMessage message)
+        private async Task Module_UserUpdated(SocketUser arg1, SocketUser arg2)
+        {
+            RuntimeUser usr1 = new RuntimeUser(arg1);
+            RuntimeUser usr2 = new RuntimeUser(arg2);
+            await defaultInfo.userUpdateEvent(usr1, usr2);
+        }
+
+        private async Task Module_MessageRecieved(IMessage message)
         {
             RuntimeMessage msg = new RuntimeMessage(message);
             await defaultInfo.messageEvent(msg);
