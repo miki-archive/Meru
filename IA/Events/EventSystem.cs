@@ -265,7 +265,7 @@ namespace IA.Events
             return false;
         }
 
-        public async Task<string> ListCommands(SDK.Interfaces.IDiscordMessage e)
+        public async Task<string> ListCommands(IDiscordMessage e)
         {
             Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
             moduleEvents.Add("Misc", new List<string>());
@@ -355,10 +355,9 @@ namespace IA.Events
             }
         }
 
-        public EventAccessibility GetUserAccessibility(SDK.Interfaces.IDiscordMessage e)
+        public EventAccessibility GetUserAccessibility(IDiscordMessage e)
         {
-            IGuildChannel channel = (e.Channel as IGuildChannel);
-            if (channel == null) return EventAccessibility.PUBLIC;
+            if (e.Channel == null) return EventAccessibility.PUBLIC;
 
             if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
             if (e.Author.HasPermissions(e.Channel, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;

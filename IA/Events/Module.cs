@@ -74,6 +74,8 @@ namespace IA.Events
 
         public void Install(Bot bot)
         {
+            defaultInfo.name = defaultInfo.name.ToLower();
+            
             if (defaultInfo.messageEvent != null)
             {
                 bot.Client.MessageReceived += Module_MessageRecieved;
@@ -93,7 +95,10 @@ namespace IA.Events
 
         public async Task InstallAsync(Bot bot)
         {
-            if(bot.isManager)
+            defaultInfo.name = defaultInfo.name.ToLower();
+            bot.Events.Modules.Add(defaultInfo.name, this);
+
+            if (bot.isManager)
             {
                 return;
             }
@@ -127,6 +132,8 @@ namespace IA.Events
             {
                 return;
             }
+
+            bot.Events.Modules.Remove(defaultInfo.name);
 
             foreach (RuntimeCommandEvent e in defaultInfo.events)
             {

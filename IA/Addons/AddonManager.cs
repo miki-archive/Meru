@@ -31,17 +31,17 @@ namespace IA.Addons
 
             foreach (string s in allFiles)
             {
-                Assembly addon = Assembly.LoadFile(s);
+                Assembly addon = Assembly.Load(File.ReadAllBytes(s));
 
                 string newS = s.Split('/')[s.Split('/').Length - 1];
                 newS = newS.Remove(newS.Length - 4);
 
-                BaseAddon currentAddon = addon.CreateInstance(newS + ".Addon") as BaseAddon;
+                IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
 
                 if (currentAddon != null)
                 {
-                    currentAddon.Create();
-                    AddonInstance m = currentAddon.GetModule();
+                    await currentAddon.Create();
+                    AddonInstance m = currentAddon.GetAddon();
                     foreach (ModuleInstance nm in m.modules)
                     {
                         Events.Module newModule = new Events.Module(nm);
@@ -55,22 +55,58 @@ namespace IA.Addons
                 }
             }
         }
-        
-        public async Task Reload(Bot bot, string module)
-        {
-            string s = CurrentDirectory + module;
 
-            Assembly addon = Assembly.LoadFile(s);
+        public async Task LoadSpecific(Bot bot, string module)
+        {
+            string s = CurrentDirectory + module + ".dll";
+
+            Assembly addon = Assembly.Load(File.ReadAllBytes(s));
 
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
 
-            BaseAddon currentAddon = addon.CreateInstance(newS + ".Addon") as BaseAddon;
+
+            IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
 
             if (currentAddon != null)
             {
-                currentAddon.Create();
-                AddonInstance m = currentAddon.GetModule();
+                await currentAddon.Create();
+                AddonInstance m = currentAddon.GetAddon();
+
+                foreach (ModuleInstance nm in m.modules)
+                {
+                    if(bot.Events.GetModuleByName(nm.data.name) != null)
+                    {
+                        Log.Warning("Module already loaded, stopping load");
+                        return;
+                    }
+                    Events.Module newModule = new Events.Module(nm);
+                    await newModule.InstallAsync(bot);
+                }
+                
+                Log.Done($"Loaded Add-On \"{newS}\" successfully");
+            }
+            else
+            {
+                Log.Error($"failed to reload module \"{newS}\"");
+            }
+        }
+
+        public async Task Reload(Bot bot, string module)
+        {
+            string s = CurrentDirectory + module + ".dll";
+
+            Assembly addon = Assembly.Load(File.ReadAllBytes(s));
+
+            string newS = s.Split('/')[s.Split('/').Length - 1];
+            newS = newS.Remove(newS.Length - 4);
+
+            IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
+
+            if (currentAddon != null)
+            {
+                await currentAddon.Create();
+                AddonInstance m = currentAddon.GetAddon();
 
                 foreach (ModuleInstance nm in m.modules)
                 {
@@ -84,6 +120,40 @@ namespace IA.Addons
             else
             {
                 Log.Error($"failed to reload module \"{newS}\"");
+            }
+        }
+
+        public async Task Unload(Bot bot, string module)
+        {
+            string s = CurrentDirectory + module + ".dll";
+
+            Assembly addon = Assembly.Load(File.ReadAllBytes(s));
+
+            string newS = s.Split('/')[s.Split('/').Length - 1];
+            newS = newS.Remove(newS.Length - 4);
+
+
+            IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
+
+            if (currentAddon != null)
+            {
+                await currentAddon.Create();
+                AddonInstance m = currentAddon.GetAddon();
+
+                foreach (ModuleInstance nm in m.modules)
+                {
+                    Events.Module mod = bot.Events.GetModuleByName(nm.data.name);
+                    
+                    if(mod != null)
+                    {
+                        await mod.UninstallAsync(bot);
+                    }
+                }
+                Log.Done($"Unloaded Add-On \"{newS}\" successfully");
+            }
+            else
+            {
+                Log.Error($"failed to unload module \"{newS}\"");
             }
         }
     }

@@ -20,10 +20,18 @@ namespace IA.SDK
             }
         }
 
-        public override DiscordUser Author {
+        public override IDiscordUser Author {
             get
             {
                 return new RuntimeUser(messageData.Author);
+            }
+        }
+
+        public override IDiscordUser Bot
+        {
+            get
+            {
+                return new RuntimeUser(IA.Bot.instance.Client.CurrentUser);
             }
         }
 
