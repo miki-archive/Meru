@@ -40,9 +40,7 @@ namespace IA.SDK
                 outputUsers.Add(new RuntimeUser(u));
             }
 
-            return outputUsers;
-
-            
+            return outputUsers;           
         }
 
         public override async Task SendFileAsync(string path)

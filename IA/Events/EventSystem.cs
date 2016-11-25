@@ -323,17 +323,25 @@ namespace IA.Events
 
         public async Task OnMessageRecieved(IDiscordMessage _message)
         {
-            if (_message.Author.IsBot || ignore.Contains(_message.Guild.Id)) return;
+            if (_message.Author.IsBot)
+            {
+                return;
+            }
 
-            if (!identifier.ContainsKey(_message.Guild.Id)) await LoadIdentifier(_message.Guild.Id);
+            if (!identifier.ContainsKey(_message.Guild.Id))
+            {
+                await LoadIdentifier(_message.Guild.Id);
+            }
 
             string message = _message.Content.ToLower();
+
 
             if (await CheckIdentifier(message, identifier[_message.Guild.Id], _message))
             {
                 return;
             }
-            else if (await CheckIdentifier(message, OverrideIdentifier.Value, _message))
+
+            if (await CheckIdentifier(message, OverrideIdentifier.Value, _message))
             {
                 return;
             }
@@ -402,15 +410,21 @@ namespace IA.Events
             }
         }
 
-        public string GetIdentifier(ulong server_id)
+        public async Task<string> GetIdentifier(ulong server_id)
         {
             if (identifier.ContainsKey(server_id))
             {
-                return identifier[server_id];
+                string returnIdentifier = identifier[server_id];
+                if(returnIdentifier == "mention")
+                {
+                    returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
+                }
+
+                return returnIdentifier;
             }
             else
             {
-                return sql.GetIdentifier(server_id);
+                return await MySQL.GetIdentifier(server_id);
             }
         }
 

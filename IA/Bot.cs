@@ -30,6 +30,14 @@ namespace IA
         public EventSystem Events { private set; get; }
         public MySQL Sql { private set; get; }
 
+        public int ShardId
+        {
+            get
+            {
+                return clientInformation.ShardId;
+            }
+        }
+
         public const string VersionText = "IA v" + VersionNumber;
         public const string VersionNumber = "1.4.4";
 
@@ -38,7 +46,6 @@ namespace IA
         public static Bot instance;
 
         string currentPath = Directory.GetCurrentDirectory();
-
 
         public Bot()
         {
@@ -187,7 +194,6 @@ namespace IA
             Console.WriteLine(arg.Message);
             await Task.CompletedTask;
         }
-
 
         private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {

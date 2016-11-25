@@ -79,30 +79,19 @@ namespace IA.SQL
         /// </summary>
         /// <param name="server_id">server id</param>
         /// <returns></returns>
-        public string GetIdentifier(ulong server_id)
+        public static async Task<string> GetIdentifier(ulong server_id)
         {
-            if (info == null) return defaultIdentifier.Value;
+            string output = instance.defaultIdentifier.Value;
 
-            string output = "";
-
-            MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = string.Format("SELECT i FROM identifier WHERE id={0}", server_id);
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-
-            while (r.Read())
+            await QueryAsync("SELECT i FROM identifier WHERE id=?id", x =>
             {
-                output = r.GetString(0);
-                break;
-            }
-            connection.Close();
+                if (x != null)
+                {
+                    output = (string)x["i"];
+                }
+            }, server_id);
 
-            if (output != "")
-            {
-                return output;
-            }
-            return "ERROR";
+            return output;
         }
 
         /// <summary>

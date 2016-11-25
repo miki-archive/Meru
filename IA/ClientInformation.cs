@@ -19,7 +19,8 @@ namespace IA
         public string DiscordPwKey { get; set; } = "";
 
         public int ShardCount { get; set; } = 1;
-        public int ShardId { get; internal set; } = -1;
+
+        internal int ShardId { get; set; } = -1;
 
         public LogLevel ConsoleLogLevel = LogLevel.ALL;
         /// <summary>
