@@ -9,7 +9,7 @@ using System.IO;
 
 namespace IA.SDK
 {
-    class RuntimeChannel : DiscordChannel, IDiscordChannel
+    class RuntimeChannel : DiscordChannel, IDiscordChannel, IProxy<IChannel>
     {
         public IChannel channel;
 
@@ -41,6 +41,8 @@ namespace IA.SDK
             }
 
             return outputUsers;
+
+            
         }
 
         public override async Task SendFileAsync(string path)
@@ -57,6 +59,18 @@ namespace IA.SDK
         {
             RuntimeMessage m = new RuntimeMessage(await (channel as IMessageChannel).SendMessage(message));
             return m;
+        }
+        public override async Task<IDiscordMessage> SendMessage(IDiscordEmbedBuilder embed)
+        {
+            return new RuntimeMessage(
+                await (channel as IMessageChannel)
+                .SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>)
+                .ToNativeObject()));
+        }
+
+        public IChannel ToNativeObject()
+        {
+            return channel;
         }
     }
 }

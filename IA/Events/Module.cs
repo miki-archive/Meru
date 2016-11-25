@@ -34,6 +34,10 @@ namespace IA.Events
             defaultInfo = new ModuleInformation();
             defaultInfo.name = addon.data.name;
             defaultInfo.enabled = addon.data.enabled;
+
+            defaultInfo.messageEvent = addon.data.messageRecieved;
+            defaultInfo.userUpdateEvent = addon.data.userUpdated;
+
             defaultInfo.events = new List<RuntimeCommandEvent>();
             foreach (CommandEvent e in addon.data.events)
             {
@@ -70,27 +74,6 @@ namespace IA.Events
         public Task Initialize()
         {
             return Task.CompletedTask;
-        }
-
-        public void Install(Bot bot)
-        {
-            defaultInfo.name = defaultInfo.name.ToLower();
-            
-            if (defaultInfo.messageEvent != null)
-            {
-                bot.Client.MessageReceived += Module_MessageRecieved;
-            }
-
-            foreach (RuntimeCommandEvent e in defaultInfo.events)
-            {
-                if (defaultInfo.eventSystem == null)
-                {
-                    defaultInfo.eventSystem = bot.Events;
-                }
-                defaultInfo.eventSystem.events.CommandEvents.Add(e.name, e);
-            }
-
-            isInstalled = true;
         }
 
         public async Task InstallAsync(Bot bot)

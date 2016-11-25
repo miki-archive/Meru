@@ -8,13 +8,17 @@ using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    class RuntimeUser : DiscordUser
+    public class RuntimeUser : DiscordUser, IProxy<IUser>
     {
         private IUser user;
 
         public RuntimeUser(IUser author)
         {
             user = author;
+        }
+
+        public RuntimeUser()
+        {
         }
 
         public override ulong Id
@@ -75,14 +79,21 @@ namespace IA.SDK
 
         public override bool HasPermissions(DiscordChannel channel, params DiscordGuildPermission[] permissions)
         {
-            foreach (DiscordChannelPermission p in permissions)
+            foreach (DiscordGuildPermission p in permissions)
             {
-                if (!(user as IGuildUser).GuildPermissions.Has((GuildPermission)Enum.Parse(typeof(GuildPermission), p.ToString())))
+                GuildPermission newP = (GuildPermission)Enum.Parse(typeof(DiscordGuildPermission), p.ToString());
+
+                if (!(user as IGuildUser).GuildPermissions.Has(newP))
                 {
                     return false;
                 }
             }
             return true;
+        }
+
+        public IUser ToNativeObject()
+        {
+            return user;
         }
     }
 }

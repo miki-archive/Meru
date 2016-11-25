@@ -31,7 +31,7 @@ namespace IA.SDK
         {
             get
             {
-                return new RuntimeUser(IA.Bot.instance.Client.CurrentUser);
+                return new RuntimeUser((Guild.GetUserAsync(IA.Bot.instance.Client.CurrentUser.Id).GetAwaiter().GetResult() as IProxy<IUser>).ToNativeObject());
             }
         }
 
@@ -109,6 +109,8 @@ namespace IA.SDK
         {
             await (messageData as IUserMessage)?.UnpinAsync();
         }
+
+        
 
         public IMessage ToIMessage()
         {
