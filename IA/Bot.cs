@@ -259,9 +259,17 @@ namespace IA
 
         private async Task Client_MessageReceived(IMessage arg)
         {
+            Stopwatch s = new Stopwatch();
+            s.Start();
+
             RuntimeMessage r = new RuntimeMessage(arg);
 
-            if (r.Guild != null)    
+            if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
+            {
+                await Task.Run(async () => await Events.OnMention(r));
+            }
+
+            if (r.Guild != null)
             {
                 await Task.Run(async () => await Events.OnMessageRecieved(r));
             }
@@ -270,10 +278,9 @@ namespace IA
                 await Task.Run(async () => await Events.OnPrivateMessage(r));
             }
 
-                            if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
-                {
-                    await Task.Run(async () => await Events.OnMention(r));
-                }
+            s.Stop();
+            Log.Notice("Command succeeded in " + s.ElapsedMilliseconds + " ms");
+
         }
     }
 }
