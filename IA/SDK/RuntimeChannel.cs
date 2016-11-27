@@ -13,10 +13,6 @@ namespace IA.SDK
     {
         public IChannel channel;
 
-        private RuntimeChannel()
-        {
-
-        }
         public RuntimeChannel(IChannel c)
         {
             channel = c;
