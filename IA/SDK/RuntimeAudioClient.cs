@@ -49,16 +49,20 @@ namespace IA.SDK
 
         public override async Task Pause()
         {
+            await Task.CompletedTask;
             //TODO Add Pause
+
         }
 
         public override async Task Play(IAudio audio, bool skipIfPlaying = false)
         {
+            await Task.CompletedTask;
             //TODO Add Play
         }
 
         public override async Task Skip()
         {
+            await Task.CompletedTask;
             //TODO Add Skip
         }
 
@@ -70,6 +74,7 @@ namespace IA.SDK
         private async Task AudioClient_Disconnected(Exception e)
         {
             Log.ErrorAt("AudioClient", e.Message);
+            await Task.CompletedTask;
         }
     }
 }

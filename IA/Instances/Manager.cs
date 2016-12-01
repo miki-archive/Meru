@@ -1,5 +1,4 @@
-﻿using IA.Forms;
-using IA.Internal;
+﻿using IA.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,7 +27,6 @@ namespace IA
             shardCount = shard_count;
             OpenManager().GetAwaiter().GetResult();
 
-            new Thread(new ThreadStart(StartForm)).Start();
         }
 
         private async Task Heartbeat()
@@ -78,7 +76,6 @@ namespace IA
         private void StartForm()
         {
             Application.EnableVisualStyles();
-            Application.Run(new ManagerForm());
         }
 
 

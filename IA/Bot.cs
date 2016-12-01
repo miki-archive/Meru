@@ -16,7 +16,6 @@ using IA.Addons;
 using IA.SDK;
 using IA.SDK.Interfaces;
 using System.Windows.Forms;
-using IA.Forms;
 using System.Threading;
 
 namespace IA

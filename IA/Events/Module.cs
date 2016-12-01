@@ -109,6 +109,11 @@ namespace IA.Events
             await Task.CompletedTask;
         }
 
+        public async Task Disable(Bot bot)
+        {
+            await Task.CompletedTask;
+        }
+
         public async Task UninstallAsync(Bot bot)
         {
             if (!isInstalled || bot.isManager)

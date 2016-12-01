@@ -62,12 +62,6 @@
     <Compile Include="Events\UserEvent.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Extension Methods\SDKMethods.cs" />
-    <Compile Include="Forms\ManagerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ManagerForm.Designer.cs">
-      <DependentUpon>ManagerForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Internal\IpcSocket.cs" />
     <Compile Include="Instances\Manager.cs" />
     <Compile Include="Instances\Shard.cs" />
@@ -226,11 +220,6 @@
       <Project>{b8ffa60f-2c45-449f-ad4d-cf1c5a3075d4}</Project>
       <Name>IA.SDK</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Forms\ManagerForm.resx">
-      <DependentUpon>ManagerForm.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
