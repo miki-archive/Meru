@@ -10,7 +10,11 @@ namespace IA.SDK
 {
     public class RuntimeMessage : DiscordMessage, IDiscordMessage
     {
-        IMessage messageData;
+        IMessage messageData = null;
+
+        RuntimeGuild guild = null;
+        RuntimeChannel channel = null;
+        RuntimeUser user = null;
 
         public override ulong Id
         {
@@ -20,10 +24,11 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordUser Author {
+        public override IDiscordUser Author
+        {
             get
             {
-                return new RuntimeUser(messageData.Author);
+                return user;
             }
         }
 
@@ -39,7 +44,7 @@ namespace IA.SDK
         {
             get
             {
-                return new RuntimeChannel(messageData.Channel);
+                return channel;
             }
         }
 
@@ -47,7 +52,7 @@ namespace IA.SDK
         {
             get
             {
-                return new RuntimeGuild((messageData.Author as IGuildUser).Guild);
+                return guild;
             }
         }
 
@@ -85,6 +90,16 @@ namespace IA.SDK
         public RuntimeMessage(IMessage msg)
         {
             messageData = msg;
+
+
+            user = new RuntimeUser(msg.Author);
+            channel = new RuntimeChannel(msg.Channel);
+            IGuild g = (messageData.Author as IGuildUser)?.Guild;
+            if (g != null)
+            {
+                guild = new RuntimeGuild(g);
+
+            }
         }
 
         public override async Task DeleteAsync()
@@ -108,13 +123,6 @@ namespace IA.SDK
         public override async Task UnpinAsync()
         {
             await (messageData as IUserMessage)?.UnpinAsync();
-        }
-
-        
-
-        public IMessage ToIMessage()
-        {
-            return messageData;
         }
     }
 }

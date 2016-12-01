@@ -225,8 +225,15 @@ namespace IA
             file.WriteComment("Shard count");
             Console.WriteLine("Shards [1-25565]:");
             inputString = Console.ReadLine();
-            outputBotInfo.ShardCount = int.Parse(inputString);    
-                       
+            outputBotInfo.ShardCount = int.Parse(inputString);
+            if (outputBotInfo.ShardCount < 1)
+            {
+                outputBotInfo.ShardCount = 1;
+            }
+            else if(outputBotInfo.ShardCount > 25565)
+            {
+                outputBotInfo.ShardCount = 25565;
+            }
 
             file.Finish();
 
@@ -251,20 +258,28 @@ namespace IA
 
         private async Task Client_MessageReceived(IMessage arg)
         {
+            Stopwatch s = new Stopwatch();
+            s.Start();
+
             RuntimeMessage r = new RuntimeMessage(arg);
 
-            if (r.Guild != null)    
+            if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
             {
-                if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
-                {
-                    await Task.Run(async () => await Events.OnMention(r));
-                }
+                await Task.Run(async () => await Events.OnMention(r));
+            }
+
+            if (r.Guild != null)
+            {
                 await Task.Run(async () => await Events.OnMessageRecieved(r));
             }
             else
             {
                 await Task.Run(async () => await Events.OnPrivateMessage(r));
             }
+
+            s.Stop();
+            Log.Notice("Command succeeded in " + s.ElapsedMilliseconds + " ms");
+
         }
     }
 }

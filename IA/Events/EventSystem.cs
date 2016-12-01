@@ -56,7 +56,7 @@ namespace IA.Events
 
         public async Task OnPrivateMessage(IDiscordMessage arg)
         {
-
+            Log.Print($"[PM] {arg.Author.Username}#{arg.Author.Discriminator}: {arg.Content}", ConsoleColor.Cyan);
             await Task.CompletedTask;
         }
 
