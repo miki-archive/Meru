@@ -258,9 +258,6 @@ namespace IA
 
         private async Task Client_MessageReceived(IMessage arg)
         {
-            Stopwatch s = new Stopwatch();
-            s.Start();
-
             RuntimeMessage r = new RuntimeMessage(arg);
 
             if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
@@ -276,10 +273,6 @@ namespace IA
             {
                 await Task.Run(async () => await Events.OnPrivateMessage(r));
             }
-
-            s.Stop();
-            Log.Notice("Command succeeded in " + s.ElapsedMilliseconds + " ms");
-
         }
     }
 }

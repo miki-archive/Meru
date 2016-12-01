@@ -206,7 +206,6 @@ namespace IA.SQL
             if (instance.info == null) return;
             MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
 
-
             List<MySqlParameter> parameters = new List<MySqlParameter>();
 
             string curCode = sqlCode;
@@ -254,8 +253,13 @@ namespace IA.SQL
                 }
             }
 
+            await Task.Run(async () => await PollQuery(connection, curCode, parameters, output));
+        }
+
+        internal static async Task PollQuery(MySqlConnection connection, string CommandText, List<MySqlParameter> parameters, QueryOutput output)
+        {
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = curCode;
+            command.CommandText = CommandText;
             command.Parameters.AddRange(parameters.ToArray());
             connection.Open();
 
