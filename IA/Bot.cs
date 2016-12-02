@@ -119,27 +119,8 @@ namespace IA
 
             Log.InitializeLogging(clientInformation);
 
-            Client = new DiscordSocketClient(new DiscordSocketConfig()
-            {
-                ShardId = id,
-                LogLevel = LogSeverity.Critical,
-                TotalShards = clientInformation.ShardCount
-            });
-
-            Events = new EventSystem(x =>
-            {
-                x.Name = clientInformation.Name;
-                x.Identifier.Value = clientInformation.Prefix.Value;
-                x.SqlInformation = clientInformation.sqlInformation;
-            });
-
-            Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
-
-            Addons = new AddonManager();
-
             if (Environment.GetCommandLineArgs().Length > 1)
             {
-                Log.Message(string.Join(" | ", Environment.GetCommandLineArgs()));
                 id = int.Parse(Environment.GetCommandLineArgs()[1]);
                 Console.Title = "Shard " + id;
             }
@@ -157,6 +138,24 @@ namespace IA
                     new Manager(clientInformation.ShardCount);
                 }
             }
+
+            Client = new DiscordSocketClient(new DiscordSocketConfig()
+            {
+                ShardId = id,
+                LogLevel = LogSeverity.Critical,
+                TotalShards = clientInformation.ShardCount
+            });
+
+            Events = new EventSystem(x =>
+            {
+                x.Name = clientInformation.Name;
+                x.Identifier.Value = clientInformation.Prefix.Value;
+                x.SqlInformation = clientInformation.sqlInformation;
+            });
+
+            Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
+
+            Addons = new AddonManager();
 
             if (!isManager)
             {
