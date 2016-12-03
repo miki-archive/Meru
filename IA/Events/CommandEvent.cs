@@ -86,7 +86,7 @@ namespace IA.Events
             {
                 if (await TryProcessCommand(e, args))
                 {
-                    Log.Message($"{name} called from {/* name here */ name } [{ e.Guild.Id } # { e.Channel.Id }]");
+                    Log.Message($"{name} called from {e.Guild.Id} [{ e.Guild.Id } # { e.Channel.Id }]");
 
                     await eventSystem.OnCommandDone(e, this);
                     CommandUsed++;
@@ -99,12 +99,13 @@ namespace IA.Events
             try
             {
                 await processCommand(e, args);
+                return true;
             }
             catch(Exception ex)
             {
                 Log.ErrorAt(name, ex.Message);
             }
-            return true;
+            return false;
         }
 
         float GetCooldown(ulong id)

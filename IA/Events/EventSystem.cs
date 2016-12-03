@@ -480,8 +480,10 @@ namespace IA.Events
                 e.enabled.Add(id, e.defaultEnabled);
                 return e.defaultEnabled;
             }
-            e.enabled.Add(id, e.defaultEnabled);
-            return (state == 1) ? true : false;
+            bool actualState = (state == 1) ? true : false;
+
+            e.enabled.Add(id, actualState);
+            return actualState;
         }
     }
 }
