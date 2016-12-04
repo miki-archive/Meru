@@ -74,6 +74,9 @@ namespace IA.SDK
         private async Task AudioClient_Disconnected(Exception e)
         {
             Log.ErrorAt("AudioClient", e.Message);
+
+            queue.Clear();
+
             await Task.CompletedTask;
         }
     }
