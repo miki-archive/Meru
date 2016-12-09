@@ -23,22 +23,24 @@ namespace IA
         {
             Log.Message("Starting shard " + shard_id);
             id = shard_id;
-            OpenShard().GetAwaiter().GetResult();
+            OpenShardAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
         /// Opens a new shard.
         /// </summary>
-        public async Task OpenShard()
+        public async Task OpenShardAsync()
         {
-            ProcessStartInfo info = new ProcessStartInfo();
-            info.Arguments = id.ToString();
-            info.WorkingDirectory = Directory.GetCurrentDirectory();
-            info.FileName = "Miki.exe";
-            info.CreateNoWindow = true;
-            info.RedirectStandardOutput = true;
-            info.RedirectStandardError = true;
-            info.UseShellExecute = false;
+            ProcessStartInfo info = new ProcessStartInfo()
+            {
+                Arguments = id.ToString(),
+                WorkingDirectory = Directory.GetCurrentDirectory(),
+                FileName = "Miki.exe",
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
+            };
 
             shardProcess = Process.Start(info);
             shardProcess.EnableRaisingEvents = true;

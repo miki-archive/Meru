@@ -20,7 +20,7 @@ namespace IA.Events
             CommandUsed = 0;
         }
 
-        public async Task Check(DiscordGuild e)
+        public async Task CheckAsync(DiscordGuild e)
         {
             await Task.Run(() => processCommand(e));
         }

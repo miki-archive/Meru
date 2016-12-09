@@ -228,7 +228,7 @@ namespace IA.Events
             {
                 if (await IsEnabled(ev, e.Id))
                 {
-                    await ev.Check(e.ToSDKGuild());
+                    await ev.CheckAsync(e.ToSDKGuild());
                 }
             }
         }
@@ -239,7 +239,7 @@ namespace IA.Events
             {
                 if (await IsEnabled(ev, e.Id))
                 {
-                    await ev.Check(e.ToSDKGuild());
+                    await ev.CheckAsync(e.ToSDKGuild());
                 }
             }
         }
