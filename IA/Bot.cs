@@ -22,8 +22,6 @@ namespace IA
 {
     public class Bot
     {
-        public ClientInformation clientInformation { private set; get; }
-
         public AddonManager Addons { private set; get; }
         public DiscordSocketClient Client { private set; get; }
         public EventSystem Events { private set; get; }
@@ -36,6 +34,11 @@ namespace IA
                 return clientInformation.ShardId;
             }
         }
+        public string Version { get
+            {
+                return clientInformation.Version;
+            }
+        }
 
         public const string VersionText = "IA v" + VersionNumber;
         public const string VersionNumber = "1.4.4";
@@ -44,7 +47,9 @@ namespace IA
 
         public static Bot instance;
 
-        string currentPath = Directory.GetCurrentDirectory();
+        private ClientInformation clientInformation;
+
+        private string currentPath = Directory.GetCurrentDirectory();
 
         public Bot()
         {
@@ -65,9 +70,13 @@ namespace IA
             InitializeBot().GetAwaiter().GetResult();
         }
 
-        public void AddDeveloper(ulong developerId)
+        public void AddDeveloper(ulong id)
         {
-            Events.Developers.Add(developerId);
+            Events.Developers.Add(id);
+        }
+        public void AddDeveloper(IDiscordUser user)
+        {
+            Events.Developers.Add(user.Id);
         }
         public void AddDeveloper(IUser user)
         {
@@ -110,6 +119,62 @@ namespace IA
         public int GetShardId()
         {
             return clientInformation.ShardId;
+        }
+
+        private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Exception ex = (Exception)e.ExceptionObject;
+            Log.ErrorAt(ex.Source, ex.Message);
+            if (e.IsTerminating)
+            {
+                Log.Error("Closing Shard");
+            }
+        }
+
+        private ClientInformation InitializePreferencesFile()
+        {
+            ClientInformation outputBotInfo = new ClientInformation();
+            FileWriter file = new FileWriter("preferences", "config");
+            file.WriteComment(VersionText + " preferences file");
+            file.WriteComment("Please do not change this file except to change\n# except to change your settings");
+            file.WriteComment("Bot Name");
+            Console.WriteLine("Enter bot name: ");
+            string inputString = Console.ReadLine();
+            file.Write(inputString);
+            outputBotInfo.Name = inputString;
+
+            file.WriteComment("Bot Token");
+            Console.WriteLine("Enter bot token: ");
+            inputString = Console.ReadLine();
+            file.Write(inputString);
+            outputBotInfo.Token = inputString;
+
+            file.WriteComment("Shard count");
+            Console.WriteLine("Shards [1-25565]:");
+            inputString = Console.ReadLine();
+            outputBotInfo.ShardCount = int.Parse(inputString);
+            if (outputBotInfo.ShardCount < 1)
+            {
+                outputBotInfo.ShardCount = 1;
+            }
+            else if (outputBotInfo.ShardCount > 25565)
+            {
+                outputBotInfo.ShardCount = 25565;
+            }
+
+            file.Finish();
+
+            return outputBotInfo;
+        }
+
+        private ClientInformation LoadPreferenceFile()
+        {
+            ClientInformation outputBotInfo = new ClientInformation();
+            FileReader file = new FileReader("preferences", "config");
+            outputBotInfo.Name = file.ReadLine();
+            outputBotInfo.Token = file.ReadLine();
+            file.Finish();
+            return outputBotInfo;
         }
 
         private async Task InitializeBot()
@@ -171,6 +236,7 @@ namespace IA
             }
         }
 
+        // Events
         private async Task Client_JoinedGuild(IGuild arg)
         {
             await Events.OnGuildJoin(arg);
@@ -191,62 +257,6 @@ namespace IA
         {
             Console.WriteLine(arg.Message);
             await Task.CompletedTask;
-        }
-
-        private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Exception ex = (Exception)e.ExceptionObject;
-            Log.ErrorAt(ex.Source, ex.Message);
-            if(e.IsTerminating)
-            {
-                Log.Error("Closing Shard");
-            }
-        }
-
-        private ClientInformation InitializePreferencesFile()
-        {
-            ClientInformation outputBotInfo = new ClientInformation();
-            FileWriter file = new FileWriter("preferences", "config");
-            file.WriteComment(VersionText + " preferences file");
-            file.WriteComment("Please do not change this file except to change\n# except to change your settings");
-            file.WriteComment("Bot Name");
-            Console.WriteLine("Enter bot name: ");
-            string inputString = Console.ReadLine();
-            file.Write(inputString);
-            outputBotInfo.Name = inputString;
-
-            file.WriteComment("Bot Token");
-            Console.WriteLine("Enter bot token: ");
-            inputString = Console.ReadLine();
-            file.Write(inputString);
-            outputBotInfo.Token = inputString;
-            
-            file.WriteComment("Shard count");
-            Console.WriteLine("Shards [1-25565]:");
-            inputString = Console.ReadLine();
-            outputBotInfo.ShardCount = int.Parse(inputString);
-            if (outputBotInfo.ShardCount < 1)
-            {
-                outputBotInfo.ShardCount = 1;
-            }
-            else if(outputBotInfo.ShardCount > 25565)
-            {
-                outputBotInfo.ShardCount = 25565;
-            }
-
-            file.Finish();
-
-            return outputBotInfo;
-        }
-
-        private ClientInformation LoadPreferenceFile()
-        {
-            ClientInformation outputBotInfo = new ClientInformation();
-            FileReader file = new FileReader("preferences", "config");
-            outputBotInfo.Name = file.ReadLine();
-            outputBotInfo.Token = file.ReadLine();
-            file.Finish();
-            return outputBotInfo;
         }
 
         private async Task Client_Ready()

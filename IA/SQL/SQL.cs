@@ -268,9 +268,11 @@ namespace IA.SQL
             if (output != null)
             {
                 MySqlDataReader r = await command.ExecuteReaderAsync() as MySqlDataReader;
+                Dictionary<string, object> outputdict = new Dictionary<string, object>();
+
                 while (await r.ReadAsync())
                 {
-                    Dictionary<string, object> outputdict = new Dictionary<string, object>();
+                    outputdict = new Dictionary<string, object>();
                     for (int i = 0; i < r.VisibleFieldCount; i++)
                     {
                         outputdict.Add(r.GetName(i), r.GetValue(i));
@@ -281,7 +283,7 @@ namespace IA.SQL
 
                 if (!hasRead)
                 {
-                    output?.Invoke(null);
+                    output?.Invoke(outputdict);
                 }
             }
             else

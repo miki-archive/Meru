@@ -40,7 +40,7 @@ namespace IA.Events
         {
             if (bot != null)
             {
-                Log.Warning("EventSystem already Defined, terminating...");
+                Log.Warning("EventSystem already defined, terminating...");
                 return;
             }
 
@@ -56,7 +56,6 @@ namespace IA.Events
 
         public async Task OnPrivateMessage(IDiscordMessage arg)
         {
-            Log.Print($"[PM] {arg.Author.Username}#{arg.Author.Discriminator}: {arg.Content}", ConsoleColor.Cyan);
             await Task.CompletedTask;
         }
 

@@ -68,9 +68,10 @@ namespace IA.Events
 
         public string GetState()
         {
-            return defaultInfo.name + ": " + "ACTIVE";
+            return defaultInfo.name + ": " + (isInstalled ? "Installed" : "Uninstalled");
         }
 
+        // TODO: either remove or use this for something.
         public Task Initialize()
         {
             return Task.CompletedTask;
@@ -96,16 +97,15 @@ namespace IA.Events
                 bot.Client.UserUpdated += Module_UserUpdated;
             }
 
-            foreach(RuntimeCommandEvent e in defaultInfo.events)
+            defaultInfo.eventSystem = bot.Events;
+
+            foreach (RuntimeCommandEvent e in defaultInfo.events)
             {
-                if(defaultInfo.eventSystem == null)
-                {
-                    defaultInfo.eventSystem = bot.Events;
-                }
                 defaultInfo.eventSystem.events.CommandEvents.Add(e.name, e);
             }
 
             isInstalled = true;
+
             await Task.CompletedTask;
         }
 
