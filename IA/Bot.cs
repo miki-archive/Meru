@@ -227,6 +227,8 @@ namespace IA
                 clientInformation.ShardId = id;
                 await Addons.Load(this);
 
+                await clientInformation.EventLoaderMethod(this);
+
                 Client.MessageReceived += Client_MessageReceived;
                 Client.JoinedGuild += Client_JoinedGuild;
                 Client.LeftGuild += Client_LeftGuild;

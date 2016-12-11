@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace IA
 {
+    public delegate Task LoadEvents(Bot bot);
+
     public class ClientInformation
     {
         public string Name { get; set; } = "IABot";
@@ -22,7 +24,10 @@ namespace IA
 
         internal int ShardId { get; set; } = -1;
 
-        public LogLevel ConsoleLogLevel = LogLevel.ALL;
+        public LoadEvents EventLoaderMethod { get; set; }
+
+        public LogLevel ConsoleLogLevel = LogLevel.NOTICE;
+        
         /// <summary>
         /// Saves logs to ./logs/xxxxx.log
         /// </summary>
@@ -43,15 +48,12 @@ namespace IA
         {
             return sqlInformation.GetConnectionString();
         }
-        public string GetVersion()
-        {
-            return "v" + Version;
-        }
     }
 
     public enum LogLevel
     {
         ALL,
+        VERBOSE,
         NOTICE,
         MESSAGE,
         WARNING,

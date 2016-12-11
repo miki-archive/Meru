@@ -267,7 +267,9 @@ namespace IA.Events
         public async Task<string> ListCommands(IDiscordMessage e)
         {
             Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
+
             moduleEvents.Add("Misc", new List<string>());
+
             EventAccessibility userEventAccessibility = GetUserAccessibility(e);
 
             foreach (Event ev in events.CommandEvents.Values)
@@ -278,7 +280,7 @@ namespace IA.Events
                     {
                         if (!moduleEvents.ContainsKey(ev.module.defaultInfo.name))
                         {
-                            moduleEvents.Add(ev.module.defaultInfo.name, new List<string>());
+                            moduleEvents.Add(ev.module.defaultInfo.name.ToUpper(), new List<string>());
                         }
                         if (GetUserAccessibility(e) >= ev.accessibility)
                         {
@@ -298,6 +300,7 @@ namespace IA.Events
             }
 
             moduleEvents.OrderBy(i => { return i.Key; });
+
             foreach (List<string> list in moduleEvents.Values)
             {
                 list.OrderBy(x =>
@@ -380,7 +383,6 @@ namespace IA.Events
             }
             return output;
         }
-
         public int CommandsUsed(string eventName)
         {
             return events.GetEvent(eventName).CommandUsed;
