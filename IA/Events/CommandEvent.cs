@@ -44,6 +44,7 @@ namespace IA.Events
             {
                 args = e.Content.Substring(e.Content.Split(' ')[0].Length + 1);
             }
+
             string[] allAliases = new string[aliases.Length + 1];
             int i = 0;
 
@@ -53,15 +54,15 @@ namespace IA.Events
                 allAliases[i] = a;
                 i++;
             }
+
             allAliases[allAliases.Length - 1] = name;
 
             if (enabled.ContainsKey(e.Channel.Id))
             {
-                if (!enabled[e.Channel.Id]) return;
-            }
-            else
-            {
-
+                if (!enabled[e.Channel.Id])
+                {
+                    return;
+                }
             }
 
             if (IsOnCooldown(e.Author.Id))
@@ -76,7 +77,7 @@ namespace IA.Events
                 {
                     if (!e.Author.HasPermissions(e.Channel, g))
                     {
-                        await e.Channel.SendMessage($"Please give me `{g}` to use this command.");
+                        await e.Channel.SendMessage($"Please give me the server permission `{g}` to use this command.");
                         return;
                     }
                 }
@@ -86,26 +87,13 @@ namespace IA.Events
             {
                 if (await TryProcessCommand(e, args))
                 {
+                    await eventSystem.OnCommandDone(e, this);
+
                     Log.Message($"{name} called from {e.Guild.Id} [{ e.Guild.Id } # { e.Channel.Id }]");
 
-                    await eventSystem.OnCommandDone(e, this);
                     CommandUsed++;
                 }
             }
-        }
-
-        public async Task<bool> TryProcessCommand(IDiscordMessage e, string args)
-        {
-            try
-            {
-                await processCommand(e, args);
-                return true;
-            }
-            catch(Exception ex)
-            {
-                Log.ErrorAt(name, ex.Message);
-            }
-            return false;
         }
 
         float GetCooldown(ulong id)
@@ -130,6 +118,20 @@ namespace IA.Events
                 lastTimeUsed.Add(id, DateTime.Now);
                 return false;
             }
+        }
+
+        async Task<bool> TryProcessCommand(IDiscordMessage e, string args)
+        {
+            try
+            {
+                await processCommand(e, args);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.ErrorAt(name, ex.Message);
+            }
+            return false;
         }
     }
 }
