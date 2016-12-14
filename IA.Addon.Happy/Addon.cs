@@ -12,11 +12,11 @@ namespace IA.Addon.Happy
         /// <summary>
         /// This is your entry point.
         /// </summary>
-        public override void Create()
+        public override async Task Create()
         {
-            base.Create();
-
-            instance.CreateModule(x =>
+            await base.Create();          
+         
+            addon.CreateModule(x =>
             {
                 x.name = "happy module";
                 x.events = new List<CommandEvent>()
