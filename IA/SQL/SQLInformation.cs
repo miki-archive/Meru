@@ -19,7 +19,7 @@ namespace IA.SQL
 
         public string GetConnectionString()
         {
-            return string.Format("datasource={0};port={1};Initial Catalog='{2}';username={3};password={4};CharSet=utf8mb4;", dataSource, port, database, username, password);
+            return string.Format("datasource={0};port={1};Initial Catalog='{2}';username={3};password={4};CharSet=utf8mb4;Allow User Variables=True;", dataSource, port, database, username, password);
         }
     }
 }

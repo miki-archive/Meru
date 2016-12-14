@@ -228,6 +228,10 @@ namespace IA.SQL
             {
                 List<string> splitString = new List<string>();
                 splitString.AddRange(splitSql[i].Split('='));
+                if(splitString[0].EndsWith(":"))
+                {
+                    continue;
+                }
 
                 if (splitString.Count > 1)
                 {
