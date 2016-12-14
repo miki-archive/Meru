@@ -61,6 +61,7 @@
     <Compile Include="Events\ModuleInformation.cs" />
     <Compile Include="Events\UserEvent.cs" />
     <Compile Include="Bot.cs" />
+    <Compile Include="Extension Methods\Mathm.cs" />
     <Compile Include="Extension Methods\SDKMethods.cs" />
     <Compile Include="Internal\IpcSocket.cs" />
     <Compile Include="Instances\Manager.cs" />

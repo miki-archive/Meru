@@ -54,28 +54,6 @@ namespace IA.Events
             DefaultIdentifier = bot.Identifier;
         }    
 
-        public async Task OnPrivateMessage(IDiscordMessage arg)
-        {
-            await Task.CompletedTask;
-        }
-
-        public void AddMentionEvent(Action<RuntimeCommandEvent> info)
-        {
-            RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
-            info.Invoke(newEvent);
-            newEvent.eventSystem = this;
-            if (newEvent.aliases.Length > 0)
-            {
-                foreach (string s in newEvent.aliases)
-                {
-                    aliases.Add(s, newEvent.name.ToLower());
-                }
-            }
-            events.MentionEvents.Add(newEvent.name.ToLower(), newEvent);
-
-            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
-        }
-
         public void AddCommandEvent(Action<RuntimeCommandEvent> info)
         {
             RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
@@ -110,6 +88,16 @@ namespace IA.Events
                 }
             }
             events.CommandDoneEvents.Add(newEvent.name.ToLower(), newEvent);
+
+            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
+
+        public void AddContinuousEvent(Action<ContinuousEvent> info)
+        {
+            ContinuousEvent newEvent = new ContinuousEvent();
+            info.Invoke(newEvent);
+            newEvent.eventSystem = this;
+            events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
 
             MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
@@ -149,14 +137,71 @@ namespace IA.Events
             MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
-        public void AddContinuousEvent(Action<ContinuousEvent> info)
+        public void AddMentionEvent(Action<RuntimeCommandEvent> info)
         {
-            ContinuousEvent newEvent = new ContinuousEvent();
+            RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
-            
+            if (newEvent.aliases.Length > 0)
+            {
+                foreach (string s in newEvent.aliases)
+                {
+                    aliases.Add(s, newEvent.name.ToLower());
+                }
+            }
+            events.MentionEvents.Add(newEvent.name.ToLower(), newEvent);
+
             MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+        }
+
+        async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e, bool doRunCommand = true)
+        {
+            if (message.StartsWith(identifier))
+            {
+                string command = message.Substring(identifier.Length).Split(' ')[0];
+
+                if (events.CommandEvents.ContainsKey(command))
+                {
+                    if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
+                    {
+                        if (doRunCommand)
+                        {
+                            if (GetUserAccessibility(e) >= events.CommandEvents[command].accessibility)
+                            {
+                                await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else if (aliases.ContainsKey(command))
+                {
+                    if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
+                    {
+                        if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].accessibility)
+                        {
+                            await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            return false;
+        }
+
+        public int CommandsUsed()
+        {
+            int output = 0;
+            foreach (Event e in events.CommandEvents.Values)
+            {
+                output += e.CommandUsed;
+            }
+            return output;
+        }
+        public int CommandsUsed(string eventName)
+        {
+            return events.GetEvent(eventName).CommandUsed;
         }
 
         public Module CreateModule(Action<ModuleInformation> info)
@@ -186,7 +231,6 @@ namespace IA.Events
             return null;
         }
 
-
         /// <summary>
         /// Gets event and returns as base value.
         /// </summary>
@@ -195,6 +239,24 @@ namespace IA.Events
         public Event GetEvent(string id)
         {
             return events.GetEvent(id);
+        }
+
+        public async Task<string> GetIdentifier(ulong server_id)
+        {
+            if (identifier.ContainsKey(server_id))
+            {
+                string returnIdentifier = identifier[server_id];
+                if (returnIdentifier == "mention")
+                {
+                    returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
+                }
+
+                return returnIdentifier;
+            }
+            else
+            {
+                return await MySQL.GetIdentifier(server_id);
+            }
         }
 
         public Module GetModuleByName(string name)
@@ -207,61 +269,35 @@ namespace IA.Events
             return null;
         }
 
-        public async Task SetIdentifierAsync(IGuild e, string prefix)
+        public EventAccessibility GetUserAccessibility(IDiscordMessage e)
         {
-            if (identifier.ContainsKey(e.Id))
-            {
-                identifier[e.Id] = prefix.ToLower();
-            }
-            else
-            {
-                identifier.Add(e.Id, prefix.ToLower());
-            }
+            if (e.Channel == null) return EventAccessibility.PUBLIC;
 
-            await Task.Run(() => MySQL.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
+            if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
+            if (e.Author.HasPermissions(e.Channel, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
+            return EventAccessibility.PUBLIC;
         }
 
-        public async Task OnGuildLeave(IGuild e)
+        async Task<bool> IsEnabled(Event e, ulong id)
         {
-            foreach (GuildEvent ev in events.LeaveServerEvents.Values)
-            {
-                if (await IsEnabled(ev, e.Id))
-                {
-                    await ev.CheckAsync(e.ToSDKGuild());
-                }
-            }
-        }
+            if (bot.SqlInformation == null) return e.defaultEnabled;
 
-        public async Task OnGuildJoin(IGuild e)
-        {
-            foreach (GuildEvent ev in events.JoinServerEvents.Values)
+            if (e.enabled.ContainsKey(id))
             {
-                if (await IsEnabled(ev, e.Id))
-                {
-                    await ev.CheckAsync(e.ToSDKGuild());
-                }
-            }
-        }
-
-        public async Task<bool> SetEnabled(string eventName, ulong channelId, bool enabled)
-        {        
-            Event setEvent = GetEvent(eventName);
-
-            if(!setEvent.canBeDisabled && !enabled|| setEvent == null)
-            {
-                return false;
+                return events.CommandEvents[e.name].enabled[id];
             }
 
-            if (setEvent != null)
+            int state = await Task.Run(() => sql.IsEventEnabled(e.name, id));
+            if (state == -1)
             {
-                if (bot.SqlInformation != null)
-                {
-                    await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, channelId, setEvent.name);
-                }
-                setEvent.enabled[channelId] = enabled;
-                return true;
+                await Task.Run(() => MySQL.Query("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, e.name, id, e.defaultEnabled));
+                e.enabled.Add(id, e.defaultEnabled);
+                return e.defaultEnabled;
             }
-            return false;
+            bool actualState = (state == 1) ? true : false;
+
+            e.enabled.Add(id, actualState);
+            return actualState;
         }
 
         public async Task<string> ListCommands(IDiscordMessage e)
@@ -323,6 +359,72 @@ namespace IA.Events
             return output;
         }
 
+        public async Task LoadIdentifier(ulong server)
+        {
+            if (bot.SqlInformation != null)
+            {
+                await MySQL.QueryAsync("SELECT i FROM identifier WHERE id=?id", async output =>
+                {
+                    if (output == null)
+                    {
+                        await MySQL.QueryAsync("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
+                        identifier.Add(server, bot.Identifier.Value);
+                    }
+                    else
+                    {
+                        identifier.Add(server, output["i"].ToString());
+                    }
+                }, server);
+            }
+            else
+            {
+                identifier.Add(server, bot.Identifier.Value);
+            }
+        }
+
+        public async Task OnCommandDone(IDiscordMessage e, RuntimeCommandEvent commandEvent)
+        {
+            foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
+            {
+                await ev.processEvent(e, commandEvent);
+            }
+        }
+
+        public async Task OnGuildLeave(IDiscordGuild e)
+        {
+            foreach (GuildEvent ev in events.LeaveServerEvents.Values)
+            {
+                if (await IsEnabled(ev, e.Id))
+                {
+                    await ev.CheckAsync(e);
+                }
+            }
+        }
+
+        public async Task OnGuildJoin(IDiscordGuild e)
+        {
+            foreach (GuildEvent ev in events.JoinServerEvents.Values)
+            {
+                if (await IsEnabled(ev, e.Id))
+                {
+                    await ev.CheckAsync(e);
+                }
+            }
+        }
+
+        public async Task OnPrivateMessage(IDiscordMessage arg)
+        {
+            await Task.CompletedTask;
+        }
+
+        public async Task OnMention(IDiscordMessage e)
+        {
+            foreach (RuntimeCommandEvent ev in events.MentionEvents.Values)
+            {
+                await ev.Check(e);
+            }
+        }
+
         public async Task OnMessageRecieved(IDiscordMessage _message)
         {
             if (_message.Author.IsBot)
@@ -349,142 +451,39 @@ namespace IA.Events
             }
         }
 
-        public async Task OnCommandDone(IDiscordMessage e, RuntimeCommandEvent commandEvent)
+        public async Task<bool> SetEnabled(string eventName, ulong channelId, bool enabled)
         {
-            foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
+            Event setEvent = GetEvent(eventName);
+
+            if (!setEvent.canBeDisabled && !enabled || setEvent == null)
             {
-                await ev.processEvent(e, commandEvent);
-            }
-        }
-
-        public async Task OnMention(IDiscordMessage e)
-        {
-            foreach (RuntimeCommandEvent ev in events.MentionEvents.Values)
-            {
-                await ev.Check(e);
-            }
-        }
-
-        public EventAccessibility GetUserAccessibility(IDiscordMessage e)
-        {
-            if (e.Channel == null) return EventAccessibility.PUBLIC;
-
-            if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
-            if (e.Author.HasPermissions(e.Channel, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
-            return EventAccessibility.PUBLIC;
-        }
-
-        public int CommandsUsed()
-        {
-            int output = 0;
-            foreach (Event e in events.CommandEvents.Values)
-            {
-                output += e.CommandUsed;
-            }
-            return output;
-        }
-        public int CommandsUsed(string eventName)
-        {
-            return events.GetEvent(eventName).CommandUsed;
-        }
-
-        public async Task LoadIdentifier(ulong server)
-        {
-            if (bot.SqlInformation != null)
-            {
-                await MySQL.QueryAsync("SELECT i FROM identifier WHERE id=?id", async output => 
-                {
-                    if (output == null)
-                    {
-                        await MySQL.QueryAsync("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
-                        identifier.Add(server, bot.Identifier.Value);
-                    }
-                    else
-                    {
-                        identifier.Add(server, output["i"].ToString());
-                    }
-                }, server);
-            }
-            else
-            {
-                identifier.Add(server, bot.Identifier.Value);
-            }
-        }
-
-        public async Task<string> GetIdentifier(ulong server_id)
-        {
-            if (identifier.ContainsKey(server_id))
-            {
-                string returnIdentifier = identifier[server_id];
-                if(returnIdentifier == "mention")
-                {
-                    returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
-                }
-
-                return returnIdentifier;
-            }
-            else
-            {
-                return await MySQL.GetIdentifier(server_id);
-            }
-        }
-
-        async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e, bool doRunCommand = true)
-        {
-            if (message.StartsWith(identifier))
-            {
-                string command = message.Substring(identifier.Length).Split(' ')[0];
-
-                if (events.CommandEvents.ContainsKey(command))
-                {
-                    if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
-                    {
-                        if (doRunCommand)
-                        {
-                            if (GetUserAccessibility(e) >= events.CommandEvents[command].accessibility)
-                            {
-                                await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
-                                return true;
-                            }
-                        }
-                    }
-                }
-                else if (aliases.ContainsKey(command))
-                {
-                    if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
-                    {
-                        if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].accessibility)
-                        {
-                            await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
-                            return true;
-                        }
-                    }
-                }
                 return false;
+            }
+
+            if (setEvent != null)
+            {
+                if (bot.SqlInformation != null)
+                {
+                    await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, channelId, setEvent.name);
+                }
+                setEvent.enabled[channelId] = enabled;
+                return true;
             }
             return false;
         }
 
-        async Task<bool> IsEnabled(Event e, ulong id)
+        public async Task SetIdentifierAsync(IGuild e, string prefix)
         {
-            if (bot.SqlInformation == null) return e.defaultEnabled;
-
-            if (e.enabled.ContainsKey(id))
+            if (identifier.ContainsKey(e.Id))
             {
-                return events.CommandEvents[e.name].enabled[id];
+                identifier[e.Id] = prefix.ToLower();
+            }
+            else
+            {
+                identifier.Add(e.Id, prefix.ToLower());
             }
 
-            int state = await Task.Run(() => sql.IsEventEnabled(e.name, id));
-            if(state == -1)
-            {
-                await Task.Run(() => MySQL.Query("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, e.name, id, e.defaultEnabled));
-                e.enabled.Add(id, e.defaultEnabled);
-                return e.defaultEnabled;
-            }
-            bool actualState = (state == 1) ? true : false;
-
-            e.enabled.Add(id, actualState);
-            return actualState;
+            await Task.Run(() => MySQL.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
         }
     }
 }

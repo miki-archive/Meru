@@ -241,12 +241,16 @@ namespace IA
         // Events
         private async Task Client_JoinedGuild(IGuild arg)
         {
-            await Events.OnGuildJoin(arg);
+            RuntimeGuild g = new RuntimeGuild(arg);
+
+            Task.Run(() => Events.OnGuildJoin(g));
         }
 
         private async Task Client_LeftGuild(IGuild arg)
         {
-            await Events.OnGuildLeave(arg);
+            RuntimeGuild g = new RuntimeGuild(arg);
+
+            Task.Run(() => Events.OnGuildLeave(g));
         }
 
         private async Task Client_Disconnected(Exception arg)
