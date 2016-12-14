@@ -101,6 +101,7 @@ namespace IA.Events
 
             foreach (RuntimeCommandEvent e in defaultInfo.events)
             {
+                e.eventSystem = bot.Events;
                 defaultInfo.eventSystem.events.CommandEvents.Add(e.name, e);
             }
 
