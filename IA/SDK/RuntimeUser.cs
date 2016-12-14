@@ -12,13 +12,12 @@ namespace IA.SDK
     {
         private IUser user;
 
+        public RuntimeUser()
+        {
+        }
         public RuntimeUser(IUser author)
         {
             user = author;
-        }
-
-        public RuntimeUser()
-        {
         }
 
         public override ulong Id
@@ -29,6 +28,14 @@ namespace IA.SDK
             }
         }
 
+        public override bool IsBot
+        {
+            get
+            {
+                return user.IsBot;
+            }
+        }
+
         public override string Username
         {
             get
@@ -36,6 +43,7 @@ namespace IA.SDK
                 return user.Username;
             }
         }
+
         public override string Discriminator
         {
             get
