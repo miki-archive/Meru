@@ -273,17 +273,19 @@ namespace IA
 
             if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
             {
-                await Task.Run(async () => await Events.OnMention(r));
+                Task.Run(() => Events.OnMention(r));
             }
 
             if (r.Guild != null)
             {
-                await Task.Run(async () => await Events.OnMessageRecieved(r));
+                Task.Run(() => Events.OnMessageRecieved(r));
             }
             else
             {
-                await Task.Run(async () => await Events.OnPrivateMessage(r));
+                Task.Run(() => Events.OnPrivateMessage(r));
             }
+
+            await Task.CompletedTask;
         }
     }
 }
