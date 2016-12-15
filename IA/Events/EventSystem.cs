@@ -168,7 +168,7 @@ namespace IA.Events
                         {
                             if (GetUserAccessibility(e) >= events.CommandEvents[command].accessibility)
                             {
-                                await Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+                                Task.Run(() => events.CommandEvents[command].Check(e, identifier));
                                 return true;
                             }
                         }
@@ -180,7 +180,7 @@ namespace IA.Events
                     {
                         if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].accessibility)
                         {
-                            await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
+                            Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
                             return true;
                         }
                     }
@@ -304,7 +304,7 @@ namespace IA.Events
         {
             Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
 
-            moduleEvents.Add("Misc", new List<string>());
+            moduleEvents.Add("MISC", new List<string>());
 
             EventAccessibility userEventAccessibility = GetUserAccessibility(e);
 
@@ -314,25 +314,25 @@ namespace IA.Events
                 {
                     if (ev.module != null)
                     {
-                        if (!moduleEvents.ContainsKey(ev.module.defaultInfo.name))
+                        if (!moduleEvents.ContainsKey(ev.module.defaultInfo.name.ToUpper()))
                         {
                             moduleEvents.Add(ev.module.defaultInfo.name.ToUpper(), new List<string>());
                         }
                         if (GetUserAccessibility(e) >= ev.accessibility)
                         {
-                            moduleEvents[ev.module.defaultInfo.name].Add(ev.name);
+                            moduleEvents[ev.module.defaultInfo.name.ToUpper()].Add(ev.name);
                         }
                     }
                     else
                     {
-                        moduleEvents["Misc"].Add(ev.name);
+                        moduleEvents["MISC"].Add(ev.name);
                     }
                 }
             }
 
-            if (moduleEvents["Misc"].Count == 0)
+            if (moduleEvents["MISC"].Count == 0)
             {
-                moduleEvents.Remove("Misc");
+                moduleEvents.Remove("MISC");
             }
 
             moduleEvents.OrderBy(i => { return i.Key; });
@@ -353,7 +353,7 @@ namespace IA.Events
                 {
                     output += items.Value[i] + ", ";
                 }
-                output.Remove(output.Length - 2);
+                output = output.Remove(output.Length - 2);
                 output += "\n\n";
             }
             return output;
@@ -361,25 +361,24 @@ namespace IA.Events
 
         public async Task LoadIdentifier(ulong server)
         {
+            string tempIdentifier = bot.Identifier.Value;
+
             if (bot.SqlInformation != null)
             {
-                await MySQL.QueryAsync("SELECT i FROM identifier WHERE id=?id", async output =>
+                MySQL.Query("SELECT i FROM identifier WHERE id=?id", output =>
                 {
                     if (output == null)
                     {
-                        await MySQL.QueryAsync("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
-                        identifier.Add(server, bot.Identifier.Value);
+                        MySQL.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
                     }
                     else
                     {
-                        identifier.Add(server, output["i"].ToString());
+                        tempIdentifier = output["i"].ToString();
                     }
                 }, server);
             }
-            else
-            {
-                identifier.Add(server, bot.Identifier.Value);
-            }
+
+            identifier.Add(server, tempIdentifier);
         }
 
         public async Task OnCommandDone(IDiscordMessage e, RuntimeCommandEvent commandEvent)
@@ -472,7 +471,7 @@ namespace IA.Events
             return false;
         }
 
-        public async Task SetIdentifierAsync(IGuild e, string prefix)
+        public async Task SetIdentifierAsync(IDiscordGuild e, string prefix)
         {
             if (identifier.ContainsKey(e.Id))
             {

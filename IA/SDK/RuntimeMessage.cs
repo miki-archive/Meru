@@ -98,7 +98,6 @@ namespace IA.SDK
             if (g != null)
             {
                 guild = new RuntimeGuild(g);
-
             }
         }
 

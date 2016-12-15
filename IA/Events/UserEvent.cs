@@ -1,5 +1,6 @@
 ﻿using Discord;
 using IA.SDK;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace IA.Events
             CommandUsed = 0;
         }
 
-        public async Task CheckAsync(DiscordGuild e)
+        public async Task CheckAsync(IDiscordGuild e)
         {
             await Task.Run(() => processCommand(e));
         }

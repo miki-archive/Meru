@@ -49,6 +49,7 @@ namespace IA.Events
                     {
                         x.processCommand = e.processCommand;
                     }
+                    x.accessibility = e.accessibility;
                     x.requiresPermissions = e.requiresPermissions;
                     x.usage = e.usage;
                     if (e.checkCommand != null)
