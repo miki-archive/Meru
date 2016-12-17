@@ -60,6 +60,21 @@ namespace IA.SDK
             }
         }
 
+        public override IDiscordGuild Guild
+        {
+            get
+            {
+                IGuildUser u = user as IGuildUser;
+
+                if(u == null)
+                {
+                    return null;
+                }
+
+                return new RuntimeGuild(u.Guild);
+            }
+        }
+
         public override async Task Kick()
         {
             await (user as IGuildUser).KickAsync();

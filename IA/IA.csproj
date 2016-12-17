@@ -84,6 +84,7 @@
     <Compile Include="SDK\RuntimeEmbedFooter.cs" />
     <Compile Include="SDK\RuntimeGuild.cs" />
     <Compile Include="SDK\RuntimeMessage.cs" />
+    <Compile Include="SDK\RuntimeRole.cs" />
     <Compile Include="SDK\RuntimeUser.cs" />
     <Compile Include="SQL\SQLInformation.cs" />
     <Compile Include="SQL\SQL.cs" />

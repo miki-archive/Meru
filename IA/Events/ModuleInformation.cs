@@ -21,8 +21,8 @@ namespace IA.Events
 
         public UserUpdatedEventDelegate userUpdateEvent;
 
-        public GuildEvent guildJoinEvent;
-        public GuildEvent guildLeaveEvent;
+        public GuildUserEventDelegate guildJoinEvent;
+        public GuildUserEventDelegate guildLeaveEvent;
 
         public List<RuntimeCommandEvent> events = new List<RuntimeCommandEvent>();
 

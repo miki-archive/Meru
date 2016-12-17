@@ -38,6 +38,9 @@ namespace IA.Events
             defaultInfo.messageEvent = addon.data.messageRecieved;
             defaultInfo.userUpdateEvent = addon.data.userUpdated;
 
+            defaultInfo.guildJoinEvent = addon.data.userJoin;
+            defaultInfo.guildLeaveEvent = addon.data.userLeave;
+
             defaultInfo.events = new List<RuntimeCommandEvent>();
             foreach (CommandEvent e in addon.data.events)
             {
@@ -63,6 +66,8 @@ namespace IA.Events
                     x.description = e.description;
                     x.errorMessage = e.errorMessage;
                     x.defaultEnabled = e.defaultEnabled;
+
+                    
                 }));
             }
         }
@@ -98,6 +103,16 @@ namespace IA.Events
                 bot.Client.UserUpdated += Module_UserUpdated;
             }
 
+            if(defaultInfo.guildJoinEvent != null)
+            {
+                bot.Client.UserJoined += Module_UserJoined;
+            }
+
+            if (defaultInfo.guildLeaveEvent != null)
+            {
+                bot.Client.UserLeft += Module_UserLeft;
+            }
+
             defaultInfo.eventSystem = bot.Events;
 
             foreach (RuntimeCommandEvent e in defaultInfo.events)
@@ -109,6 +124,20 @@ namespace IA.Events
             isInstalled = true;
 
             await Task.CompletedTask;
+        }
+
+        private async Task Module_UserJoined(SocketGuildUser arg)
+        {
+            RuntimeUser r = new RuntimeUser(arg);
+
+            await defaultInfo.guildJoinEvent(r.Guild, r);
+        }
+
+        private async Task Module_UserLeft(SocketGuildUser arg)
+        {
+            RuntimeUser r = new RuntimeUser(arg);
+
+            await defaultInfo.guildLeaveEvent(r.Guild, r);
         }
 
         public async Task Disable(Bot bot)
@@ -154,18 +183,6 @@ namespace IA.Events
         {
             RuntimeMessage msg = new RuntimeMessage(message);
             await defaultInfo.messageEvent(msg);
-        }
-
-        private async Task Module_GuildJoin(IGuild guild)
-        {
-            RuntimeGuild g = new RuntimeGuild(guild);
-            await defaultInfo.guildJoinEvent.processCommand(g);   
-        }
-
-        private async Task Module_GuildLeave(IGuild guild)
-        {
-            RuntimeGuild g = new RuntimeGuild(guild);
-            await defaultInfo.guildLeaveEvent.processCommand(g);
         }
     }
 }

@@ -20,6 +20,14 @@ namespace IA.SDK
             }
         }
 
+        public override string Name
+        {
+            get
+            {
+                return guild.Name;
+            }
+        }
+
         public override uint ChannelCount
         {
             get
@@ -33,6 +41,14 @@ namespace IA.SDK
             get
             {
                 return (uint)guild.GetUsersAsync().GetAwaiter().GetResult().Count;
+            }
+        }
+
+        public override IDiscordUser Owner
+        {
+            get
+            {
+                return new RuntimeUser(guild.GetOwnerAsync().GetAwaiter().GetResult());
             }
         }
 

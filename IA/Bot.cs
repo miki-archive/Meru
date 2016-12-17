@@ -322,7 +322,7 @@ namespace IA
 
             if (r.Guild != null)
             {
-                await Events.OnMessageRecieved(r);
+                Task.Run(async () => { Events.OnMessageRecieved(r); });
             }
             else
             {

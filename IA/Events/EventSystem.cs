@@ -15,6 +15,7 @@ namespace IA.Events
     {
         public List<ulong> Developers = new List<ulong>();
         public Dictionary<string, Module> Modules { get; internal set; } = new Dictionary<string, Module>();
+        public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
 
         Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
         Dictionary<string, string> aliases = new Dictionary<string, string>();
@@ -431,6 +432,11 @@ namespace IA.Events
                 return;
             }
 
+            if(GameEvents.ContainsKey(_message.Author.Id))
+            {
+                GameEvents[_message.Author.Id].
+            }
+
             if (!identifier.ContainsKey(_message.Guild.Id))
             {
                 await LoadIdentifier(_message.Guild.Id);
@@ -483,6 +489,16 @@ namespace IA.Events
             }
 
             await Task.Run(() => MySQL.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
+        }
+
+        public async Task StartGame(ulong id, GameEvent game)
+        {
+            if(GameEvents.ContainsKey(id))
+            {
+                return;
+            }
+            GameEvents.Add(id, game);
+            await Task.CompletedTask;
         }
     }
 }
