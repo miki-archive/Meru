@@ -1,5 +1,7 @@
 ﻿using Discord;
 using IA.SDK;
+using IA.SQL;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,20 +44,78 @@ namespace IA.Events
             CommandUsed = 0;
         }
 
-        public void SetEnabled(IMessage e, bool v)
+
+        public async Task SetEnabled(ulong serverid, bool enabled)
         {
-            if (!canBeDisabled && !v) return;
-
-            ulong id = 0;
-
-            if(!enabled.ContainsKey(e.Channel.Id))
+            if (eventSystem.bot.SqlInformation != null)
             {
-                enabled.Add(id, v);
+                if (this.enabled.ContainsKey(serverid))
+                {
+                    this.enabled[serverid] = enabled;
+                }
+                else
+                {
+                    this.enabled.Add(serverid, enabled);
+                }
+                await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, name);
             }
-            else
+        }
+
+        public async Task<bool> IsEnabled(ulong id)
+        {
+            if (!await module.IsEnabled(id)) return false;
+
+            if (eventSystem.bot.SqlInformation == null)
             {
-                enabled[id] = v;
+                return defaultEnabled;
             }
+
+            if (enabled.ContainsKey(id))
+            {
+                return enabled[id];
+            }
+
+            int state = IsEventEnabled(id);
+            if (state == -1)
+            {
+                await MySQL.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, name, id, defaultEnabled);
+                enabled.Add(id, defaultEnabled);
+                return defaultEnabled;
+            }
+            bool actualState = (state == 1) ? true : false;
+
+            enabled.Add(id, actualState);
+            return actualState;
+        }
+
+        // TODO: Query this.
+        public int IsEventEnabled(ulong serverid)
+        {
+            if (eventSystem.bot.SqlInformation == null) return 1;
+
+            MySqlConnection connection = new MySqlConnection(eventSystem.bot.SqlInformation.GetConnectionString());
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{serverid}\" AND name=\"{name}\"";
+
+            connection.Open();
+            MySqlDataReader r = command.ExecuteReader();
+
+            bool output = false;
+            string check = "";
+
+            while (r.Read())
+            {
+                output = r.GetBoolean(0);
+                check = "ok";
+                break;
+            }
+            connection.Close();
+
+            if (check == "")
+            {
+                return -1;
+            }
+            return output ? 1 : 0;
         }
     }
 }

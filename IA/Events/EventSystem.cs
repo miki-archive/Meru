@@ -25,7 +25,7 @@ namespace IA.Events
         /// <summary>
         /// Variable to check if eventSystem has been defined already.
         /// </summary>
-        static BotInformation bot;
+        public BotInformation bot;
 
         internal EventContainer events { private set; get; }
         MySQL sql;
@@ -53,7 +53,8 @@ namespace IA.Events
 
             OverrideIdentifier = PrefixValue.Set(bot.Name.ToLower() + ".");
             DefaultIdentifier = bot.Identifier;
-        }    
+        }  
+          
 
         public void AddCommandEvent(Action<RuntimeCommandEvent> info)
         {
@@ -163,7 +164,7 @@ namespace IA.Events
 
                 if (events.CommandEvents.ContainsKey(command))
                 {
-                    if (await IsEnabled(events.CommandEvents[command], e.Channel.Id))
+                    if (await events.CommandEvents[command].IsEnabled(e.Channel.Id))
                     {
                         if (doRunCommand)
                         {
@@ -177,7 +178,7 @@ namespace IA.Events
                 }
                 else if (aliases.ContainsKey(command))
                 {
-                    if (await IsEnabled(events.CommandEvents[aliases[command]], e.Channel.Id))
+                    if (await events.CommandEvents[aliases[command]].IsEnabled(e.Channel.Id))
                     {
                         if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].accessibility)
                         {
@@ -279,28 +280,6 @@ namespace IA.Events
             return EventAccessibility.PUBLIC;
         }
 
-        async Task<bool> IsEnabled(Event e, ulong id)
-        {
-            if (bot.SqlInformation == null) return e.defaultEnabled;
-
-            if (e.enabled.ContainsKey(id))
-            {
-                return events.CommandEvents[e.name].enabled[id];
-            }
-
-            int state = await Task.Run(() => sql.IsEventEnabled(e.name, id));
-            if (state == -1)
-            {
-                await Task.Run(() => MySQL.Query("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, e.name, id, e.defaultEnabled));
-                e.enabled.Add(id, e.defaultEnabled);
-                return e.defaultEnabled;
-            }
-            bool actualState = (state == 1) ? true : false;
-
-            e.enabled.Add(id, actualState);
-            return actualState;
-        }
-
         public async Task<string> ListCommands(IDiscordMessage e)
         {
             Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
@@ -311,7 +290,7 @@ namespace IA.Events
 
             foreach (Event ev in events.CommandEvents.Values)
             {
-                if (await IsEnabled(ev, e.Channel.Id) && userEventAccessibility >= ev.accessibility)
+                if (await ev.IsEnabled(e.Channel.Id) && userEventAccessibility >= ev.accessibility)
                 {
                     if (ev.module != null)
                     {
@@ -394,7 +373,7 @@ namespace IA.Events
         {
             foreach (GuildEvent ev in events.LeaveServerEvents.Values)
             {
-                if (await IsEnabled(ev, e.Id))
+                if (await ev.IsEnabled(e.Id))
                 {
                     await ev.CheckAsync(e);
                 }
@@ -405,7 +384,7 @@ namespace IA.Events
         {
             foreach (GuildEvent ev in events.JoinServerEvents.Values)
             {
-                if (await IsEnabled(ev, e.Id))
+                if (await ev.IsEnabled(e.Id))
                 {
                     await ev.CheckAsync(e);
                 }
@@ -434,7 +413,7 @@ namespace IA.Events
 
             if(GameEvents.ContainsKey(_message.Author.Id))
             {
-                GameEvents[_message.Author.Id].
+                
             }
 
             if (!identifier.ContainsKey(_message.Guild.Id))
@@ -454,27 +433,6 @@ namespace IA.Events
             {
                 return;
             }
-        }
-
-        public async Task<bool> SetEnabled(string eventName, ulong channelId, bool enabled)
-        {
-            Event setEvent = GetEvent(eventName);
-
-            if (!setEvent.canBeDisabled && !enabled || setEvent == null)
-            {
-                return false;
-            }
-
-            if (setEvent != null)
-            {
-                if (bot.SqlInformation != null)
-                {
-                    await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, channelId, setEvent.name);
-                }
-                setEvent.enabled[channelId] = enabled;
-                return true;
-            }
-            return false;
         }
 
         public async Task SetIdentifierAsync(IDiscordGuild e, string prefix)

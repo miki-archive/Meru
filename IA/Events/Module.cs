@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using IA.SQL;
+using MySql.Data.MySqlClient;
 
 namespace IA.Events
 {
@@ -14,17 +16,25 @@ namespace IA.Events
 
         Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
 
+        public string SqlName
+        {
+            get
+            {
+                return "module:" + defaultInfo.name; 
+            }
+        }
+
         bool isInstalled = false;
 
         internal Module()
         {
         }
         public Module(string name, bool enabled = true)
-        { 
+        {
             defaultInfo = new ModuleInformation();
             defaultInfo.name = name;
             defaultInfo.enabled = enabled;
-        }       
+        }
         public Module(Action<ModuleInformation> info)
         {
             info.Invoke(defaultInfo);
@@ -67,7 +77,7 @@ namespace IA.Events
                     x.errorMessage = e.errorMessage;
                     x.defaultEnabled = e.defaultEnabled;
 
-                    
+
                 }));
             }
         }
@@ -93,17 +103,17 @@ namespace IA.Events
                 return;
             }
 
-            if(defaultInfo.messageEvent != null)
+            if (defaultInfo.messageEvent != null)
             {
                 bot.Client.MessageReceived += Module_MessageRecieved;
             }
 
-            if(defaultInfo.userUpdateEvent != null)
+            if (defaultInfo.userUpdateEvent != null)
             {
                 bot.Client.UserUpdated += Module_UserUpdated;
             }
 
-            if(defaultInfo.guildJoinEvent != null)
+            if (defaultInfo.guildJoinEvent != null)
             {
                 bot.Client.UserJoined += Module_UserJoined;
             }
@@ -126,23 +136,16 @@ namespace IA.Events
             await Task.CompletedTask;
         }
 
-        private async Task Module_UserJoined(SocketGuildUser arg)
+        public async Task Disable(ulong channelid)
         {
-            RuntimeUser r = new RuntimeUser(arg);
-
-            await defaultInfo.guildJoinEvent(r.Guild, r);
-        }
-
-        private async Task Module_UserLeft(SocketGuildUser arg)
-        {
-            RuntimeUser r = new RuntimeUser(arg);
-
-            await defaultInfo.guildLeaveEvent(r.Guild, r);
-        }
-
-        public async Task Disable(Bot bot)
-        {
-            await Task.CompletedTask;
+            if (!enabled.ContainsKey(channelid))
+            {
+                enabled.Add(channelid, false);
+            }
+            else
+            {
+                enabled[channelid] = false;
+            }
         }
 
         public async Task UninstallAsync(Bot bot)
@@ -163,13 +166,27 @@ namespace IA.Events
             {
                 bot.Client.MessageReceived -= Module_MessageRecieved;
             }
-            if(defaultInfo.userUpdateEvent != null)
+            if (defaultInfo.userUpdateEvent != null)
             {
                 bot.Client.UserUpdated -= Module_UserUpdated;
             }
 
             isInstalled = false;
             await Task.CompletedTask;
+        }
+
+        private async Task Module_UserJoined(SocketGuildUser arg)
+        {
+            RuntimeUser r = new RuntimeUser(arg);
+
+            await defaultInfo.guildJoinEvent(r.Guild, r);
+        }
+
+        private async Task Module_UserLeft(SocketGuildUser arg)
+        {
+            RuntimeUser r = new RuntimeUser(arg);
+
+            await defaultInfo.guildLeaveEvent(r.Guild, r);
         }
 
         private async Task Module_UserUpdated(SocketUser arg1, SocketUser arg2)
@@ -183,6 +200,77 @@ namespace IA.Events
         {
             RuntimeMessage msg = new RuntimeMessage(message);
             await defaultInfo.messageEvent(msg);
+        }
+
+        public async Task SetEnabled(ulong serverid, bool enabled)
+        {
+            if (defaultInfo.eventSystem.bot.SqlInformation != null)
+            {
+                if (this.enabled.ContainsKey(serverid))
+                {
+                    this.enabled[serverid] = enabled;
+                }
+                else
+                {
+                    this.enabled.Add(serverid, enabled);
+                }
+                await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, SqlName);
+            }
+        }
+
+        public async Task<bool> IsEnabled(ulong id)
+        {
+            if (defaultInfo.eventSystem.bot.SqlInformation == null)
+            {
+                return defaultInfo.enabled;
+            }
+
+            if (enabled.ContainsKey(id))
+            {
+                return enabled[id];
+            }
+
+            int state = IsEventEnabled(id);
+            if (state == -1)
+            {
+                await MySQL.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, SqlName, id, defaultInfo.enabled);
+                enabled.Add(id, defaultInfo.enabled);
+                return defaultInfo.enabled;
+            }
+            bool actualState = (state == 1) ? true : false;
+
+            enabled.Add(id, actualState);
+            return actualState;
+        }
+
+        // TODO: Query this.
+        int IsEventEnabled(ulong serverid)
+        {
+            if (defaultInfo.eventSystem.bot.SqlInformation == null) return 1;
+
+            MySqlConnection connection = new MySqlConnection(defaultInfo.eventSystem.bot.SqlInformation.GetConnectionString());
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{serverid}\" AND name=\"{SqlName}\"";
+
+            connection.Open();
+            MySqlDataReader r = command.ExecuteReader();
+
+            bool output = false;
+            string check = "";
+
+            while (r.Read())
+            {
+                output = r.GetBoolean(0);
+                check = "ok";
+                break;
+            }
+            connection.Close();
+
+            if (check == "")
+            {
+                return -1;
+            }
+            return output ? 1 : 0;
         }
     }
 }

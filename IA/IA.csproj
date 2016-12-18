@@ -57,6 +57,7 @@
     <Compile Include="Events\CommandEvent.cs" />
     <Compile Include="Events\ContinuousEvent.cs" />
     <Compile Include="Events\Event.cs" />
+    <Compile Include="Events\GameEvent.cs" />
     <Compile Include="Events\Module.cs" />
     <Compile Include="Events\ModuleInformation.cs" />
     <Compile Include="Events\UserEvent.cs" />

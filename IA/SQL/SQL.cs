@@ -40,35 +40,6 @@ namespace IA.SQL
             instance = this;
         }
 
-        public int IsEventEnabled(string event_name, ulong channel_id)
-        {
-            if (info == null) return 1;
-
-            MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{channel_id}\" AND name=\"{event_name}\"";
-
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-
-            bool output = false;
-            string check = "";
-
-            while (r.Read())
-            {
-                output = r.GetBoolean(0);
-                check = "ok";
-                break;
-            }
-            connection.Close();
-
-            if (check == "")
-            {
-                return -1;
-            }
-            return output ? 1 : 0;
-        }
-
         public string GetConnectionString()
         {
             return info.GetConnectionString();
