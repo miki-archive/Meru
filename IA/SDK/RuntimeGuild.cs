@@ -12,6 +12,14 @@ namespace IA.SDK
     {
         public IGuild guild = null;
 
+        public override string AvatarUrl
+        {
+            get
+            {
+                return guild.IconUrl;
+            }
+        }
+
         public override ulong Id
         {
             get

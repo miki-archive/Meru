@@ -42,7 +42,7 @@ namespace IA.Events
         public Module(ModuleInstance addon)
         {
             defaultInfo = new ModuleInformation();
-            defaultInfo.name = addon.data.name;
+            defaultInfo.name = addon.data.name.ToLower();
             defaultInfo.enabled = addon.data.enabled;
 
             defaultInfo.messageEvent = addon.data.messageRecieved;
@@ -136,18 +136,6 @@ namespace IA.Events
             await Task.CompletedTask;
         }
 
-        public async Task Disable(ulong channelid)
-        {
-            if (!enabled.ContainsKey(channelid))
-            {
-                enabled.Add(channelid, false);
-            }
-            else
-            {
-                enabled[channelid] = false;
-            }
-        }
-
         public async Task UninstallAsync(Bot bot)
         {
             if (!isInstalled || bot.isManager)
@@ -179,27 +167,46 @@ namespace IA.Events
         {
             RuntimeUser r = new RuntimeUser(arg);
 
-            await defaultInfo.guildJoinEvent(r.Guild, r);
+            if (await IsEnabled(r.Guild.Id))
+            {
+                await defaultInfo.guildJoinEvent(r.Guild, r);
+            }
         }
 
         private async Task Module_UserLeft(SocketGuildUser arg)
         {
             RuntimeUser r = new RuntimeUser(arg);
 
-            await defaultInfo.guildLeaveEvent(r.Guild, r);
+            if (await IsEnabled(r.Guild.Id))
+            {
+                await defaultInfo.guildLeaveEvent(r.Guild, r);
+            }
         }
 
         private async Task Module_UserUpdated(SocketUser arg1, SocketUser arg2)
         {
             RuntimeUser usr1 = new RuntimeUser(arg1);
             RuntimeUser usr2 = new RuntimeUser(arg2);
-            await defaultInfo.userUpdateEvent(usr1, usr2);
+            if (await IsEnabled(usr1.Guild.Id))
+            {
+                await defaultInfo.userUpdateEvent(usr1, usr2);
+            }
         }
 
         private async Task Module_MessageRecieved(IMessage message)
         {
             RuntimeMessage msg = new RuntimeMessage(message);
-            await defaultInfo.messageEvent(msg);
+            if (await IsEnabled(msg.Guild.Id))
+            {
+                try
+                {
+                    Task.Run(() => defaultInfo.messageEvent(msg));
+                }
+                catch(Exception ex)
+                {
+                    Log.ErrorAt("module@message", ex.Message);
+                }
+            }
         }
 
         public async Task SetEnabled(ulong serverid, bool enabled)

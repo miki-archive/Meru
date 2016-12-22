@@ -40,7 +40,7 @@ namespace IA.SDK
             }
         }
 
-        public override DiscordChannel Channel
+        public override IDiscordChannel Channel
         {
             get
             {
@@ -48,7 +48,7 @@ namespace IA.SDK
             }
         }
 
-        public override DiscordGuild Guild
+        public override IDiscordGuild Guild
         {
             get
             {

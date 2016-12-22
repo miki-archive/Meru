@@ -111,12 +111,6 @@ namespace IA
             GC.SuppressFinalize(this);
         }
 
-        [Obsolete("Use Events.(their respective event)(); for more performance.")]
-        public Event GetEvent(string id)
-        {
-            return Events.GetEvent(id);
-        }
-
         public int GetShardId()
         {
             return clientInformation.ShardId;
@@ -208,7 +202,7 @@ namespace IA
             Client = new DiscordSocketClient(new DiscordSocketConfig()
             {
                 ShardId = id,
-                LogLevel = LogSeverity.Critical,
+                LogLevel = LogSeverity.Debug,
                 TotalShards = clientInformation.ShardCount
             });
 
@@ -235,7 +229,7 @@ namespace IA
                 Client.LeftGuild += Client_LeftGuild;
                 Client.Ready += Client_Ready;
                 Client.Disconnected += Client_Disconnected;
-               // Client.Log += Client_Log;
+           //     Client.Log += Client_Log;
             }
         }
 
@@ -290,7 +284,7 @@ namespace IA
         {
             RuntimeGuild g = new RuntimeGuild(arg);
 
-            Task.Run(() => Events.OnGuildLeave(g));
+            await Task.Run(() => Events.OnGuildLeave(g));
         }
 
         private async Task Client_Disconnected(Exception arg)
@@ -317,16 +311,16 @@ namespace IA
 
             if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
             {
-                await Events.OnMention(r);
+                await Task.Run(() => { Events.OnMention(r); });
             }
 
             if (r.Guild != null)
             {
-                Task.Run(async () => { Events.OnMessageRecieved(r); });
+                await Task.Run(() => { Events.OnMessageRecieved(r); });
             }
             else
             {
-               await Events.OnPrivateMessage(r);
+                await Task.Run(() => { Events.OnPrivateMessage(r); });
             }
         }
     }

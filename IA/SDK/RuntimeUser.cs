@@ -20,6 +20,14 @@ namespace IA.SDK
             user = author;
         }
 
+        public override string AvatarUrl
+        {
+            get
+            {
+                return user.AvatarUrl;
+            }
+        }
+
         public override ulong Id
         {
             get
@@ -100,7 +108,7 @@ namespace IA.SDK
             return m;
         }
 
-        public override bool HasPermissions(DiscordChannel channel, params DiscordGuildPermission[] permissions)
+        public override bool HasPermissions(IDiscordChannel channel, params DiscordGuildPermission[] permissions)
         {
             foreach (DiscordGuildPermission p in permissions)
             {

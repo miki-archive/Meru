@@ -63,7 +63,10 @@ namespace IA.Events
 
         public async Task<bool> IsEnabled(ulong id)
         {
-            if (!await module.IsEnabled(id)) return false;
+            if (module != null)
+            {
+                if (!await module.IsEnabled(id)) return false;
+            }
 
             if (eventSystem.bot.SqlInformation == null)
             {

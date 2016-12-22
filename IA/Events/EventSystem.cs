@@ -365,7 +365,14 @@ namespace IA.Events
         {
             foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
             {
-                await ev.processEvent(e, commandEvent);
+                try
+                {
+                    await ev.processEvent(e, commandEvent);
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorAt($"commanddone@{ev.name}", ex.Message);
+                }
             }
         }
 

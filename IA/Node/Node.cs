@@ -39,6 +39,19 @@ namespace IA.Node
             return output;
         }
 
+        public static string Run(string id, string args)
+        {
+            ProcessStartInfo start = new ProcessStartInfo();
+            start.FileName = @"C:\Program Files\nodejs\node.exe";
+            args = args.Replace(' ', '_');
+            start.Arguments = string.Format("{0} {1}", id, args);
+            start.UseShellExecute = false;
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardError = true;
+            string output= RunProcessAsync(start);
+            return output;
+        }
+
         public static void Run(string programName, string args, IMessageChannel channel)
         {
             ProcessStartInfo start = new ProcessStartInfo();

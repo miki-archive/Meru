@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Miki
 {
-    class Mathm
+    public class Mathm
     {
         static Random random = new Random();
 

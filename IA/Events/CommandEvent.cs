@@ -3,6 +3,7 @@ using IA.SDK;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,14 +86,16 @@ namespace IA.Events
 
             if (checkCommand(e, command, allAliases))
             {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+
                 if (await TryProcessCommand(e, args))
                 {
                     await eventSystem.OnCommandDone(e, this);
 
-                    Log.Message($"{name} called from {e.Guild.Id} [{ e.Guild.Id } # { e.Channel.Id }]");
-
-                    CommandUsed++;
+                    Log.Message($"{name} called from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
                 }
+                sw.Stop();
             }
         }
 
@@ -129,6 +132,7 @@ namespace IA.Events
             }
             catch (Exception ex)
             {
+                await e.Channel.SendMessage(errorMessage);
                 Log.ErrorAt(name, ex.Message);
             }
             return false;
