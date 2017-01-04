@@ -64,7 +64,7 @@ namespace IA.SDK
         {
             get
             {
-                return "<@!" + Id + ">";
+                return user.Mention;
             }
         }
 

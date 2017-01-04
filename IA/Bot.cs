@@ -116,6 +116,11 @@ namespace IA
             return clientInformation.ShardId;
         }
 
+        public int GetTotalShards()
+        {
+            return clientInformation.ShardCount;
+        }
+
         private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;

@@ -14,11 +14,6 @@ namespace Discord
         /// <returns></returns>
         public static async Task<IUserMessage> SendMessage(this IMessageChannel channel, string message)
         {
-            //if ((await (channel as IGuildChannel).Guild.GetCurrentUserAsync()).GetPermissions(channel as IGuildChannel).SendMessages)
-            //{
-            //    Log.WarningAt("SendMessage", "Not enough permissions to send message");
-            //    return null;
-            //}
             try
             {
                 IUserMessage m = await channel.SendMessageAsync(message);

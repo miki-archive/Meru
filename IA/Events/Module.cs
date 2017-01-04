@@ -64,7 +64,7 @@ namespace IA.Events
                     }
                     x.accessibility = e.accessibility;
                     x.requiresPermissions = e.requiresPermissions;
-                    x.usage = e.usage;
+                    x.usage = e.metadata.usage.ToArray();
                     if (e.checkCommand != null)
                     {
                         x.checkCommand = e.checkCommand;
@@ -73,8 +73,8 @@ namespace IA.Events
                     x.canBeDisabled = e.canBeDisabled;
                     x.canBeOverridenByDefaultPrefix = e.canBeOverridenByDefaultPrefix;
                     x.cooldown = e.cooldown;
-                    x.description = e.description;
-                    x.errorMessage = e.errorMessage;
+                    x.description = e.metadata.description;
+                    x.errorMessage = e.metadata.errorMessage;
                     x.defaultEnabled = e.defaultEnabled;
 
 
