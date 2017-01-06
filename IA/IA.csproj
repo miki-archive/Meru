@@ -234,14 +234,14 @@
     <Folder Include="Audio\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\IA.SDK\IA.SDK\IA.Common.csproj">
-      <Project>{b8ffa60f-2c45-449f-ad4d-cf1c5a3075d4}</Project>
-      <Name>IA.Common</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\IA.SDK\IA.SDK\IA.Common.csproj">
+      <Project>{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}</Project>
+      <Name>IA.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

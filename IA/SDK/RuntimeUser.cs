@@ -88,9 +88,9 @@ namespace IA.SDK
             await (user as IGuildUser).KickAsync();
         }
 
-        public override async Task Ban(DiscordGuild g)
+        public override async Task Ban(IDiscordGuild g)
         {
-            await (g as RuntimeGuild).guild.AddBanAsync(user);
+            await (g as IProxy<IGuild>).ToNativeObject().AddBanAsync(user);
         }
 
         public override async Task SendFile(string path)
@@ -100,7 +100,7 @@ namespace IA.SDK
             await c.SendFileAsync(path);
         }
 
-        public override async Task<DiscordMessage> SendMessage(string message)
+        public override async Task<IDiscordMessage> SendMessage(string message)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
 

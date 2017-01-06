@@ -234,7 +234,6 @@ namespace IA
                 Client.LeftGuild += Client_LeftGuild;
                 Client.Ready += Client_Ready;
                 Client.Disconnected += Client_Disconnected;
-           //     Client.Log += Client_Log;
             }
         }
 
@@ -244,52 +243,13 @@ namespace IA
             RuntimeGuild g = new RuntimeGuild(arg);
 
             Task.Run(() => Events.OnGuildJoin(g));
-
-            using (var client = new HttpClient())
-            {
-                int servers = 0;
-
-                await MySQL.QueryAsync("Select servers from sharddata", o =>
-                {
-                    servers += (int)o["servers"];
-                });
-
-                var values = new Dictionary<string, string>
-                {
-                   { "key", clientInformation.CarbonitexKey },
-                   { "servercount", servers.ToString() }
-                };
-
-                var content = new FormUrlEncodedContent(values);
-
-                var response = await client.PostAsync("https://www.carbonitex.net/discord/data/botdata.php", content);
-
-                var responseString = await response.Content.ReadAsStringAsync();
-            }
-
-            using (var client = new HttpClient())
-            {
-                var values = new Dictionary<string, string>
-                {
-                   { "key", clientInformation.DiscordPwKey },
-                   { "shard_id", ShardId.ToString() },
-                    { "shard_count", clientInformation.ShardCount.ToString() },
-                    { "server_count", Client.Guilds.Count.ToString() }
-                };
-           
-                var content = new FormUrlEncodedContent(values);
-
-                var response = await client.PostAsync("https://www.carbonitex.net/discord/data/botdata.php", content);
-
-                var responseString = await response.Content.ReadAsStringAsync();
-            }
         }
 
         private async Task Client_LeftGuild(IGuild arg)
         {
             RuntimeGuild g = new RuntimeGuild(arg);
 
-            await Task.Run(() => Events.OnGuildLeave(g));
+            Task.Run(() => Events.OnGuildLeave(g));
         }
 
         private async Task Client_Disconnected(Exception arg)

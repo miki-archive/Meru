@@ -177,116 +177,111 @@ namespace IA.SQL
         /// <returns></returns>
         public static async Task QueryAsync(string sqlCode, QueryOutput output, params object[] p)
         {
-            try
+            if (instance.info == null)
             {
-                if (instance.info == null) return;
-                MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
+                return;
+            }
 
-                List<MySqlParameter> parameters = new List<MySqlParameter>();
+            MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
 
-                string curCode = sqlCode;
-                string prevCode = "";
+            List<MySqlParameter> parameters = new List<MySqlParameter>();
 
-                // Get code ready to extract
-                while (curCode != prevCode)
+            string curCode = sqlCode;
+            string prevCode = "";
+
+            // Get code ready to extract
+            while (curCode != prevCode)
+            {
+                prevCode = curCode;
+
+                curCode = curCode.Replace(" = ", "=");
+                curCode = curCode.Replace(" =", "=");
+                curCode = curCode.Replace("= ", "=");
+            }
+
+            List<string> splitSql = new List<string>();
+            splitSql.AddRange(curCode.Split(' '));
+
+            for (int i = 0; i < splitSql.Count; i++)
+            {
+                if (splitSql[i].Contains("?"))
                 {
-                    prevCode = curCode;
+                    string s = splitSql[i].Split('?')[1].Trim('?', ';', '(', ')', '=', ',');
 
-                    curCode = curCode.Replace(" = ", "=");
-                    curCode = curCode.Replace(" =", "=");
-                    curCode = curCode.Replace("= ", "=");
-                }
-
-                List<string> splitSql = new List<string>();
-                splitSql.AddRange(curCode.Split(' '));
-
-                for (int i = 0; i < splitSql.Count; i++)
-                {
-                    List<string> splitString = new List<string>();
-                    splitString.AddRange(splitSql[i].Split('='));
-                    if (splitString[0].EndsWith(":"))
+                    if (parameters.Find(x => { return x.ParameterName == s; }) == null)
                     {
-                        continue;
-                    }
-
-                    if (splitString.Count > 1)
-                    {
-                        if (splitString[1].StartsWith("?"))
-                        {
-                            string parameterName = splitString[1].Split(';')[0].TrimEnd(',', ')');
-
-                            if (parameters.Find(x => { return x.ParameterName == parameterName; }) == null)
-                            {
-                                parameters.Add(new MySqlParameter(parameterName, p[parameters.Count]));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (splitSql[i].Contains("?"))
-                        {
-                            splitString = new List<string>();
-                            splitString.AddRange(splitSql[i].Split('?'));
-
-                            string parameterName = splitString[1].Split(';')[0].TrimEnd(',', ')');
-
-                            if (parameters.Find(x => { return x.ParameterName == parameterName; }) == null)
-                            {
-                                parameters.Add(new MySqlParameter(parameterName, p[parameters.Count]));
-                            }
-                        }
+                        parameters.Add(new MySqlParameter(
+                        s,
+                        p[parameters.Count]
+                        ));
                     }
                 }
 
-                await Task.Run(async () => await PollQuery(connection, curCode, parameters, output));
-            }
-            catch (Exception ex)
-            {
-                Log.ErrorAt("mysql", ex.Message);
+                //if (splitString.Count > 1)
+                //{
+                //    if (splitString[1].StartsWith("?"))
+                //    {
+                //        string parameterName = splitString[1].Split(';')[0].TrimEnd(';', '?', ',', ')', '(');
+
+                //        if (parameters.Find(x => { return x.ParameterName == parameterName; }) == null)
+                //        {
+                //            parameters.Add(new MySqlParameter(parameterName, p[parameters.Count]));
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    if (splitSql[i].Contains("?"))
+                //    {
+                //        splitString = new List<string>();
+                //        splitString.AddRange(splitSql[i].Split('='));
+
+                //        string parameterName = splitString[1].Split(';')[0].TrimEnd(';', '?', ',', ')', '(');
+
+                //        if (parameters.Find(x => { return x.ParameterName == parameterName; }) == null)
+                //        {
+                //            parameters.Add(new MySqlParameter(parameterName, p[parameters.Count]));
+                //        }
+                //    }
+                //}
             }
 
+            await Task.Run(async () => await PollQuery(connection, curCode, parameters, output));
         }
 
         internal static async Task PollQuery(MySqlConnection connection, string CommandText, List<MySqlParameter> parameters, QueryOutput output)
         {
-            try
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = CommandText;
+            command.Parameters.AddRange(parameters.ToArray());
+            connection.Open();
+
+            bool hasRead = false;
+
+            if (output != null)
             {
-                MySqlCommand command = connection.CreateCommand();
-                command.CommandText = CommandText;
-                command.Parameters.AddRange(parameters.ToArray());
-                connection.Open();
+                MySqlDataReader r = await command.ExecuteReaderAsync() as MySqlDataReader;
+                Dictionary<string, object> outputdict = new Dictionary<string, object>();
 
-                bool hasRead = false;
-
-                if (output != null)
+                while (await r.ReadAsync())
                 {
-                    MySqlDataReader r = await command.ExecuteReaderAsync() as MySqlDataReader;
-                    Dictionary<string, object> outputdict = new Dictionary<string, object>();
-
-                    while (await r.ReadAsync())
+                    outputdict = new Dictionary<string, object>();
+                    for (int i = 0; i < r.VisibleFieldCount; i++)
                     {
-                        outputdict = new Dictionary<string, object>();
-                        for (int i = 0; i < r.VisibleFieldCount; i++)
-                        {
-                            outputdict.Add(r.GetName(i), r.GetValue(i));
-                        }
-                        output?.Invoke(outputdict);
-                        hasRead = true;
+                        outputdict.Add(r.GetName(i), r.GetValue(i));
                     }
-
-                    if (!hasRead)
-                    {
-                        output?.Invoke(outputdict);
-                    }
+                    output?.Invoke(outputdict);
+                    hasRead = true;
                 }
-                else
+
+                if (!hasRead)
                 {
-                    await command.ExecuteNonQueryAsync();
+                    output?.Invoke(outputdict);
                 }
             }
-            catch(Exception e)
+            else
             {
-                Log.ErrorAt("mysql", e.Message);
+                await command.ExecuteNonQueryAsync();
             }
             await connection.CloseAsync();
         }
