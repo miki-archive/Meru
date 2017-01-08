@@ -95,7 +95,7 @@ namespace IA.SDK
 
         public IDiscordEmbedBuilder AddField(Action<IEmbedField> field)
         {
-            IEmbedField f = new RuntimeEmbedField(new EmbedField());
+            IEmbedField f = new RuntimeEmbedField("", "");
 
             field.Invoke(f);
             fields.Add(f);

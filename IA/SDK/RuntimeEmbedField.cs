@@ -6,23 +6,33 @@ namespace IA.SDK
 {
     public class RuntimeEmbedField : IEmbedField
     {
-        EmbedField field;
+        EmbedFieldBuilder field;
 
-        public RuntimeEmbedField(EmbedField f)
+        public RuntimeEmbedField(IEmbedField f)
         {
-            field = f;
+            field = new EmbedFieldBuilder();
+            field.Name = f.Name;
+            field.Value = f.Value;
+            field.IsInline = f.IsInline;
+        }
+        public RuntimeEmbedField(string Name, string Value, bool Isinline = false)
+        {
+            field = new EmbedFieldBuilder();
+            field.Name = Name;
+            field.Value = Value;
+            field.IsInline = IsInline;
         }
 
         public bool IsInline
         {
             get
             {
-                return field.Inline;
+                return field.IsInline;
             }
 
             set
             {
-                field.Inline = value;
+                field.IsInline = value;
             }
         }
 
