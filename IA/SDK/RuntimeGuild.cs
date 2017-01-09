@@ -60,6 +60,21 @@ namespace IA.SDK
             }
         }
 
+        public override List<IDiscordRole> Roles
+        {
+            get
+            {
+                List<IDiscordRole> output = new List<IDiscordRole>();
+
+                foreach (IRole role in guild.Roles)
+                {
+                    output.Add(new RuntimeRole(role));
+                }
+
+                return output;
+            }
+        }
+
         public RuntimeGuild(IGuild g)
         {
             guild = g;
@@ -84,6 +99,11 @@ namespace IA.SDK
                 rChannels.Add(new RuntimeChannel(c));
             }
             return rChannels;
+        }
+
+        public override IDiscordRole GetRole(ulong role_id)
+        {
+            return new RuntimeRole(guild.GetRole(role_id));
         }
     }
 }

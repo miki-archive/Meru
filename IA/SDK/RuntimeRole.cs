@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace IA.SDK
 {
-    class RuntimeRole : DiscordRole
+    class RuntimeRole : DiscordRole, IProxy<IRole>
     {
         IRole role;
 
@@ -42,6 +43,27 @@ namespace IA.SDK
                 }
                 return "";
             }
+        }
+
+        public override System.Drawing.Color Color
+        {
+            get
+            {
+                return System.Drawing.Color.FromArgb(role.Color.R, role.Color.G, role.Color.B);
+            }
+        }
+
+        public override string Name
+        {
+            get
+            {
+                return role.Name;
+            }
+        }
+
+        public IRole ToNativeObject()
+        {
+            return role;
         }
     }
 }

@@ -28,6 +28,14 @@ namespace IA
         public EventSystem Events { private set; get; }
         public MySQL Sql { private set; get; }
 
+        public string Name
+        {
+            get
+            {
+                return clientInformation.Name;
+            }
+        }
+
         public int ShardId
         {
             get
@@ -35,7 +43,9 @@ namespace IA
                 return clientInformation.ShardId;
             }
         }
-        public string Version { get
+        public string Version
+        {
+            get
             {
                 return clientInformation.Version;
             }
@@ -192,7 +202,7 @@ namespace IA
             else
             {
                 Console.Title = clientInformation.Name + " " + clientInformation.Version;
-                if (Debugger.IsAttached)
+                if (Debugger.IsAttached || clientInformation.ShardCount == 1)
                 {
                     isManager = false;
                     clientInformation.ShardCount = 1;
@@ -200,10 +210,10 @@ namespace IA
                 else
                 {
                     isManager = true;
-                    new Manager(clientInformation.ShardCount);
+                    new Manager(clientInformation.ShardCount, this);
                 }
             }
-
+           
             Client = new DiscordSocketClient(new DiscordSocketConfig()
             {
                 ShardId = id,

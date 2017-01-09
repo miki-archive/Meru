@@ -68,6 +68,14 @@ namespace IA.SDK
             }
         }
 
+        public override List<ulong> RoleIds
+        {
+            get
+            {
+                return (user as IGuildUser).RoleIds.ToList();
+            }
+        }
+
         public override IDiscordGuild Guild
         {
             get
@@ -107,6 +115,13 @@ namespace IA.SDK
             RuntimeMessage m = new RuntimeMessage(await c.SendMessageAsync(message));
             return m;
         }
+        public override async Task<IDiscordMessage> SendMessage(IDiscordEmbedBuilder embed)
+        {
+            IDMChannel c = await user.CreateDMChannelAsync();
+            IMessage m = await c.SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>).ToNativeObject());
+
+            return new RuntimeMessage(m);
+        }
 
         public override bool HasPermissions(IDiscordChannel channel, params DiscordGuildPermission[] permissions)
         {
@@ -120,6 +135,19 @@ namespace IA.SDK
                 }
             }
             return true;
+        }
+
+        public override async Task AddRoleAsync(IDiscordRole role)
+        {
+            await (user as IGuildUser).AddRolesAsync((role as IProxy<IRole>).ToNativeObject());
+        }
+
+        public override async Task RemoveRoleAsync(IDiscordRole role)
+        {
+            IRole r = (role as IProxy<IRole>).ToNativeObject();
+            IGuildUser u = (user as IGuildUser);
+
+            await u.RemoveRolesAsync(r);
         }
 
         public IUser ToNativeObject()
