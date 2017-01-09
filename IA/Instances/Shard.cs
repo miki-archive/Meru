@@ -19,23 +19,23 @@ namespace IA
         /// Create a new shard
         /// </summary>
         /// <param name="shard_id">shard id</param>
-        public Shard(int shard_id)
+        public Shard(int shard_id, Bot bot)
         {
             Log.Message("Starting shard " + shard_id);
             id = shard_id;
-            OpenShardAsync().GetAwaiter().GetResult();
+            OpenShardAsync(bot).GetAwaiter().GetResult();
         }
 
         /// <summary>
         /// Opens a new shard.
         /// </summary>
-        public async Task OpenShardAsync()
+        public async Task OpenShardAsync(Bot bot)
         {
             ProcessStartInfo info = new ProcessStartInfo()
             {
                 Arguments = id.ToString(),
                 WorkingDirectory = Directory.GetCurrentDirectory(),
-                FileName = "Miki.exe",
+                FileName = $"{bot.Name}.exe",
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

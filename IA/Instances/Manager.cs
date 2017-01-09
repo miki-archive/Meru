@@ -17,14 +17,17 @@ namespace IA
     class Manager : IpcSocket
     {
         AppDomain app = AppDomain.CurrentDomain;
+        Bot bot = null;
 
         List<Shard> shard = new List<Shard>();
 
         int shardCount;
 
-        public Manager(int shard_count)
+        public Manager(int shard_count, Bot bot)
         {
             shardCount = shard_count;
+
+            this.bot = bot;
             OpenManager().GetAwaiter().GetResult();
 
         }
@@ -37,13 +40,13 @@ namespace IA
                 {
                     Log.Error("[Shard " + i + "] has stopped responding.");
                     shard[i].shardProcess.Kill();
-                    shard[i] = new Shard(i);
+                    shard[i] = new Shard(i, bot);
                 }
 
                 if (shard[i].shardProcess.HasExited)
                 {
                     Log.Error("[Shard " + i + "] has crashed.");
-                    shard[i] = new Shard(i);
+                    shard[i] = new Shard(i, bot);
                 }
             }
 
@@ -66,7 +69,7 @@ namespace IA
 
             for (int i = 0; i < shardCount; i++)
             {
-                shard.Add(new Shard(i));
+                shard.Add(new Shard(i, bot));
             }
             await Task.Run(async () => await Heartbeat());
             await Task.Delay(-1);
