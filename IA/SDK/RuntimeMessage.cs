@@ -101,6 +101,11 @@ namespace IA.SDK
             }
         }
 
+        public override IDiscordEmbed CreateEmbed()
+        {
+            return new RuntimeEmbedBuilder(new EmbedBuilder());
+        }
+
         public override async Task DeleteAsync()
         {
             await messageData.DeleteAsync();

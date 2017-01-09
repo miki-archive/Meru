@@ -234,9 +234,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\IA.SDK\IA.SDK\IA.Common.csproj">
+    <ProjectReference Include="..\..\IA.SDK\IA.SDK\IA.SDK.csproj">
       <Project>{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}</Project>
-      <Name>IA.Common</Name>
+      <Name>IA.SDK</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

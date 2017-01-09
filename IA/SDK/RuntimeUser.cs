@@ -115,7 +115,7 @@ namespace IA.SDK
             RuntimeMessage m = new RuntimeMessage(await c.SendMessageAsync(message));
             return m;
         }
-        public override async Task<IDiscordMessage> SendMessage(IDiscordEmbedBuilder embed)
+        public override async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
             IMessage m = await c.SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>).ToNativeObject());

@@ -9,7 +9,7 @@ using Discord;
 
 namespace IA.SDK
 {
-    public class RuntimeEmbedBuilder : IDiscordEmbedBuilder, IProxy<EmbedBuilder>
+    public class RuntimeEmbedBuilder : IDiscordEmbed, IProxy<EmbedBuilder>
     {
         public EmbedBuilder embed;
 
@@ -67,6 +67,19 @@ namespace IA.SDK
             }
         }
 
+        public string ImageUrl
+        {
+            get
+            {
+                return embed.ImageUrl;
+            }
+
+            set
+            {
+                embed.ImageUrl = value;
+            }
+        }
+
         public string Title
         {
             get
@@ -93,7 +106,7 @@ namespace IA.SDK
             }
         }
 
-        public IDiscordEmbedBuilder AddField(Action<IEmbedField> field)
+        public IDiscordEmbed AddField(Action<IEmbedField> field)
         {
             IEmbedField f = new RuntimeEmbedField("", "");
 
