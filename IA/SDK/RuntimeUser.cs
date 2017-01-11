@@ -8,7 +8,7 @@ using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    public class RuntimeUser : DiscordUser, IProxy<IUser>
+    public class RuntimeUser : IDiscordUser, IProxy<IUser>
     {
         private IUser user;
 
@@ -20,7 +20,7 @@ namespace IA.SDK
             user = author;
         }
 
-        public override string AvatarUrl
+        public string AvatarUrl
         {
             get
             {
@@ -28,7 +28,7 @@ namespace IA.SDK
             }
         }
 
-        public override ulong Id
+        public ulong Id
         {
             get
             {
@@ -36,7 +36,7 @@ namespace IA.SDK
             }
         }
 
-        public override bool IsBot
+        public bool IsBot
         {
             get
             {
@@ -44,7 +44,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Username
+        public string Username
         {
             get
             {
@@ -52,7 +52,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Discriminator
+        public string Discriminator
         {
             get
             {
@@ -60,7 +60,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Mention
+        public string Mention
         {
             get
             {
@@ -68,7 +68,7 @@ namespace IA.SDK
             }
         }
 
-        public override List<ulong> RoleIds
+        public List<ulong> RoleIds
         {
             get
             {
@@ -76,7 +76,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordGuild Guild
+        public IDiscordGuild Guild
         {
             get
             {
@@ -91,31 +91,31 @@ namespace IA.SDK
             }
         }
 
-        public override async Task Kick()
+        public async Task Kick()
         {
             await (user as IGuildUser).KickAsync();
         }
 
-        public override async Task Ban(IDiscordGuild g)
+        public async Task Ban(IDiscordGuild g)
         {
             await (g as IProxy<IGuild>).ToNativeObject().AddBanAsync(user);
         }
 
-        public override async Task SendFile(string path)
+        public async Task SendFile(string path)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
 
             await c.SendFileAsync(path);
         }
 
-        public override async Task<IDiscordMessage> SendMessage(string message)
+        public async Task<IDiscordMessage> SendMessage(string message)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
 
             RuntimeMessage m = new RuntimeMessage(await c.SendMessageAsync(message));
             return m;
         }
-        public override async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
+        public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
             IMessage m = await c.SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>).ToNativeObject());
@@ -123,7 +123,7 @@ namespace IA.SDK
             return new RuntimeMessage(m);
         }
 
-        public override bool HasPermissions(IDiscordChannel channel, params DiscordGuildPermission[] permissions)
+        public bool HasPermissions(IDiscordChannel channel, params DiscordGuildPermission[] permissions)
         {
             foreach (DiscordGuildPermission p in permissions)
             {
@@ -137,12 +137,12 @@ namespace IA.SDK
             return true;
         }
 
-        public override async Task AddRoleAsync(IDiscordRole role)
+        public async Task AddRoleAsync(IDiscordRole role)
         {
             await (user as IGuildUser).AddRolesAsync((role as IProxy<IRole>).ToNativeObject());
         }
 
-        public override async Task RemoveRoleAsync(IDiscordRole role)
+        public async Task RemoveRoleAsync(IDiscordRole role)
         {
             IRole r = (role as IProxy<IRole>).ToNativeObject();
             IGuildUser u = (user as IGuildUser);
@@ -153,6 +153,34 @@ namespace IA.SDK
         public IUser ToNativeObject()
         {
             return user;
+        }
+
+        public async Task AddRolesAsync(List<IDiscordRole> roles)
+        {
+            List<IRole> roleList = new List<IRole>();
+
+            foreach (IDiscordRole a in roles)
+            {
+                roleList.Add((a as IProxy<IRole>).ToNativeObject());
+            }
+
+            IGuildUser u = (user as IGuildUser);
+
+            await u.AddRolesAsync(roleList);
+        }
+
+        public async Task RemoveRolesAsync(List<IDiscordRole> roles)
+        {
+            List<IRole> roleList = new List<IRole>();
+
+            foreach (IDiscordRole a in roles)
+            {
+                roleList.Add((a as IProxy<IRole>).ToNativeObject());
+            }
+
+            IGuildUser u = (user as IGuildUser);
+
+            await u.RemoveRolesAsync(roleList);
         }
     }
 }

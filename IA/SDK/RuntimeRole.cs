@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    class RuntimeRole : DiscordRole, IProxy<IRole>
+    class RuntimeRole : IDiscordRole, IProxy<IRole>
     {
         IRole role;
 
@@ -17,7 +18,7 @@ namespace IA.SDK
             this.role = role;
         }
 
-        public override ulong Id
+        public ulong Id
         {
             get
             {
@@ -25,7 +26,7 @@ namespace IA.SDK
             }
         }
 
-        public override int Position
+        public int Position
         {
             get
             {
@@ -33,7 +34,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Mention
+        public string Mention
         {
             get
             {
@@ -45,7 +46,7 @@ namespace IA.SDK
             }
         }
 
-        public override System.Drawing.Color Color
+        public System.Drawing.Color Color
         {
             get
             {
@@ -53,7 +54,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Name
+        public string Name
         {
             get
             {

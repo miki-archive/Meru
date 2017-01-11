@@ -24,7 +24,9 @@ namespace IA
     public class Bot
     {
         public AddonManager Addons { private set; get; }
-        public DiscordSocketClient Client { private set; get; }
+
+        public DiscordShardedClient Client { private set; get; }
+
         public EventSystem Events { private set; get; }
         public MySQL Sql { private set; get; }
 
@@ -94,24 +96,15 @@ namespace IA
             Events.Developers.Add(user.Id);
         }
 
-        public void Connect()
-        {
-            if (!isManager)
-            {
-                Log.Message("Connecting...");
-                Client.LoginAsync(TokenType.Bot, clientInformation.Token).GetAwaiter().GetResult();
-                Client.ConnectAsync().GetAwaiter().GetResult();
-                Task.Delay(-1).GetAwaiter().GetResult();
-            }
-        }
-
         public async Task ConnectAsync()
         {
             if (!isManager)
             {
                 Log.Message("Connecting...");
+
                 await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
                 await Client.ConnectAsync();
+                await Task.Delay(250);
                 await Task.Delay(-1);
             }
         }
@@ -213,10 +206,9 @@ namespace IA
                     new Manager(clientInformation.ShardCount, this);
                 }
             }
-           
-            Client = new DiscordSocketClient(new DiscordSocketConfig()
+
+            Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
-                ShardId = id,
                 LogLevel = LogSeverity.Debug,
                 TotalShards = clientInformation.ShardCount
             });
@@ -232,22 +224,15 @@ namespace IA
 
             Addons = new AddonManager();
 
-            if (!isManager)
+            if(clientInformation.EventLoaderMethod != null)
             {
-                clientInformation.ShardId = id;
-                await Addons.Load(this);
-
-                if (clientInformation.EventLoaderMethod != null)
-                {
-                    await clientInformation.EventLoaderMethod(this);
-                }
-
-                Client.MessageReceived += Client_MessageReceived;
-                Client.JoinedGuild += Client_JoinedGuild;
-                Client.LeftGuild += Client_LeftGuild;
-                Client.Ready += Client_Ready;
-                Client.Disconnected += Client_Disconnected;
+                await clientInformation.EventLoaderMethod(this);
             }
+
+            Client.MessageReceived += Client_MessageReceived;
+            Client.JoinedGuild += Client_JoinedGuild;
+            Client.LeftGuild += Client_LeftGuild;
+            Client.Log += Client_Log;
         }
 
         // Events

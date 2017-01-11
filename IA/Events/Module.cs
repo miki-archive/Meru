@@ -105,22 +105,34 @@ namespace IA.Events
 
             if (defaultInfo.messageEvent != null)
             {
-                bot.Client.MessageReceived += Module_MessageRecieved;
+                for (int i = 0; i < bot.GetTotalShards(); i++)
+                {
+                    bot.Client.MessageReceived += Module_MessageRecieved;
+                }
             }
 
             if (defaultInfo.userUpdateEvent != null)
             {
-                bot.Client.UserUpdated += Module_UserUpdated;
+                for (int i = 0; i < bot.GetTotalShards(); i++)
+                {
+                    bot.Client.UserUpdated += Module_UserUpdated;
+                }
             }
 
             if (defaultInfo.guildJoinEvent != null)
             {
-                bot.Client.UserJoined += Module_UserJoined;
+                for (int i = 0; i < bot.GetTotalShards(); i++)
+                {
+                    bot.Client.UserJoined += Module_UserJoined;
+                }
             }
 
             if (defaultInfo.guildLeaveEvent != null)
             {
-                bot.Client.UserLeft += Module_UserLeft;
+                for (int i = 0; i < bot.GetTotalShards(); i++)
+                {
+                    bot.Client.UserLeft += Module_UserLeft;
+                }
             }
 
             defaultInfo.eventSystem = bot.Events;
@@ -152,11 +164,17 @@ namespace IA.Events
 
             if (defaultInfo.messageEvent != null)
             {
-                bot.Client.MessageReceived -= Module_MessageRecieved;
+                for (int i = 0; i < bot.GetTotalShards(); i++)
+                {
+                    bot.Client.MessageReceived -= Module_MessageRecieved;
+                }
             }
             if (defaultInfo.userUpdateEvent != null)
             {
-                bot.Client.UserUpdated -= Module_UserUpdated;
+                for (int i = 0; i < bot.GetTotalShards(); i++)
+                {
+                    bot.Client.UserUpdated -= Module_UserUpdated;
+                }
             }
 
             isInstalled = false;

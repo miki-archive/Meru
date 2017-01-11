@@ -9,7 +9,7 @@ using System.IO;
 
 namespace IA.SDK
 {
-    class RuntimeChannel : DiscordChannel, IDiscordChannel, IProxy<IChannel>
+    class RuntimeChannel : IDiscordChannel, IProxy<IChannel>
     {
         public IChannel channel;
 
@@ -18,7 +18,15 @@ namespace IA.SDK
             channel = c;
         }
 
-        public override ulong Id
+        public IDiscordGuild Guild
+        {
+            get
+            {
+                return new RuntimeGuild((channel as IGuildChannel).Guild);
+            }
+        }
+
+        public ulong Id
         {
             get
             {
@@ -26,7 +34,15 @@ namespace IA.SDK
             }
         }
 
-        public async override Task<IEnumerable<IDiscordUser>> GetUsersAsync()
+        public string Name
+        {
+            get
+            {
+                return channel.Name;
+            }
+        }
+
+        public async  Task<IEnumerable<IDiscordUser>> GetUsersAsync()
         {
             IEnumerable<IUser> users = await channel.GetUsersAsync().Flatten();
             List<RuntimeUser> outputUsers = new List<RuntimeUser>();
@@ -39,22 +55,22 @@ namespace IA.SDK
             return outputUsers;           
         }
 
-        public override async Task SendFileAsync(string path)
+        public  async Task SendFileAsync(string path)
         {
             await (channel as IMessageChannel).SendFileAsync(path);
         }
 
-        public override async Task SendFileAsync(MemoryStream stream, string extension)
+        public  async Task SendFileAsync(MemoryStream stream, string extension)
         {
             await (channel as IMessageChannel)?.SendFileAsync(stream, extension);
         }
 
-        public override async Task<DiscordMessage> SendMessage(string message)
+        public  async Task<DiscordMessage> SendMessage(string message)
         {
             RuntimeMessage m = new RuntimeMessage(await (channel as IMessageChannel).SendMessage(message));
             return m;
         }
-        public override async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
+        public  async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
             return new RuntimeMessage(
                 await (channel as IMessageChannel)

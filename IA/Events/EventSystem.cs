@@ -418,11 +418,6 @@ namespace IA.Events
                 return;
             }
 
-            if(GameEvents.ContainsKey(_message.Author.Id))
-            {
-                
-            }
-
             if (!identifier.ContainsKey(_message.Guild.Id))
             {
                 await LoadIdentifier(_message.Guild.Id);
