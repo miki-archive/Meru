@@ -46,19 +46,19 @@ namespace IA.SDK
             }
         }
 
-        public System.Drawing.Color Color
-        {
-            get
-            {
-                return System.Drawing.Color.FromArgb(role.Color.R, role.Color.G, role.Color.B);
-            }
-        }
-
         public string Name
         {
             get
             {
                 return role.Name;
+            }
+        }
+
+        Color IDiscordRole.Color
+        {
+            get
+            {
+                return new Color(role.Color.R, role.Color.G, role.Color.B);
             }
         }
 

@@ -28,11 +28,11 @@ namespace IA.SDK
             }
         }
 
-        public System.Drawing.Color Color
+        public Color Color
         {
             get
             {
-                return System.Drawing.Color.FromArgb(embed.Color.Value.R, embed.Color.Value.G, embed.Color.Value.B);
+                return new Color(embed.Color.Value.R, embed.Color.Value.G, embed.Color.Value.B);
             }
 
             set

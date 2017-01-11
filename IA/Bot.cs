@@ -54,7 +54,7 @@ namespace IA
         }
 
         public const string VersionText = "IA v" + VersionNumber;
-        public const string VersionNumber = "1.4.4";
+        public const string VersionNumber = "1.5.1";
 
         public bool isManager = false;
 
@@ -182,35 +182,15 @@ namespace IA
 
         private async Task InitializeBot()
         {
-            int id = 0;
             instance = this;
 
             Log.InitializeLogging(clientInformation);
 
-            if (Environment.GetCommandLineArgs().Length > 1)
-            {
-                id = int.Parse(Environment.GetCommandLineArgs()[1]);
-                Console.Title = "Shard " + id;
-            }
-            else
-            {
-                Console.Title = clientInformation.Name + " " + clientInformation.Version;
-                if (Debugger.IsAttached || clientInformation.ShardCount == 1)
-                {
-                    isManager = false;
-                    clientInformation.ShardCount = 1;
-                }
-                else
-                {
-                    isManager = true;
-                    new Manager(clientInformation.ShardCount, this);
-                }
-            }
-
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
-                LogLevel = LogSeverity.Debug,
-                TotalShards = clientInformation.ShardCount
+                LogLevel = LogSeverity.Info,
+                TotalShards = clientInformation.ShardCount,
+
             });
 
             Events = new EventSystem(x =>

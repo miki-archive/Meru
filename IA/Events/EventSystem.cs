@@ -160,7 +160,7 @@ namespace IA.Events
         {
             if (message.StartsWith(identifier))
             {
-                string command = message.Substring(identifier.Length).Split(' ')[0];
+                string command = message.Substring(identifier.Length).Split(' ')[0].ToLower();
 
                 if (events.CommandEvents.ContainsKey(command))
                 {
