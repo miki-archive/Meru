@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    public class RuntimeMessage : DiscordMessage, IDiscordMessage
+    public class RuntimeMessage : IDiscordMessage
     {
         IMessage messageData = null;
 
         RuntimeGuild guild = null;
-        RuntimeChannel channel = null;
+        RuntimeMessageChannel channel = null;
         RuntimeUser user = null;
 
-        public override ulong Id
+        public ulong Id
         {
             get
             {
@@ -24,7 +24,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordUser Author
+        public IDiscordUser Author
         {
             get
             {
@@ -32,7 +32,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordUser Bot
+        public IDiscordUser Bot
         {
             get
             {
@@ -40,7 +40,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordChannel Channel
+        public IDiscordChannel Channel
         {
             get
             {
@@ -48,7 +48,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordGuild Guild
+        public IDiscordGuild Guild
         {
             get
             {
@@ -56,7 +56,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Content
+        public string Content
         {
             get
             {
@@ -64,14 +64,14 @@ namespace IA.SDK
             }
         }
 
-        public override IReadOnlyCollection<ulong> MentionedUserIds
+        public IReadOnlyCollection<ulong> MentionedUserIds
         {
             get
             {
                 return messageData.MentionedUserIds;
             }
         }
-        public override IReadOnlyCollection<ulong> MentionedRoleIds
+        public IReadOnlyCollection<ulong> MentionedRoleIds
         {
             get
             {
@@ -79,11 +79,27 @@ namespace IA.SDK
             }
         }
 
-        public override DateTimeOffset Timestamp
+        public DateTimeOffset Timestamp
         {
             get
             {
                 return messageData.Timestamp;
+            }
+        }
+
+        public int ShardId
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        IDiscordMessageChannel IDiscordMessage.Channel
+        {
+            get
+            {
+                throw new NotImplementedException();
             }
         }
 
@@ -93,7 +109,7 @@ namespace IA.SDK
 
 
             user = new RuntimeUser(msg.Author);
-            channel = new RuntimeChannel(msg.Channel);
+            channel = new RuntimeMessageChannel(msg.Channel);
             IGuild g = (messageData.Author as IGuildUser)?.Guild;
             if (g != null)
             {
@@ -101,17 +117,17 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordEmbed CreateEmbed()
+        public IDiscordEmbed CreateEmbed()
         {
             return new RuntimeEmbedBuilder(new EmbedBuilder());
         }
 
-        public override async Task DeleteAsync()
+        public async Task DeleteAsync()
         {
             await messageData.DeleteAsync();
         }
 
-        public override async Task ModifyAsync(string message)
+        public async Task ModifyAsync(string message)
         {
             await (messageData as IUserMessage)?.ModifyAsync(x =>
             {
@@ -119,12 +135,12 @@ namespace IA.SDK
             });
         }
 
-        public override async Task PinAsync()
+        public async Task PinAsync()
         {
             await (messageData as IUserMessage)?.PinAsync();
         }
 
-        public override async Task UnpinAsync()
+        public async Task UnpinAsync()
         {
             await (messageData as IUserMessage)?.UnpinAsync();
         }

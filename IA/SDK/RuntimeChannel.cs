@@ -9,11 +9,11 @@ using System.IO;
 
 namespace IA.SDK
 {
-    class RuntimeChannel : IDiscordChannel, IProxy<IChannel>
+    class RuntimeMessageChannel : IDiscordMessageChannel, IProxy<IChannel>
     {
         public IChannel channel;
 
-        public RuntimeChannel(IChannel c)
+        public RuntimeMessageChannel(IChannel c)
         {
             channel = c;
         }
