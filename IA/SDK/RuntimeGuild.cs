@@ -80,9 +80,9 @@ namespace IA.SDK
             guild = g;
         }
 
-        public override async Task<IDiscordChannel> GetDefaultChannel()
+        public override async Task<IDiscordMessageChannel> GetDefaultChannel()
         {
-            return new RuntimeChannel(await guild.GetDefaultChannelAsync());
+            return new RuntimeMessageChannel(await guild.GetDefaultChannelAsync());
         }
 
         public override async Task<IDiscordUser> GetUserAsync(ulong user_id)
@@ -90,13 +90,13 @@ namespace IA.SDK
             return new RuntimeUser(await guild.GetUserAsync(user_id));
         }
 
-        public override async Task<List<IDiscordChannel>> GetChannels()
+        public override async Task<List<IDiscordMessageChannel>> GetChannels()
         {
             List<IGuildChannel> channels = (await guild.GetChannelsAsync()).ToList();
-            List<IDiscordChannel> rChannels = new List<IDiscordChannel>();
+            List<IDiscordMessageChannel> rChannels = new List<IDiscordMessageChannel>();
             foreach(IGuildChannel c in channels)
             {
-                rChannels.Add(new RuntimeChannel(c));
+                rChannels.Add(new RuntimeMessageChannel(c));
             }
             return rChannels;
         }
