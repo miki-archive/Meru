@@ -25,7 +25,7 @@ namespace IA
     {
         public AddonManager Addons { private set; get; }
 
-        public DiscordShardedClient Client { private set; get; }
+        public ShardedClient Client { private set; get; }
 
         public EventSystem Events { private set; get; }
         public MySQL Sql { private set; get; }
@@ -38,13 +38,6 @@ namespace IA
             }
         }
 
-        public int ShardId
-        {
-            get
-            {
-                return clientInformation.ShardId;
-            }
-        }
         public string Version
         {
             get
@@ -54,9 +47,7 @@ namespace IA
         }
 
         public const string VersionText = "IA v" + VersionNumber;
-        public const string VersionNumber = "1.5.1";
-
-        public bool isManager = false;
+        public const string VersionNumber = "1.5.5";
 
         public static Bot instance;
 
@@ -98,15 +89,7 @@ namespace IA
 
         public async Task ConnectAsync()
         {
-            if (!isManager)
-            {
-                Log.Message("Connecting...");
-
-                await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
-                await Client.ConnectAsync();
-                await Task.Delay(250);
-                await Task.Delay(-1);
-            }
+            await Client.ConnectAsync();
         }
 
         public void Dispose()
@@ -186,12 +169,7 @@ namespace IA
 
             Log.InitializeLogging(clientInformation);
 
-            Client = new DiscordShardedClient(new DiscordSocketConfig()
-            {
-                LogLevel = LogSeverity.Info,
-                TotalShards = clientInformation.ShardCount,
-
-            });
+            Client = new ShardedClient(clientInformation);
 
             Events = new EventSystem(x =>
             {
@@ -204,15 +182,16 @@ namespace IA
 
             Addons = new AddonManager();
 
-            if(clientInformation.EventLoaderMethod != null)
+            if (clientInformation.EventLoaderMethod != null)
             {
                 await clientInformation.EventLoaderMethod(this);
             }
 
-            Client.MessageReceived += Client_MessageReceived;
-            Client.JoinedGuild += Client_JoinedGuild;
-            Client.LeftGuild += Client_LeftGuild;
-            Client.Log += Client_Log;
+            Client.MessageRecieved += Client_MessageReceived;
+            Client.Ready += Client_Ready;
+            //x.JoinedGuild += Client_JoinedGuild;
+            //x.LeftGuild += Client_LeftGuild;
+            //x.Log += Client_Log;
         }
 
         // Events
@@ -242,17 +221,15 @@ namespace IA
             await Task.CompletedTask;
         }
 
-        private async Task Client_Ready()
+        private async Task Client_Ready(int id)
         {
-            Log.Done("Connected!");
+            Log.Done($"Shard {id} Connected!");
             await Task.CompletedTask;
         }
 
-        private async Task Client_MessageReceived(IMessage arg)
+        private async Task Client_MessageReceived(IDiscordMessage r)
         {
-            RuntimeMessage r = new RuntimeMessage(arg);
-
-            if (arg.Content.Contains(Client.CurrentUser.Id.ToString()))
+            if (r.Content.Contains(r.Bot.Id.ToString()))
             {
                 await Task.Run(() => { Events.OnMention(r); });
             }

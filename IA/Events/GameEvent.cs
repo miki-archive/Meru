@@ -10,10 +10,10 @@ namespace IA.Events
 {
     public class GameEvent
     {
-        ulong userId;
+        ulong userId = 0;
 
-        List<CommandEvent> commands;
-        EventSystem parent;
+        List<CommandEvent> commands = new List<CommandEvent>();
+        EventSystem parent = null;
 
         public bool CheckAsync(IDiscordMessage _message)
         {

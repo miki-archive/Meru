@@ -250,7 +250,7 @@ namespace IA.Events
                 string returnIdentifier = identifier[server_id];
                 if (returnIdentifier == "mention")
                 {
-                    returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
+                   // returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
                 }
 
                 return returnIdentifier;

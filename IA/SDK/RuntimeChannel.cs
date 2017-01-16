@@ -65,7 +65,7 @@ namespace IA.SDK
             await (channel as IMessageChannel)?.SendFileAsync(stream, extension);
         }
 
-        public  async Task<DiscordMessage> SendMessage(string message)
+        public  async Task<IDiscordMessage> SendMessage(string message)
         {
             RuntimeMessage m = new RuntimeMessage(await (channel as IMessageChannel).SendMessage(message));
             return m;

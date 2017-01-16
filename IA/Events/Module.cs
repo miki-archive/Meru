@@ -98,41 +98,36 @@ namespace IA.Events
             defaultInfo.name = defaultInfo.name.ToLower();
             bot.Events.Modules.Add(defaultInfo.name, this);
 
-            if (bot.isManager)
-            {
-                return;
-            }
-
             if (defaultInfo.messageEvent != null)
             {
-                for (int i = 0; i < bot.GetTotalShards(); i++)
+                bot.Client.ForEachShard(x =>
                 {
-                    bot.Client.MessageReceived += Module_MessageRecieved;
-                }
+                    x.MessageReceived += Module_MessageRecieved;
+                });
             }
 
             if (defaultInfo.userUpdateEvent != null)
             {
-                for (int i = 0; i < bot.GetTotalShards(); i++)
+                bot.Client.ForEachShard(x =>
                 {
-                    bot.Client.UserUpdated += Module_UserUpdated;
-                }
+                    x.UserUpdated += Module_UserUpdated;
+                });
             }
 
             if (defaultInfo.guildJoinEvent != null)
             {
-                for (int i = 0; i < bot.GetTotalShards(); i++)
+                bot.Client.ForEachShard(x =>
                 {
-                    bot.Client.UserJoined += Module_UserJoined;
-                }
+                    x.UserJoined += Module_UserJoined;
+                });
             }
 
             if (defaultInfo.guildLeaveEvent != null)
             {
-                for (int i = 0; i < bot.GetTotalShards(); i++)
+                bot.Client.ForEachShard(x =>
                 {
-                    bot.Client.UserLeft += Module_UserLeft;
-                }
+                    x.UserLeft += Module_UserLeft;
+                });
             }
 
             defaultInfo.eventSystem = bot.Events;
@@ -150,7 +145,7 @@ namespace IA.Events
 
         public async Task UninstallAsync(Bot bot)
         {
-            if (!isInstalled || bot.isManager)
+            if (!isInstalled)
             {
                 return;
             }
@@ -162,21 +157,29 @@ namespace IA.Events
                 defaultInfo.eventSystem.events.CommandEvents.Remove(e.name);
             }
 
-            if (defaultInfo.messageEvent != null)
-            {
-                for (int i = 0; i < bot.GetTotalShards(); i++)
-                {
-                    bot.Client.MessageReceived -= Module_MessageRecieved;
-                }
-            }
             if (defaultInfo.userUpdateEvent != null)
             {
-                for (int i = 0; i < bot.GetTotalShards(); i++)
+                bot.Client.ForEachShard(x =>
                 {
-                    bot.Client.UserUpdated -= Module_UserUpdated;
-                }
+                    x.UserUpdated -= Module_UserUpdated;
+                });
             }
 
+            if (defaultInfo.guildJoinEvent != null)
+            {
+                bot.Client.ForEachShard(x =>
+                {
+                    x.UserJoined -= Module_UserJoined;
+                });
+            }
+
+            if (defaultInfo.guildLeaveEvent != null)
+            {
+                bot.Client.ForEachShard(x =>
+                {
+                    x.UserLeft -= Module_UserLeft;
+                });
+            }
             isInstalled = false;
             await Task.CompletedTask;
         }

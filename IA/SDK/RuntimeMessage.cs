@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,15 +9,16 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    public class RuntimeMessage : DiscordMessage, IDiscordMessage
+    public class RuntimeMessage : IDiscordMessage
     {
         IMessage messageData = null;
 
         RuntimeGuild guild = null;
         RuntimeChannel channel = null;
         RuntimeUser user = null;
+        RuntimeClient client = null;
 
-        public override ulong Id
+        public ulong Id
         {
             get
             {
@@ -24,7 +26,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordUser Author
+        public IDiscordUser Author
         {
             get
             {
@@ -32,15 +34,15 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordUser Bot
+        public IDiscordUser Bot
         {
             get
             {
-                return new RuntimeUser((Guild.GetUserAsync(IA.Bot.instance.Client.CurrentUser.Id).GetAwaiter().GetResult() as IProxy<IUser>).ToNativeObject());
+                return new RuntimeUser((Guild.GetUserAsync(IA.Bot.instance.Client.GetShard(0).CurrentUser.Id).GetAwaiter().GetResult() as IProxy<IUser>).ToNativeObject());
             }
         }
 
-        public override IDiscordChannel Channel
+        public IDiscordChannel Channel
         {
             get
             {
@@ -48,7 +50,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordGuild Guild
+        public IDiscordGuild Guild
         {
             get
             {
@@ -56,7 +58,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Content
+        public string Content
         {
             get
             {
@@ -64,14 +66,14 @@ namespace IA.SDK
             }
         }
 
-        public override IReadOnlyCollection<ulong> MentionedUserIds
+        public IReadOnlyCollection<ulong> MentionedUserIds
         {
             get
             {
                 return messageData.MentionedUserIds;
             }
         }
-        public override IReadOnlyCollection<ulong> MentionedRoleIds
+        public IReadOnlyCollection<ulong> MentionedRoleIds
         {
             get
             {
@@ -79,7 +81,7 @@ namespace IA.SDK
             }
         }
 
-        public override DateTimeOffset Timestamp
+        public DateTimeOffset Timestamp
         {
             get
             {
@@ -87,10 +89,17 @@ namespace IA.SDK
             }
         }
 
+        public Interfaces.IDiscordClient Discord
+        {
+            get
+            {
+                return client;
+            }
+        }
+
         public RuntimeMessage(IMessage msg)
         {
             messageData = msg;
-
 
             user = new RuntimeUser(msg.Author);
             channel = new RuntimeChannel(msg.Channel);
@@ -100,18 +109,31 @@ namespace IA.SDK
                 guild = new RuntimeGuild(g);
             }
         }
+        public RuntimeMessage(IMessage msg, DiscordSocketClient c)
+        {
+            messageData = msg;
 
-        public override IDiscordEmbed CreateEmbed()
+            user = new RuntimeUser(msg.Author);
+            channel = new RuntimeChannel(msg.Channel);
+            IGuild g = (messageData.Author as IGuildUser)?.Guild;
+            if (g != null)
+            {
+                guild = new RuntimeGuild(g);
+            }
+            client = new RuntimeClient(c);
+        }
+
+        public IDiscordEmbed CreateEmbed()
         {
             return new RuntimeEmbedBuilder(new EmbedBuilder());
         }
 
-        public override async Task DeleteAsync()
+        public async Task DeleteAsync()
         {
             await messageData.DeleteAsync();
         }
 
-        public override async Task ModifyAsync(string message)
+        public async Task ModifyAsync(string message)
         {
             await (messageData as IUserMessage)?.ModifyAsync(x =>
             {
@@ -119,12 +141,12 @@ namespace IA.SDK
             });
         }
 
-        public override async Task PinAsync()
+        public async Task PinAsync()
         {
             await (messageData as IUserMessage)?.PinAsync();
         }
 
-        public override async Task UnpinAsync()
+        public async Task UnpinAsync()
         {
             await (messageData as IUserMessage)?.UnpinAsync();
         }

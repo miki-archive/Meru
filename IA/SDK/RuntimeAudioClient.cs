@@ -22,6 +22,7 @@ namespace IA.SDK
 
         private RuntimeAudioClient(IAudioClient client)
         {
+            this.client = client;
             client.Disconnected += AudioClient_Disconnected;
         }
 
