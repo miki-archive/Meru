@@ -8,6 +8,7 @@ namespace IA
     {
         static ClientInformation client;
         static FileWriter log;
+        static StreamWriter sw;
 
         public static void InitializeLogging(ClientInformation c)
         {   

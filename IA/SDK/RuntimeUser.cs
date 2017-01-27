@@ -91,6 +91,22 @@ namespace IA.SDK
             }
         }
 
+        public IDiscordAudioChannel VoiceChannel
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public string Nickname
+        {
+            get
+            {
+                return (user as IGuildUser).Nickname;
+            }
+        }
+
         public async Task Kick()
         {
             await (user as IGuildUser).KickAsync();
@@ -105,7 +121,7 @@ namespace IA.SDK
         {
             IDMChannel c = await user.CreateDMChannelAsync();
 
-            await c.SendFileAsync(path);
+            //await c.SendFileAsync(path);
         }
 
         public async Task<IDiscordMessage> SendMessage(string message)
@@ -181,6 +197,14 @@ namespace IA.SDK
             IGuildUser u = (user as IGuildUser);
 
             await u.RemoveRolesAsync(roleList);
+        }
+
+        public async Task SetNickname(string text)
+        {
+            await (user as IGuildUser).ModifyAsync(x =>
+            {
+                x.Nickname = text;
+            });
         }
     }
 }

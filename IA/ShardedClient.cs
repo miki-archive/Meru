@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace IA
 {
+    // TODO: Either throw it away or keep it for later.
     public class ShardedClient
     {
         public event Func<int, Task> Ready;

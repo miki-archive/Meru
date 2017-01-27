@@ -100,34 +100,22 @@ namespace IA.Events
 
             if (defaultInfo.messageEvent != null)
             {
-                bot.Client.ForEachShard(x =>
-                {
-                    x.MessageReceived += Module_MessageRecieved;
-                });
+                bot.Client.MessageReceived += Module_MessageRecieved;
             }
 
             if (defaultInfo.userUpdateEvent != null)
             {
-                bot.Client.ForEachShard(x =>
-                {
-                    x.UserUpdated += Module_UserUpdated;
-                });
+                bot.Client.UserUpdated += Module_UserUpdated;
             }
 
             if (defaultInfo.guildJoinEvent != null)
             {
-                bot.Client.ForEachShard(x =>
-                {
-                    x.UserJoined += Module_UserJoined;
-                });
+                bot.Client.UserJoined += Module_UserJoined;
             }
 
             if (defaultInfo.guildLeaveEvent != null)
             {
-                bot.Client.ForEachShard(x =>
-                {
-                    x.UserLeft += Module_UserLeft;
-                });
+                bot.Client.UserLeft += Module_UserLeft;
             }
 
             defaultInfo.eventSystem = bot.Events;
@@ -157,29 +145,26 @@ namespace IA.Events
                 defaultInfo.eventSystem.events.CommandEvents.Remove(e.name);
             }
 
+            if(defaultInfo.messageEvent != null)
+            {
+                bot.Client.MessageReceived -= Module_MessageRecieved;
+            }
+
             if (defaultInfo.userUpdateEvent != null)
             {
-                bot.Client.ForEachShard(x =>
-                {
-                    x.UserUpdated -= Module_UserUpdated;
-                });
+                bot.Client.UserUpdated -= Module_UserUpdated;
             }
 
             if (defaultInfo.guildJoinEvent != null)
             {
-                bot.Client.ForEachShard(x =>
-                {
-                    x.UserJoined -= Module_UserJoined;
-                });
+                bot.Client.UserJoined -= Module_UserJoined;
             }
 
             if (defaultInfo.guildLeaveEvent != null)
             {
-                bot.Client.ForEachShard(x =>
-                {
-                    x.UserLeft -= Module_UserLeft;
-                });
+                bot.Client.UserLeft -= Module_UserLeft;
             }
+
             isInstalled = false;
             await Task.CompletedTask;
         }

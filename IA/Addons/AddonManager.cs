@@ -31,27 +31,39 @@ namespace IA.Addons
 
             foreach (string s in allFiles)
             {
-                Assembly addon = Assembly.Load(File.ReadAllBytes(s));
-
-                string newS = s.Split('/')[s.Split('/').Length - 1];
-                newS = newS.Remove(newS.Length - 4);
-
-                IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
-
-                if (currentAddon != null)
+                try
                 {
-                    await currentAddon.Create();
-                    AddonInstance m = currentAddon.GetAddon();
-                    foreach (ModuleInstance nm in m.modules)
+                    if(!s.EndsWith(".dll"))
                     {
-                        Events.Module newModule = new Events.Module(nm);
-                        await newModule.InstallAsync(bot);
+                        continue;
                     }
-                    Log.Done($"loaded Add-On \"{newS}\" successfully");
+
+                    Assembly addon = Assembly.Load(File.ReadAllBytes(s));
+
+                    string newS = s.Split('/')[s.Split('/').Length - 1];
+                    newS = newS.Remove(newS.Length - 4);
+
+                    IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
+
+                    if (currentAddon != null)
+                    {
+                        await currentAddon.Create();
+                        AddonInstance m = currentAddon.GetAddon();
+                        foreach (ModuleInstance nm in m.modules)
+                        {
+                            Events.Module newModule = new Events.Module(nm);
+                            await newModule.InstallAsync(bot);
+                        }
+                        Log.Done($"loaded Add-On \"{newS}\" successfully");
+                    }
+                    else
+                    {
+                        Log.Error($"failed to load module \"{newS}\"");
+                    }
                 }
-                else
+                catch
                 {
-                    Log.Error($"failed to load module \"{newS}\"");
+                    Log.Warning($"Module {s} is not compatible with Miki");
                 }
             }
         }

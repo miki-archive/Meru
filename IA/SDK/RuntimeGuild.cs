@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    public class RuntimeGuild : DiscordGuild
+    public class RuntimeGuild : IDiscordGuild
     {
         public IGuild guild = null;
 
-        public override string AvatarUrl
+        public string AvatarUrl
         {
             get
             {
@@ -20,7 +20,7 @@ namespace IA.SDK
             }
         }
 
-        public override ulong Id
+        public ulong Id
         {
             get
             {
@@ -28,7 +28,7 @@ namespace IA.SDK
             }
         }
 
-        public override string Name
+        public string Name
         {
             get
             {
@@ -36,7 +36,7 @@ namespace IA.SDK
             }
         }
 
-        public override uint ChannelCount
+        public uint ChannelCount
         {
             get
             {
@@ -44,7 +44,7 @@ namespace IA.SDK
             }
         }
 
-        public override uint UserCount
+        public uint UserCount
         {
             get
             {
@@ -52,7 +52,7 @@ namespace IA.SDK
             }
         }
 
-        public override IDiscordUser Owner
+        public IDiscordUser Owner
         {
             get
             {
@@ -60,7 +60,7 @@ namespace IA.SDK
             }
         }
 
-        public override List<IDiscordRole> Roles
+        public List<IDiscordRole> Roles
         {
             get
             {
@@ -80,17 +80,17 @@ namespace IA.SDK
             guild = g;
         }
 
-        public override async Task<IDiscordMessageChannel> GetDefaultChannel()
+        public async Task<IDiscordMessageChannel> GetDefaultChannel()
         {
             return new RuntimeMessageChannel(await guild.GetDefaultChannelAsync());
         }
 
-        public override async Task<IDiscordUser> GetUserAsync(ulong user_id)
+        public async Task<IDiscordUser> GetUserAsync(ulong user_id)
         {
             return new RuntimeUser(await guild.GetUserAsync(user_id));
         }
 
-        public override async Task<List<IDiscordMessageChannel>> GetChannels()
+        public async Task<List<IDiscordMessageChannel>> GetChannels()
         {
             List<IGuildChannel> channels = (await guild.GetChannelsAsync()).ToList();
             List<IDiscordMessageChannel> rChannels = new List<IDiscordMessageChannel>();
@@ -101,7 +101,7 @@ namespace IA.SDK
             return rChannels;
         }
 
-        public override IDiscordRole GetRole(ulong role_id)
+        public IDiscordRole GetRole(ulong role_id)
         {
             return new RuntimeRole(guild.GetRole(role_id));
         }

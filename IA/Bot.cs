@@ -1,23 +1,16 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using IA.Addons;
 using IA.Events;
 using IA.FileHandling;
-using IA.SQL;
-using System.IO;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using IA.Internal;
-using IA.Addons;
 using IA.SDK;
 using IA.SDK.Interfaces;
-using System.Windows.Forms;
+using IA.SQL;
+using System;
+using System.IO;
 using System.Threading;
-using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace IA
 {
@@ -25,7 +18,7 @@ namespace IA
     {
         public AddonManager Addons { private set; get; }
 
-        public ShardedClient Client { private set; get; }
+        public DiscordShardedClient Client { private set; get; }
 
         public EventSystem Events { private set; get; }
         public MySQL Sql { private set; get; }
@@ -89,7 +82,9 @@ namespace IA
 
         public async Task ConnectAsync()
         {
+            await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
             await Client.ConnectAsync();
+            await Task.Delay(-1);
         }
 
         public void Dispose()
@@ -105,16 +100,6 @@ namespace IA
         public int GetTotalShards()
         {
             return clientInformation.ShardCount;
-        }
-
-        private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Exception ex = (Exception)e.ExceptionObject;
-            Log.ErrorAt(ex.Source, ex.Message);
-            if (e.IsTerminating)
-            {
-                Log.Error("Closing Shard");
-            }
         }
 
         private ClientInformation InitializePreferencesFile()
@@ -169,7 +154,12 @@ namespace IA
 
             Log.InitializeLogging(clientInformation);
 
-            Client = new ShardedClient(clientInformation);
+            Log.Message(VersionText);
+
+            Client = new DiscordShardedClient(new DiscordSocketConfig()
+            {
+                TotalShards = clientInformation.ShardCount
+            });
 
             Events = new EventSystem(x =>
             {
@@ -181,17 +171,37 @@ namespace IA
             Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
 
             Addons = new AddonManager();
+            await Addons.Load(this);
 
             if (clientInformation.EventLoaderMethod != null)
             {
                 await clientInformation.EventLoaderMethod(this);
             }
 
-            Client.MessageRecieved += Client_MessageReceived;
-            Client.Ready += Client_Ready;
-            //x.JoinedGuild += Client_JoinedGuild;
-            //x.LeftGuild += Client_LeftGuild;
-            //x.Log += Client_Log;
+            Application.ThreadException +=
+               new ThreadExceptionEventHandler(Application_ThreadException);
+
+            Client.MessageReceived += async (a) => 
+            {
+                Task.Run(() => Client_MessageReceived(a));
+            };
+            Client.JoinedGuild += Client_JoinedGuild;
+            Client.LeftGuild += Client_LeftGuild;
+
+            foreach(DiscordSocketClient c in Client.Shards)
+            {
+                c.Ready += async () => {
+                    Log.Message($"shard {c.ShardId} connected!");
+                    await c.SetGameAsync($"{c.ShardId}/{GetTotalShards()} | >help");
+                };
+            }
+
+            //Client.Log += Client_Log;
+        }
+
+        private void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            Log.Error(e.Exception.Message + "\n\n" + e.Exception.StackTrace);
         }
 
         // Events
@@ -221,26 +231,29 @@ namespace IA
             await Task.CompletedTask;
         }
 
-        private async Task Client_Ready(int id)
+        private async Task Client_MessageReceived(SocketMessage arg)
         {
-            Log.Done($"Shard {id} Connected!");
-            await Task.CompletedTask;
-        }
+            try
+            {
+                RuntimeMessage r = new RuntimeMessage(arg);
 
-        private async Task Client_MessageReceived(IDiscordMessage r)
-        {
-            if (r.Content.Contains(r.Bot.Id.ToString()))
-            {
-                await Task.Run(() => { Events.OnMention(r); });
-            }
+                if (r.Content.Contains(r.Bot.Id.ToString()))
+                {
+                    await Events.OnMention(r);
+                }
 
-            if (r.Guild != null)
-            {
-                await Task.Run(() => { Events.OnMessageRecieved(r); });
+                if (r.Guild != null)
+                {
+                    await Events.OnMessageRecieved(r);
+                }
+                else
+                {
+                    await Events.OnPrivateMessage(r);
+                }
             }
-            else
+            catch(Exception e)
             {
-                await Task.Run(() => { Events.OnPrivateMessage(r); });
+                Log.ErrorAt("messagerecieved", e.Message);
             }
         }
     }

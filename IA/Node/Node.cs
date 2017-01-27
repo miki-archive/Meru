@@ -49,6 +49,7 @@ namespace IA.Node
             start.RedirectStandardOutput = true;
             start.RedirectStandardError = true;
             string output= RunProcessAsync(start);
+            Log.Message("NODE: " + output);
             return output;
         }
 

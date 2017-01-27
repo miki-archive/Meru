@@ -42,7 +42,7 @@ namespace IA.SDK
             }
         }
 
-        public IDiscordChannel Channel
+        public IDiscordMessageChannel Channel
         {
             get
             {
@@ -89,13 +89,14 @@ namespace IA.SDK
             }
         }
 
-<<<<<<< HEAD
         public Interfaces.IDiscordClient Discord
         {
             get
             {
                 return client;
-=======
+            }
+        }
+
         public int ShardId
         {
             get
@@ -104,12 +105,11 @@ namespace IA.SDK
             }
         }
 
-        IDiscordMessageChannel IDiscordMessage.Channel
+        public IDiscordAudioChannel VoiceChannel
         {
             get
             {
                 throw new NotImplementedException();
->>>>>>> 7ec0f55567826bbda9ef2bcd49a18c04d2ddebac
             }
         }
 
@@ -118,7 +118,7 @@ namespace IA.SDK
             messageData = msg;
 
             user = new RuntimeUser(msg.Author);
-            channel = new RuntimeChannel(msg.Channel);
+            channel = new RuntimeMessageChannel(msg.Channel);
             IGuild g = (messageData.Author as IGuildUser)?.Guild;
             if (g != null)
             {
