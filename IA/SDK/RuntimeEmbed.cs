@@ -1,11 +1,7 @@
-﻿using IA.SDK.Interfaces;
+﻿using Discord;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using Discord;
 
 namespace IA.SDK
 {

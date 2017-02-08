@@ -1,15 +1,12 @@
 ﻿using Discord;
 using IA.SDK.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    class RuntimeMessageChannel : IDiscordMessageChannel, IProxy<IChannel>
+    internal class RuntimeMessageChannel : IDiscordMessageChannel, IProxy<IChannel>
     {
         public IChannel channel;
 
@@ -46,7 +43,7 @@ namespace IA.SDK
         {
             List<IMessage> m = new List<IMessage>();
 
-            foreach(IDiscordMessage msg in messages)
+            foreach (IDiscordMessage msg in messages)
             {
                 m.Add((msg as IProxy<IMessage>).ToNativeObject());
             }
@@ -77,12 +74,12 @@ namespace IA.SDK
                 outputUsers.Add(new RuntimeUser(u));
             }
 
-            return outputUsers;           
+            return outputUsers;
         }
 
         public async Task<IDiscordMessage> SendFileAsync(string path)
         {
-            return null;// new RuntimeMessage(await (channel as IMessageChannel).SendFileAsync(path));
+            return new RuntimeMessage(await (channel as IMessageChannel).SendFileAsync(path));
         }
 
         public async Task<IDiscordMessage> SendFileAsync(MemoryStream stream, string extension)
@@ -95,6 +92,7 @@ namespace IA.SDK
             RuntimeMessage m = new RuntimeMessage(await (channel as IMessageChannel).SendMessage(message));
             return m;
         }
+
         public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
             return new RuntimeMessage(

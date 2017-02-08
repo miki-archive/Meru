@@ -1,13 +1,10 @@
-﻿using Discord;
+﻿using IA.SDK;
+using IA.SDK.Interfaces;
 using IA.SQL;
-using IA.SDK;
-using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using IA.SDK.Interfaces;
 
 namespace IA.Events
 {
@@ -17,10 +14,10 @@ namespace IA.Events
         public Dictionary<string, Module> Modules { get; internal set; } = new Dictionary<string, Module>();
         public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
 
-        Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
-        Dictionary<string, string> aliases = new Dictionary<string, string>();
+        private Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
+        private Dictionary<string, string> aliases = new Dictionary<string, string>();
 
-        List<ulong> ignore = new List<ulong>();
+        private List<ulong> ignore = new List<ulong>();
 
         /// <summary>
         /// Variable to check if eventSystem has been defined already.
@@ -28,7 +25,7 @@ namespace IA.Events
         public BotInformation bot;
 
         internal EventContainer events { private set; get; }
-        MySQL sql;
+        private MySQL sql;
 
         public PrefixValue DefaultIdentifier { private set; get; }
         public PrefixValue OverrideIdentifier { private set; get; }
@@ -53,15 +50,14 @@ namespace IA.Events
 
             OverrideIdentifier = PrefixValue.Set(bot.Name.ToLower() + ".");
             DefaultIdentifier = bot.Identifier;
-        }  
-          
+        }
 
         public void AddCommandEvent(Action<RuntimeCommandEvent> info)
         {
             RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            if(newEvent.usage[0] == "usage not set!")
+            if (newEvent.usage[0] == "usage not set!")
             {
                 newEvent.usage[0] = newEvent.name;
             }
@@ -118,7 +114,6 @@ namespace IA.Events
             }
             events.JoinServerEvents.Add(newEvent.name.ToLower(), newEvent);
 
-
             MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
@@ -156,7 +151,7 @@ namespace IA.Events
             MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
-        async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e, bool doRunCommand = true)
+        private async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e, bool doRunCommand = true)
         {
             if (message.StartsWith(identifier))
             {
@@ -201,6 +196,7 @@ namespace IA.Events
             }
             return output;
         }
+
         public int CommandsUsed(string eventName)
         {
             return events.GetEvent(eventName).CommandUsed;
@@ -209,7 +205,7 @@ namespace IA.Events
         public Module CreateModule(Action<ModuleInformation> info)
         {
             Module newModule = new Module(info);
-            foreach(Event e in newModule.defaultInfo.events)
+            foreach (Event e in newModule.defaultInfo.events)
             {
                 e.eventSystem = this;
                 e.module = newModule;
@@ -250,7 +246,7 @@ namespace IA.Events
                 string returnIdentifier = identifier[server_id];
                 if (returnIdentifier == "mention")
                 {
-                   // returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
+                    // returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
                 }
 
                 return returnIdentifier;
@@ -263,7 +259,7 @@ namespace IA.Events
 
         public Module GetModuleByName(string name)
         {
-            if(Modules.ContainsKey(name.ToLower()))
+            if (Modules.ContainsKey(name.ToLower()))
             {
                 return Modules[name.ToLower()];
             }
@@ -425,7 +421,6 @@ namespace IA.Events
 
             string message = _message.Content.ToLower();
 
-
             if (await CheckIdentifier(message, identifier[_message.Guild.Id], _message))
             {
                 return;
@@ -453,7 +448,7 @@ namespace IA.Events
 
         public async Task StartGame(ulong id, GameEvent game)
         {
-            if(GameEvents.ContainsKey(id))
+            if (GameEvents.ContainsKey(id))
             {
                 return;
             }

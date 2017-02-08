@@ -1,12 +1,11 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using IA.SDK;
-using IA.SDK.Interfaces;
+using IA.SQL;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Discord.WebSocket;
-using IA.SQL;
-using MySql.Data.MySqlClient;
 
 namespace IA.Events
 {
@@ -14,31 +13,34 @@ namespace IA.Events
     {
         public ModuleInformation defaultInfo = new ModuleInformation();
 
-        Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
+        private Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
 
         public string SqlName
         {
             get
             {
-                return "module:" + defaultInfo.name; 
+                return "module:" + defaultInfo.name;
             }
         }
 
-        bool isInstalled = false;
+        private bool isInstalled = false;
 
         internal Module()
         {
         }
+
         public Module(string name, bool enabled = true)
         {
             defaultInfo = new ModuleInformation();
             defaultInfo.name = name;
             defaultInfo.enabled = enabled;
         }
+
         public Module(Action<ModuleInformation> info)
         {
             info.Invoke(defaultInfo);
         }
+
         public Module(ModuleInstance addon)
         {
             defaultInfo = new ModuleInformation();
@@ -76,8 +78,6 @@ namespace IA.Events
                     x.description = e.metadata.description;
                     x.errorMessage = e.metadata.errorMessage;
                     x.defaultEnabled = e.defaultEnabled;
-
-
                 }));
             }
         }
@@ -145,7 +145,7 @@ namespace IA.Events
                 defaultInfo.eventSystem.events.CommandEvents.Remove(e.name);
             }
 
-            if(defaultInfo.messageEvent != null)
+            if (defaultInfo.messageEvent != null)
             {
                 bot.Client.MessageReceived -= Module_MessageRecieved;
             }
@@ -208,7 +208,7 @@ namespace IA.Events
                 {
                     Task.Run(() => defaultInfo.messageEvent(msg));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Log.ErrorAt("module@message", ex.Message);
                 }
@@ -257,7 +257,7 @@ namespace IA.Events
         }
 
         // TODO: Query this.
-        int IsEventEnabled(ulong serverid)
+        private int IsEventEnabled(ulong serverid)
         {
             if (defaultInfo.eventSystem.bot.SqlInformation == null) return 1;
 

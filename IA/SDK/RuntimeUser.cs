@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Discord;
+using IA.SDK.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Discord;
-using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
@@ -15,6 +14,7 @@ namespace IA.SDK
         public RuntimeUser()
         {
         }
+
         public RuntimeUser(IUser author)
         {
             user = author;
@@ -82,7 +82,7 @@ namespace IA.SDK
             {
                 IGuildUser u = user as IGuildUser;
 
-                if(u == null)
+                if (u == null)
                 {
                     return null;
                 }
@@ -131,6 +131,7 @@ namespace IA.SDK
             RuntimeMessage m = new RuntimeMessage(await c.SendMessageAsync(message));
             return m;
         }
+
         public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
             IDMChannel c = await user.CreateDMChannelAsync();

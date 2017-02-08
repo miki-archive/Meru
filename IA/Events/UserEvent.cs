@@ -1,15 +1,10 @@
-﻿using Discord;
-using IA.SDK;
+﻿using IA.SDK;
 using IA.SDK.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public class GuildEvent:Event
+    public class GuildEvent : Event
     {
         public ProcessServerCommand processCommand = async (e) =>
         {

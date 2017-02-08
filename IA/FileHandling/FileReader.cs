@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IA.FileHandling
 {
     public class FileReader : IDisposable
     {
-        StreamReader file;
+        private StreamReader file;
 
-        string filePath;
+        private string filePath;
 
         public FileReader(string fileName)
         {
@@ -26,6 +22,7 @@ namespace IA.FileHandling
                 file = new StreamReader(new FileStream(filePath, FileMode.Create));
             }
         }
+
         public FileReader(string fileName, string relativePath)
         {
             Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);
@@ -40,6 +37,7 @@ namespace IA.FileHandling
                 file = new StreamReader(new FileStream(filePath, FileMode.Open));
             }
         }
+
         public void Dispose()
         {
             file.Dispose();
@@ -49,6 +47,7 @@ namespace IA.FileHandling
         {
             return File.Exists(Directory.GetCurrentDirectory() + "\\" + fileName);
         }
+
         public static bool FileExist(string fileName, string relativePath)
         {
             Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);

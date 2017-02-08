@@ -1,17 +1,14 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using IA.SDK.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK
 {
     public class RuntimeClient : Interfaces.IDiscordClient
     {
-        DiscordSocketClient client;
+        private DiscordSocketClient client;
 
         public RuntimeClient(DiscordSocketClient c)
         {
@@ -23,7 +20,7 @@ namespace IA.SDK
             get
             {
                 List<IDiscordGuild> g = new List<IDiscordGuild>();
-                foreach(IGuild guild in client.Guilds)
+                foreach (IGuild guild in client.Guilds)
                 {
                     g.Add(new RuntimeGuild(guild));
                 }
@@ -41,7 +38,7 @@ namespace IA.SDK
 
         public IDiscordUser GetUser(ulong id)
         {
-            throw new NotImplementedException();
+            return new RuntimeUser(client.GetUser(id));
         }
 
         public async Task SetGameAsync(string game, string link = "")

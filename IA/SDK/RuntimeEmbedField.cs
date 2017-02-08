@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Discord;
 using IA.SDK.Interfaces;
-using Discord;
 
 namespace IA.SDK
 {
     public class RuntimeEmbedField : IEmbedField
     {
-        EmbedFieldBuilder field;
+        private EmbedFieldBuilder field;
 
         public RuntimeEmbedField(IEmbedField f)
         {
@@ -15,6 +14,7 @@ namespace IA.SDK
             field.Value = f.Value;
             field.IsInline = f.IsInline;
         }
+
         public RuntimeEmbedField(string Name, string Value, bool Isinline = false)
         {
             field = new EmbedFieldBuilder();

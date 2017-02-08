@@ -1,12 +1,9 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using IA.Events;
 using IA.SDK;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA
@@ -15,9 +12,10 @@ namespace IA
     public class ShardedClient
     {
         public event Func<int, Task> Ready;
+
         public event Func<IDiscordMessage, Task> MessageRecieved;
 
-        List<DiscordSocketClient> shards = new List<DiscordSocketClient>();
+        private List<DiscordSocketClient> shards = new List<DiscordSocketClient>();
 
         private ClientInformation info = new ClientInformation();
 
@@ -36,7 +34,7 @@ namespace IA
                 int channelCount = 0;
                 foreach (DiscordSocketClient sc in shards)
                 {
-                    foreach(SocketGuild g in sc.Guilds)
+                    foreach (SocketGuild g in sc.Guilds)
                     {
                         channelCount += g.Channels.Count;
                     }
@@ -44,6 +42,7 @@ namespace IA
                 return channelCount;
             }
         }
+
         public int GuildCount
         {
             get
@@ -98,11 +97,9 @@ namespace IA
             }
         }
 
-
-
         public async Task ConnectAsync()
         {
-            foreach(DiscordSocketClient client in shards)
+            foreach (DiscordSocketClient client in shards)
             {
                 Log.Message($"Connecting to shard {client.ShardId}");
                 await client.LoginAsync(TokenType.Bot, info.Token);
@@ -113,7 +110,7 @@ namespace IA
 
         public void ForEachShard(Action<DiscordSocketClient> a)
         {
-            foreach(DiscordSocketClient cli in shards)
+            foreach (DiscordSocketClient cli in shards)
             {
                 a.Invoke(cli);
             }
@@ -123,13 +120,14 @@ namespace IA
         {
             return shards[id];
         }
+
         public IDiscordUser GetUser(ulong id)
         {
-            foreach(DiscordSocketClient client in shards)
+            foreach (DiscordSocketClient client in shards)
             {
                 IUser u = client.GetUser(id);
 
-                if(u != null)
+                if (u != null)
                 {
                     return new RuntimeUser(u);
                 }
@@ -137,7 +135,7 @@ namespace IA
             return null;
         }
 
-        async Task OnMessageRecieved(DiscordSocketClient c, IMessage m)
+        private async Task OnMessageRecieved(DiscordSocketClient c, IMessage m)
         {
             IDiscordMessage msg = new RuntimeMessage(m);
             await MessageRecieved.Invoke(msg);

@@ -1,10 +1,5 @@
-﻿using Discord;
-using IA.SDK;
-using IA.SDK.Interfaces;
+﻿using IA.SDK.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -17,8 +12,8 @@ namespace IA.Events
 
         public CommandDoneEvent() : base()
         {
-
         }
+
         public CommandDoneEvent(Action<CommandDoneEvent> e)
         {
             e.Invoke(this);

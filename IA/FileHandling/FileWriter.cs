@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IA.FileHandling
 {
     public class FileWriter : IDisposable
     {
-        string filePath;
+        private string filePath;
 
-        StreamWriter file;
+        private StreamWriter file;
 
         public FileWriter(string fileName)
         {
@@ -29,6 +24,7 @@ namespace IA.FileHandling
                 file.WriteLine($"# {fileName} created with {Bot.VersionText}");
             }
         }
+
         public FileWriter(string fileName, string relativePath)
         {
             Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);
@@ -61,12 +57,14 @@ namespace IA.FileHandling
             file.WriteLine(variable);
             file.Flush();
         }
+
         public void Write(string variable, string comment)
         {
             file.WriteLine($"# {comment}");
             file.WriteLine(variable);
             file.Flush();
         }
+
         public void WriteComment(string comment)
         {
             file.WriteLine($"# {comment}");

@@ -1,17 +1,11 @@
 ﻿using Discord;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
 using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    class RuntimeRole : IDiscordRole, IProxy<IRole>
+    internal class RuntimeRole : IDiscordRole, IProxy<IRole>
     {
-        IRole role;
+        private IRole role;
 
         public RuntimeRole(IRole role)
         {

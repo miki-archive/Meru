@@ -2,26 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace IA
 {
-    class Manager : IpcSocket
+    internal class Manager : IpcSocket
     {
-        AppDomain app = AppDomain.CurrentDomain;
-        Bot bot = null;
+        private AppDomain app = AppDomain.CurrentDomain;
+        private Bot bot = null;
 
-        List<Shard> shard = new List<Shard>();
+        private List<Shard> shard = new List<Shard>();
 
-        int shardCount;
+        private int shardCount;
 
         public Manager(int shard_count, Bot bot)
         {
@@ -29,7 +22,6 @@ namespace IA
 
             this.bot = bot;
             OpenManager().GetAwaiter().GetResult();
-
         }
 
         private async Task Heartbeat()
@@ -81,7 +73,6 @@ namespace IA
             Application.EnableVisualStyles();
         }
 
-
         #region events
 
         private void App_ProcessExit(object sender, EventArgs e)
@@ -92,6 +83,6 @@ namespace IA
             }
         }
 
-        #endregion
+        #endregion events
     }
 }

@@ -7,6 +7,7 @@ using IA.SDK;
 using IA.SDK.Interfaces;
 using IA.SQL;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +61,7 @@ namespace IA
             }
             InitializeBot().GetAwaiter().GetResult();
         }
+
         public Bot(Action<ClientInformation> info)
         {
             clientInformation = new ClientInformation();
@@ -71,10 +73,12 @@ namespace IA
         {
             Events.Developers.Add(id);
         }
+
         public void AddDeveloper(IDiscordUser user)
         {
             Events.Developers.Add(user.Id);
         }
+
         public void AddDeveloper(IUser user)
         {
             Events.Developers.Add(user.Id);
@@ -181,16 +185,18 @@ namespace IA
             Application.ThreadException +=
                new ThreadExceptionEventHandler(Application_ThreadException);
 
-            Client.MessageReceived += async (a) => 
+            Client.MessageReceived += async (a) =>
             {
                 Task.Run(() => Client_MessageReceived(a));
             };
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
+            Client.UserUpdated += async (u1, u2) => { Log.Done($"UPDATED {u1.Username}"); };
 
-            foreach(DiscordSocketClient c in Client.Shards)
+            foreach (DiscordSocketClient c in Client.Shards)
             {
-                c.Ready += async () => {
+                c.Ready += async () =>
+                {
                     Log.Message($"shard {c.ShardId} connected!");
                     await c.SetGameAsync($"{c.ShardId}/{GetTotalShards()} | >help");
                 };
@@ -233,9 +239,12 @@ namespace IA
 
         private async Task Client_MessageReceived(SocketMessage arg)
         {
+            Stopwatch s = new Stopwatch();
+            s.Start();
+
             try
             {
-                RuntimeMessage r = new RuntimeMessage(arg);
+                RuntimeMessage r = new RuntimeMessage(arg, arg.Discord);
 
                 if (r.Content.Contains(r.Bot.Id.ToString()))
                 {
@@ -251,10 +260,13 @@ namespace IA
                     await Events.OnPrivateMessage(r);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.ErrorAt("messagerecieved", e.Message);
             }
+
+            s.Stop();
+            Log.Message($"Message handled in {s.ElapsedMilliseconds}ms");
         }
     }
 }

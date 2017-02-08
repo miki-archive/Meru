@@ -1,5 +1,4 @@
-﻿using System;
-using Discord;
+﻿using Discord;
 using IA.SDK.Interfaces;
 
 namespace IA.SDK
@@ -25,6 +24,7 @@ namespace IA.SDK
                 author.IconUrl = value;
             }
         }
+
         public string Name
         {
             get
@@ -37,6 +37,7 @@ namespace IA.SDK
                 author.Name = value;
             }
         }
+
         public string Url
         {
             get

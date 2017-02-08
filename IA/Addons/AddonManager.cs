@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using IA.SDK;
 using System.IO;
-using IA.SDK;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IA.Events;
 using System.Reflection;
-using Discord;
+using System.Threading.Tasks;
 
 namespace IA.Addons
 {
@@ -33,7 +27,7 @@ namespace IA.Addons
             {
                 try
                 {
-                    if(!s.EndsWith(".dll"))
+                    if (!s.EndsWith(".dll"))
                     {
                         continue;
                     }
@@ -77,7 +71,6 @@ namespace IA.Addons
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
 
-
             IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
 
             if (currentAddon != null)
@@ -87,7 +80,7 @@ namespace IA.Addons
 
                 foreach (ModuleInstance nm in m.modules)
                 {
-                    if(bot.Events.GetModuleByName(nm.data.name) != null)
+                    if (bot.Events.GetModuleByName(nm.data.name) != null)
                     {
                         Log.Warning("Module already loaded, stopping load");
                         return;
@@ -95,7 +88,7 @@ namespace IA.Addons
                     Events.Module newModule = new Events.Module(nm);
                     await newModule.InstallAsync(bot);
                 }
-                
+
                 Log.Done($"Loaded Add-On \"{newS}\" successfully");
             }
             else
@@ -144,7 +137,6 @@ namespace IA.Addons
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
 
-
             IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
 
             if (currentAddon != null)
@@ -155,8 +147,8 @@ namespace IA.Addons
                 foreach (ModuleInstance nm in m.modules)
                 {
                     Events.Module mod = bot.Events.GetModuleByName(nm.data.name);
-                    
-                    if(mod != null)
+
+                    if (mod != null)
                     {
                         await mod.UninstallAsync(bot);
                     }

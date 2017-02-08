@@ -1,11 +1,7 @@
 ﻿using Discord;
-using Discord.API;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Node
@@ -48,7 +44,7 @@ namespace IA.Node
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             start.RedirectStandardError = true;
-            string output= RunProcessAsync(start);
+            string output = RunProcessAsync(start);
             Log.Message("NODE: " + output);
             return output;
         }
@@ -66,7 +62,7 @@ namespace IA.Node
             channel.SendMessage(":white_check_mark: " + programName + ".js successfully ended.").GetAwaiter().GetResult();
         }
 
-        static string RunProcessAsync(ProcessStartInfo p)
+        private static string RunProcessAsync(ProcessStartInfo p)
         {
             if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
             {
@@ -83,7 +79,7 @@ namespace IA.Node
             }
         }
 
-        static void RunProcessRealtime(ProcessStartInfo p, string programName, IMessageChannel channel)
+        private static void RunProcessRealtime(ProcessStartInfo p, string programName, IMessageChannel channel)
         {
             if (File.Exists(Directory.GetCurrentDirectory() + @"\" + p.Arguments.Split(' ')[0] + ".js"))
             {
@@ -100,4 +96,3 @@ namespace IA.Node
         }
     }
 }
-

@@ -1,19 +1,16 @@
 ﻿using IA.SDK;
 using IA.SDK.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Events
 {
     public class GameEvent
     {
-        ulong userId = 0;
+        private ulong userId = 0;
 
-        List<CommandEvent> commands = new List<CommandEvent>();
-        EventSystem parent = null;
+        private List<CommandEvent> commands = new List<CommandEvent>();
+        private EventSystem parent = null;
 
         public bool CheckAsync(IDiscordMessage _message)
         {
@@ -21,7 +18,7 @@ namespace IA.Events
 
             if (e != null)
             {
-                Task.Run(() => 
+                Task.Run(() =>
                 {
                     e.checkCommand(_message, _message.Content.Split(' ')[0], e.aliases);
                 });

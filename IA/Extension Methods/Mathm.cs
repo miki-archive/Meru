@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Miki
 {
     public class Mathm
     {
-        static Random random = new Random();
+        private static Random random = new Random();
 
         public static float Clamp(float value, float min, float max)
         {
             return Math.Min(Math.Max(value, min), max);
         }
+
         public static int Clamp(int value, int min, int max)
-        { 
+        {
             return Math.Min(Math.Max(value, min), max);
         }
 

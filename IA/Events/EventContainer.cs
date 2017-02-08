@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    class EventContainer
+    internal class EventContainer
     {
         public Dictionary<string, RuntimeCommandEvent> CommandEvents { private set; get; } = new Dictionary<string, RuntimeCommandEvent>();
         public Dictionary<string, CommandDoneEvent> CommandDoneEvents { private set; get; } = new Dictionary<string, CommandDoneEvent>();

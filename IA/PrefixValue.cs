@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace IA
+﻿namespace IA
 {
     public class PrefixValue
     {
@@ -8,6 +6,7 @@ namespace IA
         {
             return c1.Value == c2;
         }
+
         public static bool operator ==(string c1, PrefixValue c2)
         {
             return c1 == c2.Value;
@@ -17,10 +16,11 @@ namespace IA
         {
             return c1.Value != c2;
         }
+
         public static bool operator !=(string c1, PrefixValue c2)
         {
             return c1 != c2.Value;
-        } 
+        }
 
         public string Value { get; internal set; } = "";
 

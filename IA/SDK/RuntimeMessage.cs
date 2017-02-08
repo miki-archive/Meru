@@ -3,20 +3,18 @@ using Discord.WebSocket;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK
 {
     public class RuntimeMessage : IDiscordMessage
     {
-        IMessage messageData = null;
+        private IMessage messageData = null;
 
-        RuntimeGuild guild = null;
-        RuntimeMessageChannel channel = null;
-        RuntimeUser user = null;
-        RuntimeClient client = null;
+        private RuntimeGuild guild = null;
+        private RuntimeMessageChannel channel = null;
+        private RuntimeUser user = null;
+        private RuntimeClient client = null;
 
         public ulong Id
         {
@@ -73,6 +71,7 @@ namespace IA.SDK
                 return messageData.MentionedUserIds;
             }
         }
+
         public IReadOnlyCollection<ulong> MentionedRoleIds
         {
             get
@@ -120,11 +119,15 @@ namespace IA.SDK
             user = new RuntimeUser(msg.Author);
             channel = new RuntimeMessageChannel(msg.Channel);
             IGuild g = (messageData.Author as IGuildUser)?.Guild;
+
+            client = new RuntimeClient((msg as SocketMessage)?.Discord);
+
             if (g != null)
             {
                 guild = new RuntimeGuild(g);
             }
         }
+
         public RuntimeMessage(IMessage msg, DiscordSocketClient c)
         {
             messageData = msg;

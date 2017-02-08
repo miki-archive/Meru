@@ -1,11 +1,8 @@
-﻿using Discord;
-using IA.SDK;
+﻿using IA.SDK;
 using IA.SQL;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -43,7 +40,6 @@ namespace IA.Events
             info.Invoke(this);
             CommandUsed = 0;
         }
-
 
         public async Task SetEnabled(ulong serverid, bool enabled)
         {

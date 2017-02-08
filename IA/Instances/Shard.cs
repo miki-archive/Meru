@@ -1,16 +1,12 @@
 ﻿using IA.Internal;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA
 {
-    class Shard : IpcSocket
+    internal class Shard : IpcSocket
     {
         public int id;
         public Process shardProcess;

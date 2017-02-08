@@ -8,12 +8,12 @@ namespace IA.SQL
     public delegate void QueryOutput(Dictionary<string, object> result);
 
     public class MySQL
-    {   
-        static MySQL instance;
+    {
+        private static MySQL instance;
 
-        SQLInformation info;
+        private SQLInformation info;
 
-        PrefixValue defaultIdentifier;
+        private PrefixValue defaultIdentifier;
 
         public MySQL()
         {
@@ -26,10 +26,11 @@ namespace IA.SQL
             info = instance.info;
             defaultIdentifier = instance.defaultIdentifier;
         }
+
         public MySQL(SQLInformation info, PrefixValue defaultIdentifier)
         {
             this.info = info;
-            if(defaultIdentifier == null)
+            if (defaultIdentifier == null)
             {
                 this.defaultIdentifier = new PrefixValue(">");
             }
@@ -83,7 +84,6 @@ namespace IA.SQL
         {
             if (instance.info == null) return;
             MySqlConnection connection = new MySqlConnection(instance.info.GetConnectionString());
-
 
             List<MySqlParameter> parameters = new List<MySqlParameter>();
 
@@ -320,4 +320,3 @@ namespace IA.SQL
         }
     }
 }
-

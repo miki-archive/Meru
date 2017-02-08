@@ -1,9 +1,7 @@
 ﻿using Discord;
 using IA.SDK.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK
@@ -94,7 +92,7 @@ namespace IA.SDK
         {
             List<IGuildChannel> channels = (await guild.GetChannelsAsync()).ToList();
             List<IDiscordMessageChannel> rChannels = new List<IDiscordMessageChannel>();
-            foreach(IGuildChannel c in channels)
+            foreach (IGuildChannel c in channels)
             {
                 rChannels.Add(new RuntimeMessageChannel(c));
             }

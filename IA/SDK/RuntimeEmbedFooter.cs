@@ -1,5 +1,4 @@
-﻿using System;
-using Discord;
+﻿using Discord;
 using IA.SDK.Interfaces;
 
 namespace IA.SDK

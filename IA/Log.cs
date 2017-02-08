@@ -6,12 +6,11 @@ namespace IA
 {
     public class Log
     {
-        static ClientInformation client;
-        static FileWriter log;
-        static StreamWriter sw;
+        private static ClientInformation client;
+        private static FileWriter log;
 
         public static void InitializeLogging(ClientInformation c)
-        {   
+        {
             client = c;
             Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/logs");
             if (client.CanFileLog(LogLevel.ERROR))
@@ -74,7 +73,7 @@ namespace IA
             if (client == null)
             {
                 return;
-            } 
+            }
 
             Console.ForegroundColor = ConsoleColor.Red;
             if (client.CanLog(LogLevel.ERROR))
@@ -97,7 +96,7 @@ namespace IA
             if (client == null)
             {
                 return;
-            } 
+            }
 
             Console.ForegroundColor = ConsoleColor.Red;
             if (client.CanLog(LogLevel.ERROR))
@@ -108,7 +107,7 @@ namespace IA
             {
                 log?.Write(message);
             }
-        Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         /// <summary>

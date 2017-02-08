@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Internal
@@ -31,7 +29,7 @@ namespace IA.Internal
                 Console.WriteLine("[SERVER] Current TransmissionMode: {0}.",
                     pipeServer.TransmissionMode);
 
-                Console.WriteLine(p.StartInfo.Arguments + 
+                Console.WriteLine(p.StartInfo.Arguments +
                     pipeServer.GetClientHandleAsString());
 
                 pipeServer.DisposeLocalCopyOfClientHandle();

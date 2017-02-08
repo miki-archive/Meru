@@ -3,17 +3,15 @@ using Discord.Audio;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    class RuntimeAudioClient : DiscordAudioClient, IProxy<IAudioClient>
+    internal class RuntimeAudioClient : DiscordAudioClient, IProxy<IAudioClient>
     {
-        IAudioClient client;
+        private IAudioClient client;
 
-        Queue<IAudio> queue = new Queue<IAudio>();
+        private Queue<IAudio> queue = new Queue<IAudio>();
 
         public static async Task<RuntimeAudioClient> Create(RuntimeUser u)
         {
@@ -45,14 +43,12 @@ namespace IA.SDK
         public override async Task Disconnect()
         {
             await client.DisconnectAsync();
-           
         }
 
         public override async Task Pause()
         {
             await Task.CompletedTask;
             //TODO Add Pause
-
         }
 
         public override async Task Play(IAudio audio, bool skipIfPlaying = false)

@@ -1,11 +1,8 @@
-﻿using Discord;
-using IA.SDK;
+﻿using IA.SDK;
 using IA.SDK.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -30,6 +27,7 @@ namespace IA.Events
         {
             CommandUsed = 0;
         }
+
         public RuntimeCommandEvent(Action<RuntimeCommandEvent> info)
         {
             info.Invoke(this);
@@ -99,13 +97,13 @@ namespace IA.Events
             }
         }
 
-        float GetCooldown(ulong id)
+        private float GetCooldown(ulong id)
         {
             float currentCooldown = (float)(DateTime.Now.AddSeconds(-cooldown) - lastTimeUsed[id]).TotalSeconds;
             return currentCooldown;
         }
 
-        bool IsOnCooldown(ulong id)
+        private bool IsOnCooldown(ulong id)
         {
             if (lastTimeUsed.ContainsKey(id))
             {
@@ -123,7 +121,7 @@ namespace IA.Events
             }
         }
 
-        async Task<bool> TryProcessCommand(IDiscordMessage e, string args)
+        private async Task<bool> TryProcessCommand(IDiscordMessage e, string args)
         {
             try
             {

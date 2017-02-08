@@ -19,7 +19,7 @@ namespace Discord
                 IUserMessage m = await channel.SendMessageAsync(message);
                 return m;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.ErrorAt("msg", e.Message);
             }
@@ -36,11 +36,11 @@ namespace Discord
         public static async Task<IUserMessage> SendMessageAndDeleteAsync(this IMessageChannel channel, string message, int seconds)
         {
             IUserMessage m = await channel.SendMessage(message);
-            if(seconds > 0) await Task.Run(() => DeleteMessage(m, seconds));
+            if (seconds > 0) await Task.Run(() => DeleteMessage(m, seconds));
             return m;
         }
 
-        static async Task DeleteMessage(IUserMessage message, int seconds)
+        private static async Task DeleteMessage(IUserMessage message, int seconds)
         {
             await Task.Delay(seconds * 1000);
             await message.DeleteAsync();

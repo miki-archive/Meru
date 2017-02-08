@@ -1,8 +1,5 @@
-﻿using Discord;
-using IA.SDK;
-using IA.SDK.Interfaces;
+﻿using IA.SDK;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace IA.Events
 {
