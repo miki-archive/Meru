@@ -114,7 +114,8 @@ namespace IA.SDK
 
         public async Task Ban(IDiscordGuild g)
         {
-            await (g as IProxy<IGuild>).ToNativeObject().AddBanAsync(user);
+            IGuild x = (g as IProxy<IGuild>).ToNativeObject();
+            await x.AddBanAsync(user);
         }
 
         public async Task SendFile(string path)

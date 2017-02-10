@@ -3,10 +3,11 @@ using IA.SDK.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace IA.SDK
 {
-    public class RuntimeGuild : IDiscordGuild
+    public class RuntimeGuild : IDiscordGuild, IProxy<IGuild>
     {
         public IGuild guild = null;
 
@@ -102,6 +103,11 @@ namespace IA.SDK
         public IDiscordRole GetRole(ulong role_id)
         {
             return new RuntimeRole(guild.GetRole(role_id));
+        }
+
+        public IGuild ToNativeObject()
+        {
+            return guild;
         }
     }
 }
