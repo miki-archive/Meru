@@ -107,7 +107,14 @@ namespace IA.SDK
             IEmbedField f = new RuntimeEmbedField("", "");
 
             field.Invoke(f);
-            fields.Add(f);
+
+            embed.AddField(x =>
+            {
+                x.Name = f.Name;
+                x.Value = f.Value;
+                x.IsInline = f.IsInline;
+            });
+
             return this;
         }
 
