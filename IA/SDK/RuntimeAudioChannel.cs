@@ -10,9 +10,9 @@ namespace IA.SDK
 {
     class RuntimeAudioChannel : IDiscordAudioChannel
     {
-        IAudioChannel audio;
+        IVoiceChannel audio;
 
-        public RuntimeAudioChannel(IAudioChannel a)
+        public RuntimeAudioChannel(IVoiceChannel a)
         {
             audio = a;
         }
@@ -21,7 +21,7 @@ namespace IA.SDK
         {
             get
             {
-                throw new NotImplementedException();
+                return new RuntimeGuild(audio.Guild);
             }
         }
 
@@ -29,7 +29,7 @@ namespace IA.SDK
         {
             get
             {
-                throw new NotImplementedException();
+                return audio.Id;
             }
         }
 
@@ -37,13 +37,13 @@ namespace IA.SDK
         {
             get
             {
-                throw new NotImplementedException();
+                return audio.Name;
             }
         }
 
-        public Task<IDiscordAudioClient> ConnectAsync()
+        public async Task<IDiscordAudioClient> ConnectAsync()
         {
-            throw new NotImplementedException();
+            return new RuntimeAudioClient(await audio.ConnectAsync());
         }
 
         public Task<IEnumerable<IDiscordUser>> GetUsersAsync()

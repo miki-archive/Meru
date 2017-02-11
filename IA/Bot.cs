@@ -162,6 +162,7 @@ namespace IA
 
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
+                AudioMode = Discord.Audio.AudioMode.Outgoing,
                 TotalShards = clientInformation.ShardCount
             });
 

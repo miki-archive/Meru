@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    public class RuntimeMessage : IDiscordMessage
+    public class RuntimeMessage : IDiscordMessage, IProxy<IMessage>
     {
         private IMessage messageData = null;
 
@@ -168,6 +168,11 @@ namespace IA.SDK
         public async Task UnpinAsync()
         {
             await (messageData as IUserMessage)?.UnpinAsync();
+        }
+
+        public IMessage ToNativeObject()
+        {
+            return messageData;
         }
     }
 }

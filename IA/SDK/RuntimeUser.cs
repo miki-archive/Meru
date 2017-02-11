@@ -95,7 +95,7 @@ namespace IA.SDK
         {
             get
             {
-                return null;
+                return new RuntimeAudioChannel((user as IGuildUser).VoiceChannel);
             }
         }
 

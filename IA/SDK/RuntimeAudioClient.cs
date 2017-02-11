@@ -3,11 +3,12 @@ using Discord.Audio;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    internal class RuntimeAudioClient : DiscordAudioClient, IProxy<IAudioClient>
+    public class RuntimeAudioClient : IDiscordAudioClient, IProxy<IAudioClient>
     {
         private IAudioClient client;
 
@@ -18,13 +19,13 @@ namespace IA.SDK
             return new RuntimeAudioClient(await (u.ToNativeObject() as IGuildUser).VoiceChannel?.ConnectAsync());
         }
 
-        private RuntimeAudioClient(IAudioClient client)
+        public RuntimeAudioClient(IAudioClient client)
         {
             this.client = client;
             client.Disconnected += AudioClient_Disconnected;
         }
 
-        public override Queue<IAudio> AudioQueue
+        public Queue<IAudio> AudioQueue
         {
             get
             {
@@ -32,7 +33,7 @@ namespace IA.SDK
             }
         }
 
-        public override bool IsPlaying
+        public bool IsPlaying
         {
             get
             {
@@ -40,24 +41,45 @@ namespace IA.SDK
             }
         }
 
-        public override async Task Disconnect()
+        public async Task Disconnect()
         {
             await client.DisconnectAsync();
         }
 
-        public override async Task Pause()
+        public async Task Pause()
         {
             await Task.CompletedTask;
             //TODO Add Pause
         }
 
-        public override async Task Play(IAudio audio, bool skipIfPlaying = false)
+        public async Task Play(IAudio audio, bool skipIfPlaying = false)
         {
             await Task.CompletedTask;
             //TODO Add Play
         }
 
-        public override async Task Skip()
+        public async Task PlayFile(string file)
+        {
+            var ffmpeg = new ProcessStartInfo
+            {
+                FileName = "./ffmpeg.exe",
+                Arguments = $"-i {file} -ac 2 -f s16le -ar 48000 pipe:1",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+            };
+            Process p = Process.Start(ffmpeg);
+            
+            var output = p.StandardOutput.BaseStream;
+
+            var discord = client.CreateOpusStream(1920);
+
+            await output.CopyToAsync(discord);
+
+            await discord.FlushAsync();
+        }
+
+
+        public async Task Skip()
         {
             await Task.CompletedTask;
             //TODO Add Skip
@@ -75,6 +97,11 @@ namespace IA.SDK
             queue.Clear();
 
             await Task.CompletedTask;
+        }
+
+        public async Task Connect(IDiscordAudioChannel v)
+        {
+            client = ((await v.ConnectAsync()) as IProxy<IAudioClient>).ToNativeObject();
         }
     }
 }
