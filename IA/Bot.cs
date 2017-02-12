@@ -163,7 +163,8 @@ namespace IA
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
                 AudioMode = Discord.Audio.AudioMode.Outgoing,
-                TotalShards = clientInformation.ShardCount
+                TotalShards = clientInformation.ShardCount,
+                LogLevel = LogSeverity.Debug,
             });
 
             Events = new EventSystem(x =>
@@ -192,7 +193,7 @@ namespace IA
             };
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
-            Client.UserUpdated += async (u1, u2) => { Log.Done($"UPDATED {u1.Username}"); };
+//            Client.UserUpdated += async (u1, u2) => { Log.Done($"UPDATED {u1.Username}"); };
 
             foreach (DiscordSocketClient c in Client.Shards)
             {
@@ -203,7 +204,7 @@ namespace IA
                 };
             }
 
-            //Client.Log += Client_Log;
+ //           Client.Log += Client_Log;
         }
 
         private void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
@@ -267,7 +268,8 @@ namespace IA
             }
 
             s.Stop();
-            Log.Message($"Message handled in {s.ElapsedMilliseconds}ms");
+
+        //    Log.Done($"Processed commandhandler in {s.ElapsedMilliseconds}ms");
         }
     }
 }

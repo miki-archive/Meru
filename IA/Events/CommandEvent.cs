@@ -90,7 +90,7 @@ namespace IA.Events
                 if (await TryProcessCommand(e, args))
                 {
                     await eventSystem.OnCommandDone(e, this);
-
+                    CommandUsed++;
                     Log.Message($"{name} called from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
                 }
                 sw.Stop();

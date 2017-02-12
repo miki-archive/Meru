@@ -5,6 +5,7 @@ using IA.SQL;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -206,7 +207,13 @@ namespace IA.Events
             {
                 try
                 {
-                    Task.Run(() => defaultInfo.messageEvent(msg));
+                    Task.Run(async () =>
+                    {
+                        Stopwatch s = new Stopwatch();
+                        s.Start();
+                        await defaultInfo.messageEvent(msg);
+                        s.Stop();
+                    });
                 }
                 catch (Exception ex)
                 {

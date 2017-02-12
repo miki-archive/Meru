@@ -90,11 +90,14 @@ namespace IA.SDK
         public async Task<IDiscordMessage> SendMessage(string message)
         {
             RuntimeMessage m = new RuntimeMessage(await (channel as IMessageChannel).SendMessage(message));
+            Log.Message("Sent message to channel " + channel.Name);
+
             return m;
         }
 
         public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
+            Log.Message("Sent message to channel " + channel.Name);
             return new RuntimeMessage(
                 await (channel as IMessageChannel)
                 .SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>)

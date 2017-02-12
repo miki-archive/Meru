@@ -130,6 +130,7 @@ namespace IA.SDK
             IDMChannel c = await user.CreateDMChannelAsync();
 
             RuntimeMessage m = new RuntimeMessage(await c.SendMessageAsync(message));
+            Log.Message("Sent message to " + user.Username);
             return m;
         }
 
@@ -137,7 +138,7 @@ namespace IA.SDK
         {
             IDMChannel c = await user.CreateDMChannelAsync();
             IMessage m = await c.SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>).ToNativeObject());
-
+            Log.Message("Sent message to " + user.Username);
             return new RuntimeMessage(m);
         }
 
