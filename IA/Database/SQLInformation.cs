@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace IA.SQL
+namespace IA
 {
-    public class SQLInformation
+    public class SqlInformation
     {
         public string dataSource = "";
         public int port = 3306;
@@ -12,7 +12,7 @@ namespace IA.SQL
         public string username = "root";
         public string password = "";
 
-        public SQLInformation(Action<SQLInformation> info)
+        public SqlInformation(Action<SqlInformation> info)
         {
             info.Invoke(this);
         }

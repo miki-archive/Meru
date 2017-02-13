@@ -1,6 +1,6 @@
-﻿using IA.SDK;
+﻿using IA.Database;
+using IA.SDK;
 using IA.SDK.Interfaces;
-using IA.SQL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,7 @@ namespace IA.Events
         public BotInformation bot;
 
         internal EventContainer events { private set; get; }
-        private MySQL sql;
+        private Sql sql;
 
         public PrefixValue DefaultIdentifier { private set; get; }
         public PrefixValue OverrideIdentifier { private set; get; }
@@ -44,9 +44,9 @@ namespace IA.Events
 
             bot = new BotInformation(botInfo);
             events = new EventContainer();
-            sql = new MySQL(bot.SqlInformation, bot.Identifier);
+            sql = new Sql(bot.SqlInformation, bot.Identifier);
 
-            MySQL.TryCreateTable("identifier(id BIGINT, i varchar(255))");
+            Sql.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 
             OverrideIdentifier = PrefixValue.Set(bot.Name.ToLower() + ".");
             DefaultIdentifier = bot.Identifier;
@@ -70,7 +70,7 @@ namespace IA.Events
             }
             events.CommandEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddCommandDoneEvent(Action<CommandDoneEvent> info)
@@ -87,7 +87,7 @@ namespace IA.Events
             }
             events.CommandDoneEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddContinuousEvent(Action<ContinuousEvent> info)
@@ -97,7 +97,7 @@ namespace IA.Events
             newEvent.eventSystem = this;
             events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddJoinEvent(Action<GuildEvent> info)
@@ -114,7 +114,7 @@ namespace IA.Events
             }
             events.JoinServerEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddLeaveEvent(Action<GuildEvent> info)
@@ -131,7 +131,7 @@ namespace IA.Events
             }
             events.LeaveServerEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddMentionEvent(Action<RuntimeCommandEvent> info)
@@ -148,7 +148,7 @@ namespace IA.Events
             }
             events.MentionEvents.Add(newEvent.name.ToLower(), newEvent);
 
-            MySQL.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
+            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         private async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e, bool doRunCommand = true)
@@ -253,7 +253,7 @@ namespace IA.Events
             }
             else
             {
-                return await MySQL.GetIdentifier(server_id);
+                return await Sql.GetIdentifier(server_id);
             }
         }
 
@@ -341,15 +341,15 @@ namespace IA.Events
 
             if (bot.SqlInformation != null)
             {
-                MySQL.Query("SELECT i FROM identifier WHERE id=?id", output =>
+                Sql.Query("SELECT i FROM identifier WHERE id=?id", output =>
                 {
                     if (output == null)
                     {
-                        MySQL.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
+                        Sql.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
                     }
                     else
                     {
-                        tempIdentifier = output["i"].ToString();
+                        tempIdentifier = output.GetString("i");
                     }
                 }, server);
             }
@@ -443,7 +443,7 @@ namespace IA.Events
                 identifier.Add(e.Id, prefix.ToLower());
             }
 
-            await Task.Run(() => MySQL.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
+            await Task.Run(() => Sql.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
         }
 
         public async Task StartGame(ulong id, GameEvent game)

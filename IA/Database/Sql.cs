@@ -3,23 +3,23 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IA.SQL
+namespace IA.Database
 {
-    public delegate void QueryOutput(Dictionary<string, object> result);
+    public delegate void QueryOutput(SqlQueryResponse result);
 
-    public class MySQL
+    public class Sql
     {
-        private static MySQL instance;
+        private static Sql instance;
 
-        private SQLInformation info;
+        private SqlInformation info;
 
         private PrefixValue defaultIdentifier;
 
-        public MySQL()
+        public Sql()
         {
             if (instance == null)
             {
-                Log.ErrorAt("IA.SQLManager", "IA not initialized");
+                Log.ErrorAt("IA.Sql", "IA not initialized");
                 return;
             }
 
@@ -27,7 +27,7 @@ namespace IA.SQL
             defaultIdentifier = instance.defaultIdentifier;
         }
 
-        public MySQL(SQLInformation info, PrefixValue defaultIdentifier)
+        public Sql(SqlInformation info, PrefixValue defaultIdentifier)
         {
             this.info = info;
             if (defaultIdentifier == null)
@@ -59,7 +59,7 @@ namespace IA.SQL
             {
                 if (x != null)
                 {
-                    output = (string)x["i"];
+                    output = x.GetString("i");
                 }
             }, server_id);
 
@@ -70,7 +70,7 @@ namespace IA.SQL
         /// Gets the instance of the initialized object if created.
         /// </summary>
         /// <returns></returns>
-        public static MySQL GetInstance()
+        public static Sql GetInstance()
         {
             return instance;
         }
@@ -152,7 +152,7 @@ namespace IA.SQL
                     {
                         outputdict.Add(r.GetName(i), r.GetValue(i));
                     }
-                    output?.Invoke(outputdict);
+                    output?.Invoke(new SqlQueryResponse(outputdict));
                     hasRead = true;
                 }
 
@@ -270,13 +270,13 @@ namespace IA.SQL
                     {
                         outputdict.Add(r.GetName(i), r.GetValue(i));
                     }
-                    output?.Invoke(outputdict);
+                    output?.Invoke(new SqlQueryResponse(outputdict));
                     hasRead = true;
                 }
 
                 if (!hasRead)
                 {
-                    output?.Invoke(outputdict);
+                    output?.Invoke(new SqlQueryResponse(outputdict));
                 }
             }
             else
@@ -284,23 +284,6 @@ namespace IA.SQL
                 await command.ExecuteNonQueryAsync();
             }
             await connection.CloseAsync();
-        }
-
-        [Obsolete("use 'MySQL.Query' instead.")]
-        /// <summary>
-        /// Old Query, doesnt return anything.
-        /// </summary>
-        /// <param name="sqlCode">valid sql code</param>
-        public void SendToSQL(string sqlCode)
-        {
-            if (info == null) return;
-
-            MySqlConnection connection = new MySqlConnection(info.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = sqlCode;
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-            connection.Close();
         }
 
         /// <summary>

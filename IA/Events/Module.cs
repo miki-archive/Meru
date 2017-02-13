@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using IA.Database;
 using IA.SDK;
-using IA.SQL;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -234,7 +234,7 @@ namespace IA.Events
                 {
                     this.enabled.Add(serverid, enabled);
                 }
-                await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, SqlName);
+                await Sql.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, SqlName);
             }
         }
 
@@ -253,7 +253,7 @@ namespace IA.Events
             int state = IsEventEnabled(id);
             if (state == -1)
             {
-                await MySQL.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, SqlName, id, defaultInfo.enabled);
+                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, SqlName, id, defaultInfo.enabled);
                 enabled.Add(id, defaultInfo.enabled);
                 return defaultInfo.enabled;
             }

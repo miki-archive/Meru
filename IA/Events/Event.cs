@@ -1,5 +1,5 @@
-﻿using IA.SDK;
-using IA.SQL;
+﻿using IA.Database;
+using IA.SDK;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -53,7 +53,7 @@ namespace IA.Events
                 {
                     this.enabled.Add(serverid, enabled);
                 }
-                await MySQL.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, name);
+                await Sql.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, name);
             }
         }
 
@@ -77,7 +77,7 @@ namespace IA.Events
             int state = IsEventEnabled(id);
             if (state == -1)
             {
-                await MySQL.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, name, id, defaultEnabled);
+                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, name, id, defaultEnabled);
                 enabled.Add(id, defaultEnabled);
                 return defaultEnabled;
             }

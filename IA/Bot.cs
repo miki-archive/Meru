@@ -1,11 +1,11 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using IA.Addons;
+using IA.Database;
 using IA.Events;
 using IA.FileHandling;
 using IA.SDK;
 using IA.SDK.Interfaces;
-using IA.SQL;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -22,7 +22,7 @@ namespace IA
         public DiscordShardedClient Client { private set; get; }
 
         public EventSystem Events { private set; get; }
-        public MySQL Sql { private set; get; }
+        public Sql Sql { private set; get; }
 
         public string Name
         {
@@ -174,7 +174,7 @@ namespace IA
                 x.SqlInformation = clientInformation.sqlInformation;
             });
 
-            Sql = new MySQL(clientInformation.sqlInformation, clientInformation.Prefix);
+            Sql = new Sql(clientInformation.sqlInformation, clientInformation.Prefix);
 
             Addons = new AddonManager();
             await Addons.Load(this);

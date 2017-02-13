@@ -90,8 +90,9 @@
     <Compile Include="SDK\RuntimeRole.cs" />
     <Compile Include="SDK\RuntimeUser.cs" />
     <Compile Include="ShardedClient.cs" />
-    <Compile Include="SQL\SQLInformation.cs" />
-    <Compile Include="SQL\SQL.cs" />
+    <Compile Include="Database\SqlQueryResponse.cs" />
+    <Compile Include="Database\SQLInformation.cs" />
+    <Compile Include="Database\Sql.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

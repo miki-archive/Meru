@@ -1,5 +1,4 @@
-﻿using IA.SQL;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace IA
 {
@@ -29,7 +28,7 @@ namespace IA
         /// </summary>
         public LogLevel FileLogLevel = LogLevel.ERROR;
 
-        public SQLInformation sqlInformation;
+        public SqlInformation sqlInformation;
 
         public bool CanLog(LogLevel level)
         {

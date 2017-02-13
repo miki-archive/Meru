@@ -1,5 +1,4 @@
-﻿using IA.SQL;
-using System;
+﻿using System;
 
 namespace IA.Events
 {
@@ -7,7 +6,7 @@ namespace IA.Events
     {
         public string Name;
         public PrefixValue Identifier = PrefixValue.Set(">");
-        public SQLInformation SqlInformation;
+        public SqlInformation SqlInformation;
 
         public BotInformation()
         {
