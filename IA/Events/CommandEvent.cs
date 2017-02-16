@@ -131,7 +131,7 @@ namespace IA.Events
             catch (Exception ex)
             {
                 await e.Channel.SendMessage(errorMessage);
-                Log.ErrorAt(name, ex.Message);
+                Log.ErrorAt(name, ex.Message + "\n" + ex.StackTrace);
             }
             return false;
         }

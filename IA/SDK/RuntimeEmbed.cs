@@ -118,6 +118,11 @@ namespace IA.SDK
             return this;
         }
 
+        public void CreateFooter()
+        {
+            embed.Footer = new EmbedFooterBuilder();
+        }
+
         public EmbedBuilder ToNativeObject()
         {
             return embed;

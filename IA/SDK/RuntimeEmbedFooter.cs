@@ -3,7 +3,7 @@ using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    internal class RuntimeEmbedFooter : IEmbedFooter, IProxy<EmbedFooterBuilder>
+    public class RuntimeEmbedFooter : IEmbedFooter, IProxy<EmbedFooterBuilder>
     {
         private EmbedFooterBuilder footer;
 
