@@ -80,29 +80,11 @@ namespace IA.SDK
             }
         }
 
-        public DateTimeOffset Timestamp
-        {
-            get
-            {
-                return messageData.Timestamp;
-            }
-        }
+        public DateTimeOffset Timestamp => messageData.Timestamp;
 
-        public Interfaces.IDiscordClient Discord
-        {
-            get
-            {
-                return client;
-            }
-        }
+        public Interfaces.IDiscordClient Discord => client;
 
-        public int ShardId
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public int ShardId => client.ShardId;
 
         public IDiscordAudioChannel VoiceChannel
         {
@@ -116,8 +98,8 @@ namespace IA.SDK
         {
             messageData = msg;
 
-            user = new RuntimeUser(msg.Author);
-            channel = new RuntimeMessageChannel(msg.Channel);
+            if (msg.Author != null) user = new RuntimeUser(msg.Author);
+            if(msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
             IGuild g = (messageData.Author as IGuildUser)?.Guild;
 
             client = new RuntimeClient((msg as SocketMessage)?.Discord);
@@ -132,8 +114,8 @@ namespace IA.SDK
         {
             messageData = msg;
 
-            user = new RuntimeUser(msg.Author);
-            channel = new RuntimeMessageChannel(msg.Channel);
+            if (msg.Author != null) user = new RuntimeUser(msg.Author);
+            if (msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
             IGuild g = (messageData.Author as IGuildUser)?.Guild;
             if (g != null)
             {

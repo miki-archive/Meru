@@ -122,7 +122,7 @@ namespace IA
             }
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            if (client.CanFileLog(LogLevel.WARNING))
+            if (client.CanLog(LogLevel.WARNING))
             {
                 Console.WriteLine("[wrn]: " + message);
             }

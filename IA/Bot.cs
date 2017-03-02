@@ -241,9 +241,6 @@ namespace IA
 
         private async Task Client_MessageReceived(SocketMessage arg)
         {
-            Stopwatch s = new Stopwatch();
-            s.Start();
-
             try
             {
                 RuntimeMessage r = new RuntimeMessage(arg, arg.Discord);
@@ -266,10 +263,6 @@ namespace IA
             {
                 Log.ErrorAt("messagerecieved", e.Message);
             }
-
-            s.Stop();
-
-        //    Log.Done($"Processed commandhandler in {s.ElapsedMilliseconds}ms");
         }
     }
 }

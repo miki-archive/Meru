@@ -53,6 +53,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
+    <Compile Include="Database\Sql.cs" />
+    <Compile Include="Database\SQLInformation.cs" />
     <Compile Include="Events\CommandDoneEvent.cs" />
     <Compile Include="Events\CommandEvent.cs" />
     <Compile Include="Events\ContinuousEvent.cs" />
@@ -77,6 +79,7 @@
     <Compile Include="Node\Node.cs" />
     <Compile Include="PrefixValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SDK\RuntimeAddonInstance.cs" />
     <Compile Include="SDK\RuntimeAudioChannel.cs" />
     <Compile Include="SDK\RuntimeAudioClient.cs" />
     <Compile Include="SDK\RuntimeChannel.cs" />
@@ -90,9 +93,6 @@
     <Compile Include="SDK\RuntimeRole.cs" />
     <Compile Include="SDK\RuntimeUser.cs" />
     <Compile Include="ShardedClient.cs" />
-    <Compile Include="Database\SqlQueryResponse.cs" />
-    <Compile Include="Database\SQLInformation.cs" />
-    <Compile Include="Database\Sql.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

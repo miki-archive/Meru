@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 
 namespace IA.Database
 {
-    public delegate void QueryOutput(SqlQueryResponse result);
-
     public class Sql
     {
         private static Sql instance;
