@@ -14,13 +14,13 @@ namespace IA.Events
 
         public bool CheckAsync(IDiscordMessage _message)
         {
-            CommandEvent e = commands.Find(x => { return x.name == _message.Content.Split(' ')[0].ToLower(); });
+            CommandEvent e = commands.Find(x => { return x.Name == _message.Content.Split(' ')[0].ToLower(); });
 
             if (e != null)
             {
                 Task.Run(() =>
                 {
-                    e.checkCommand(_message, _message.Content.Split(' ')[0], e.aliases);
+                    e.CheckCommand(_message, _message.Content.Split(' ')[0], e.Aliases);
                 });
                 return true;
             }

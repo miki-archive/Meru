@@ -107,6 +107,22 @@ namespace IA.SDK
             }
         }
 
+        public DateTimeOffset CreatedAt
+        {
+            get
+            {
+                return user.CreatedAt;
+            }
+        }
+
+        public DateTimeOffset? JoinedAt
+        {
+            get
+            {
+                return (user as IGuildUser)?.JoinedAt;
+            }
+        }
+
         public async Task Kick()
         {
             await (user as IGuildUser).KickAsync();

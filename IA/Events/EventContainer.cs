@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using IA.SDK.Events;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace IA.Events
 {
     internal class EventContainer
     {
-        public Dictionary<string, RuntimeCommandEvent> CommandEvents { private set; get; } = new Dictionary<string, RuntimeCommandEvent>();
+        public Dictionary<string, ICommandEvent> CommandEvents { private set; get; } = new Dictionary<string, RuntimeCommandEvent>();
         public Dictionary<string, CommandDoneEvent> CommandDoneEvents { private set; get; } = new Dictionary<string, CommandDoneEvent>();
 
         public Dictionary<string, Event> MentionEvents { private set; get; } = new Dictionary<string, Event>();
@@ -19,7 +20,7 @@ namespace IA.Events
         /// </summary>
         internal Dictionary<string, Event> InternalEvents { private set; get; } = new Dictionary<string, Event>();
 
-        public Event GetEvent(string name)
+        public IEvent GetEvent(string name)
         {
             if (CommandEvents.ContainsKey(name))
             {
@@ -49,9 +50,9 @@ namespace IA.Events
             return InternalEvents[name];
         }
 
-        public Event[] GetAllEvents()
+        public IEvent[] GetAllEvents()
         {
-            List<Event> allEvents = new List<Event>();
+            List<IEvent> allEvents = new List<IEvent>();
             allEvents.AddRange(CommandEvents.Values);
             allEvents.AddRange(MentionEvents.Values);
             allEvents.AddRange(ContinuousEvents.Values);
@@ -60,9 +61,9 @@ namespace IA.Events
             return allEvents.ToArray();
         }
 
-        public Dictionary<string, Event> GetAllEventsDictionary()
+        public Dictionary<string, IEvent> GetAllEventsDictionary()
         {
-            Dictionary<string, Event> allEvents = new Dictionary<string, Event>();
+            Dictionary<string, IEvent> allEvents = new Dictionary<string, IEvent>();
             CommandEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
             MentionEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));
             ContinuousEvents.ToList().ForEach(x => allEvents.Add(x.Key, x.Value));

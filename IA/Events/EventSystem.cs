@@ -1,5 +1,6 @@
 ﻿using IA.Database;
 using IA.SDK;
+using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace IA.Events
     public class EventSystem
     {
         public List<ulong> Developers = new List<ulong>();
-        public Dictionary<string, Module> Modules { get; internal set; } = new Dictionary<string, Module>();
+        public Dictionary<string, RuntimeModule> Modules { get; internal set; } = new Dictionary<string, RuntimeModule>();
         public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
 
         private Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
@@ -57,18 +58,18 @@ namespace IA.Events
             RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            if (newEvent.usage[0] == "usage not set!")
+            if (newEvent.Metadata.usage[0] == "usage not set!")
             {
-                newEvent.usage[0] = newEvent.name;
+                newEvent.Metadata.usage[0] = newEvent.Name;
             }
-            if (newEvent.aliases.Length > 0)
+            if (newEvent.Aliases.Length > 0)
             {
-                foreach (string s in newEvent.aliases)
+                foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.name.ToLower());
+                    aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.CommandEvents.Add(newEvent.name.ToLower(), newEvent);
+            events.CommandEvents.Add(newEvent.Name.ToLower(), newEvent);
 
             Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
@@ -78,14 +79,14 @@ namespace IA.Events
             CommandDoneEvent newEvent = new CommandDoneEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            if (newEvent.aliases.Length > 0)
+            if (newEvent.Aliases.Length > 0)
             {
-                foreach (string s in newEvent.aliases)
+                foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.name.ToLower());
+                    aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.CommandDoneEvents.Add(newEvent.name.ToLower(), newEvent);
+            events.CommandDoneEvents.Add(newEvent.Name.ToLower(), newEvent);
 
             Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
@@ -95,7 +96,7 @@ namespace IA.Events
             ContinuousEvent newEvent = new ContinuousEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            events.ContinuousEvents.Add(newEvent.name.ToLower(), newEvent);
+            events.ContinuousEvents.Add(newEvent.Name.ToLower(), newEvent);
 
             Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
@@ -105,14 +106,14 @@ namespace IA.Events
             GuildEvent newEvent = new GuildEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            if (newEvent.aliases.Length > 0)
+            if (newEvent.Aliases.Length > 0)
             {
-                foreach (string s in newEvent.aliases)
+                foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.name.ToLower());
+                    aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.JoinServerEvents.Add(newEvent.name.ToLower(), newEvent);
+            events.JoinServerEvents.Add(newEvent.Name.ToLower(), newEvent);
 
             Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
@@ -122,14 +123,14 @@ namespace IA.Events
             GuildEvent newEvent = new GuildEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            if (newEvent.aliases.Length > 0)
+            if (newEvent.Aliases.Length > 0)
             {
-                foreach (string s in newEvent.aliases)
+                foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.name.ToLower());
+                    aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.LeaveServerEvents.Add(newEvent.name.ToLower(), newEvent);
+            events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
 
             Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
@@ -139,14 +140,14 @@ namespace IA.Events
             RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            if (newEvent.aliases.Length > 0)
+            if (newEvent.Aliases.Length > 0)
             {
-                foreach (string s in newEvent.aliases)
+                foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.name.ToLower());
+                    aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.MentionEvents.Add(newEvent.name.ToLower(), newEvent);
+            events.MentionEvents.Add(newEvent.Name.ToLower(), newEvent);
 
             Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
@@ -163,9 +164,9 @@ namespace IA.Events
                     {
                         if (doRunCommand)
                         {
-                            if (GetUserAccessibility(e) >= events.CommandEvents[command].accessibility)
+                            if (GetUserAccessibility(e) >= events.CommandEvents[command].Accessibility)
                             {
-                                Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+                                Task.Run(() => events.CommandEvents[command].CheckCommand(e, identifier));
                                 return true;
                             }
                         }
@@ -175,9 +176,9 @@ namespace IA.Events
                 {
                     if (await events.CommandEvents[aliases[command]].IsEnabled(e.Channel.Id))
                     {
-                        if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].accessibility)
+                        if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].Accessibility)
                         {
-                            Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
+                            Task.Run(() => events.CommandEvents[aliases[command]].CheckCommand(e, identifier));
                             return true;
                         }
                     }
@@ -192,26 +193,26 @@ namespace IA.Events
             int output = 0;
             foreach (Event e in events.CommandEvents.Values)
             {
-                output += e.CommandUsed;
+                output += e.TimesUsed;
             }
             return output;
         }
 
         public int CommandsUsed(string eventName)
         {
-            return events.GetEvent(eventName).CommandUsed;
+            return events.GetEvent(eventName).TimesUsed;
         }
 
-        public Module CreateModule(Action<ModuleInformation> info)
+        public RuntimeModule CreateModule(Action<IModule> info)
         {
-            Module newModule = new Module(info);
-            foreach (Event e in newModule.defaultInfo.events)
+            RuntimeModule newModule = new RuntimeModule(info);
+            foreach (Event e in newModule.Events)
             {
                 e.eventSystem = this;
-                e.module = newModule;
+                e.Module = newModule;
             }
-            newModule.defaultInfo.eventSystem = this;
-            Modules.Add(newModule.defaultInfo.name, newModule);
+            newModule.EventSystem = this;
+            Modules.Add(newModule.Name, newModule);
             return newModule;
         }
 
@@ -220,7 +221,7 @@ namespace IA.Events
         /// </summary>
         /// <param name="id">event id</param>
         /// <returns>CommandEvent from local database</returns>
-        public RuntimeCommandEvent GetCommandEvent(string id)
+        public ICommandEvent GetCommandEvent(string id)
         {
             if (events.CommandEvents.ContainsKey(id))
             {
@@ -234,7 +235,7 @@ namespace IA.Events
         /// </summary>
         /// <param name="id">event id</param>
         /// <returns>Event from local database</returns>
-        public Event GetEvent(string id)
+        public IEvent GetEvent(string id)
         {
             return events.GetEvent(id);
         }
@@ -257,7 +258,7 @@ namespace IA.Events
             }
         }
 
-        public Module GetModuleByName(string name)
+        public RuntimeModule GetModuleByName(string name)
         {
             if (Modules.ContainsKey(name.ToLower()))
             {
@@ -286,22 +287,23 @@ namespace IA.Events
 
             foreach (Event ev in events.CommandEvents.Values)
             {
-                if (await ev.IsEnabled(e.Channel.Id) && userEventAccessibility >= ev.accessibility)
+                if (await ev.IsEnabled(e.Channel.Id) && userEventAccessibility >= ev.Accessibility)
                 {
-                    if (ev.module != null)
+                    if (ev.Module != null)
                     {
-                        if (!moduleEvents.ContainsKey(ev.module.defaultInfo.name.ToUpper()))
+                        if (!moduleEvents.ContainsKey(ev.Module.Name.ToUpper()))
                         {
-                            moduleEvents.Add(ev.module.defaultInfo.name.ToUpper(), new List<string>());
+                            moduleEvents.Add(ev.Module.Name.ToUpper(), new List<string>());
                         }
-                        if (GetUserAccessibility(e) >= ev.accessibility)
+
+                        if (GetUserAccessibility(e) >= ev.Accessibility)
                         {
-                            moduleEvents[ev.module.defaultInfo.name.ToUpper()].Add(ev.name);
+                            moduleEvents[ev.Module.Name.ToUpper()].Add(ev.Name);
                         }
                     }
                     else
                     {
-                        moduleEvents["MISC"].Add(ev.name);
+                        moduleEvents["MISC"].Add(ev.Name);
                     }
                 }
             }
@@ -367,7 +369,7 @@ namespace IA.Events
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorAt($"commanddone@{ev.name}", ex.Message);
+                    Log.ErrorAt($"commanddone@{ev.Name}", ex.Message);
                 }
             }
         }

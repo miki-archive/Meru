@@ -1,5 +1,6 @@
 ﻿using IA.Database;
 using IA.SDK;
+using IA.SDK.Events;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -7,38 +8,43 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public class Event
+    public class Event : IEvent
     {
-        public string name = "name not set";
-        public string[] aliases = new string[0];
+        public string Name { get; set; } = "$command-not-named";
+        public string[] Aliases { get; set; }
 
-        public string description = "description not set for this command!";
-        public string[] usage = new string[] { "usage not set!" };
-        public string errorMessage = "Something went wrong!";
+        public EventAccessibility Accessibility { get; set; } = EventAccessibility.PUBLIC;
+        public EventMetadata Metadata { get; set; } = new EventMetadata();
 
-        public bool canBeOverridenByDefaultPrefix = false;
-        public bool canBeDisabled = true;
-        public bool defaultEnabled = true;
+        public bool OverridableByDefaultPrefix { get; set; } = false;
+        public bool CanBeDisabled { get; set; } = false;
+        public bool DefaultEnabled { get; set; } = true;
+  
+        public IModule Module { get; set; }
 
-        public Module module;
+        public int TimesUsed { get; set; } = 0;
+
         internal EventSystem eventSystem;
-
-        public EventAccessibility accessibility = EventAccessibility.PUBLIC;
 
         public Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
         protected Dictionary<ulong, DateTime> lastTimeUsed = new Dictionary<ulong, DateTime>();
 
-        public int CommandUsed { protected set; get; }
-
-        public Event()
+        public Event() { }
+        public Event(IEvent eventObject)
         {
-            CommandUsed = 0;
+            Name = eventObject.Name;
+            Aliases = eventObject.Aliases;
+            Accessibility = eventObject.Accessibility;
+            Metadata = eventObject.Metadata;
+            OverridableByDefaultPrefix = eventObject.OverridableByDefaultPrefix;
+            CanBeDisabled = eventObject.CanBeDisabled;
+            DefaultEnabled = eventObject.DefaultEnabled;
+            Module = eventObject.Module;
+            TimesUsed = eventObject.TimesUsed;
         }
-
         public Event(Action<Event> info)
         {
             info.Invoke(this);
-            CommandUsed = 0;
         }
 
         public async Task SetEnabled(ulong serverid, bool enabled)
@@ -53,20 +59,20 @@ namespace IA.Events
                 {
                     this.enabled.Add(serverid, enabled);
                 }
-                await Sql.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, name);
+                await Sql.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, Name);
             }
         }
 
         public async Task<bool> IsEnabled(ulong id)
         {
-            if (module != null)
+            if (Module != null)
             {
-                if (!await module.IsEnabled(id)) return false;
+                if (!await Module.IsEnabled(id)) return false;
             }
 
             if (eventSystem.bot.SqlInformation == null)
             {
-                return defaultEnabled;
+                return DefaultEnabled;
             }
 
             if (enabled.ContainsKey(id))
@@ -77,9 +83,9 @@ namespace IA.Events
             int state = IsEventEnabled(id);
             if (state == -1)
             {
-                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, name, id, defaultEnabled);
-                enabled.Add(id, defaultEnabled);
-                return defaultEnabled;
+                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, Name, id, DefaultEnabled);
+                enabled.Add(id, DefaultEnabled);
+                return DefaultEnabled;
             }
             bool actualState = (state == 1) ? true : false;
 
@@ -94,7 +100,7 @@ namespace IA.Events
 
             MySqlConnection connection = new MySqlConnection(eventSystem.bot.SqlInformation.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{serverid}\" AND name=\"{name}\"";
+            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{serverid}\" AND name=\"{Name}\"";
 
             connection.Open();
             MySqlDataReader r = command.ExecuteReader();

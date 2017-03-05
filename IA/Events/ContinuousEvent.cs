@@ -22,14 +22,14 @@ namespace IA.Events
 
         public ContinuousEvent()
         {
-            CommandUsed = 0;
+          //  CommandUsed = 0;
         }
 
         public async Task Check()
         {
             if (TryProcessCommand())
             {
-                CommandUsed++;
+         //       CommandUsed++;
                 await Task.Delay(tickDelay * 1000);
                 await Check();
             }

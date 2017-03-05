@@ -1,4 +1,5 @@
-﻿using IA.SDK;
+﻿using IA.Events;
+using IA.SDK;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -41,19 +42,15 @@ namespace IA.Addons
 
                     if (currentAddon != null)
                     {
-                        RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
-                        aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance));
+                        IAddonInstance aInstance = new RuntimeAddonInstance();
+                        aInstance = await currentAddon.Create(aInstance);
 
-                        foreach (ModuleInstance nm in aInstance.modules)
+                        foreach (IModule nm in aInstance.Modules)
                         {
-                            Events.Module newModule = new Events.Module(nm);
+                            IModule newModule = new RuntimeModule(nm);
                             await newModule.InstallAsync(bot);
                         }
                         Log.Done($"loaded Add-On {newS} successfully");
-                    }
-                    else
-                    {
-                        Log.Error($"\"{newS}\" is not a module");
                     }
                 }
                 catch
@@ -79,14 +76,14 @@ namespace IA.Addons
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
                 aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance));
 
-                foreach (ModuleInstance nm in aInstance.modules)
+                foreach (IModule nm in aInstance.Modules)
                 {
-                    if (bot.Events.GetModuleByName(nm.data.name) != null)
+                    if (bot.Events.GetModuleByName(nm.Name) != null)
                     {
                         Log.Warning("Module already loaded, stopping load");
                         return;
                     }
-                    Events.Module newModule = new Events.Module(nm);
+                    RuntimeModule newModule = nm as RuntimeModule;
                     await newModule.InstallAsync(bot);
                 }
 
@@ -114,11 +111,11 @@ namespace IA.Addons
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
                 aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance));
 
-                foreach (ModuleInstance nm in aInstance.modules)
+                foreach (IModule nm in aInstance.Modules)
                 {
-                    await bot.Events.GetModuleByName(nm.data.name).UninstallAsync(bot);
+                    await bot.Events.GetModuleByName(nm.Name).UninstallAsync(bot);
 
-                    Events.Module newModule = new Events.Module(nm);
+                    RuntimeModule newModule = nm as RuntimeModule;
                     await newModule.InstallAsync(bot);
                 }
                 Log.Done($"Reloaded Add-On \"{newS}\" successfully");
@@ -145,9 +142,9 @@ namespace IA.Addons
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
                 aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance));
 
-                foreach (ModuleInstance nm in aInstance.modules)
+                foreach (ModuleInstance nm in aInstance.Modules)
                 {
-                    Events.Module mod = bot.Events.GetModuleByName(nm.data.name);
+                    Events.RuntimeModule mod = bot.Events.GetModuleByName(nm.Name);
 
                     if (mod != null)
                     {

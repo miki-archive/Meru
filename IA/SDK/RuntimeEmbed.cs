@@ -22,6 +22,12 @@ namespace IA.SDK
             {
                 return new RuntimeEmbedAuthor(embed.Author);
             }
+            set
+            {
+                embed.Author.Name = value.Name;
+                embed.Author.IconUrl = value.IconUrl;
+                embed.Author.Url = value.Url;
+            }
         }
 
         public Color Color
@@ -102,6 +108,19 @@ namespace IA.SDK
             }
         }
 
+        IEmbedAuthor IDiscordEmbed.Author
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public IDiscordEmbed AddField(Action<IEmbedField> field)
         {
             IEmbedField f = new RuntimeEmbedField("", "");
@@ -116,6 +135,12 @@ namespace IA.SDK
             });
 
             return this;
+        }
+
+        public IEmbedAuthor CreateAuthor()
+        {
+            embed.Author = new EmbedAuthorBuilder();
+            return Author;
         }
 
         public void CreateFooter()

@@ -1,38 +1,33 @@
 ﻿using IA.SDK;
+using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public class RuntimeCommandEvent : Event
+    public class RuntimeCommandEvent : Event, ICommandEvent
     {
-        public int cooldown = 1;
+        public int Cooldown { get; set; }
 
-        public DiscordGuildPermission[] requiresPermissions = new SDK.DiscordGuildPermission[0];
+        public List<DiscordGuildPermission> GuildPermissions { get; set; }
 
-        public CheckCommand checkCommand = (e, command, aliases) =>
+        public CheckCommandDelegate CheckCommand { get; set; } = (e, args, aliases) =>
         {
-            return aliases.Contains(command);
+            return true;
         };
 
-        public ProcessCommand processCommand = async (e, args) =>
-        {
-            await e.Channel.SendMessage("This command has not been set up properly.");
-        };
+        public ProcessCommandDelegate ProcessCommand { get; set; }
 
-        public RuntimeCommandEvent()
+        public RuntimeCommandEvent() { }
+        public RuntimeCommandEvent(ICommandEvent commandEvent)
         {
-            CommandUsed = 0;
-        }
 
-        public RuntimeCommandEvent(Action<RuntimeCommandEvent> info)
-        {
-            info.Invoke(this);
-            CommandUsed = 0;
         }
+        public RuntimeCommandEvent(Action<RuntimeCommandEvent> info) { info.Invoke(this);  }
 
         public async Task Check(IDiscordMessage e, string identifier = "")
         {
@@ -44,7 +39,7 @@ namespace IA.Events
                 args = e.Content.Substring(e.Content.Split(' ')[0].Length + 1);
             }
 
-            string[] allAliases = new string[aliases.Length + 1];
+            string[] allAliases = new string[Aliases.Length + 1];
             int i = 0;
 
             // loading aliases
@@ -54,7 +49,7 @@ namespace IA.Events
                 i++;
             }
 
-            allAliases[allAliases.Length - 1] = name;
+            allAliases[allAliases.Length - 1] = Name;
 
             if (enabled.ContainsKey(e.Channel.Id))
             {
@@ -70,19 +65,19 @@ namespace IA.Events
                 return;
             }
 
-            if (requiresPermissions.Length > 0)
+            if (GuildPermissions.Count > 0)
             {
-                foreach (DiscordGuildPermission g in requiresPermissions)
+                foreach (DiscordGuildPermission g in GuildPermissions)
                 {
                     if (!e.Author.HasPermissions(e.Channel, g))
                     {
-                        await e.Channel.SendMessage($"Please give me the server permission `{g}` to use this command.");
+                        await e.Channel.SendMessage($"Please give me the guild permission `{g}` to use this command.");
                         return;
                     }
                 }
             }
 
-            if (checkCommand(e, command, allAliases))
+            if (CheckCommand(e, command, allAliases))
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
@@ -90,8 +85,8 @@ namespace IA.Events
                 if (await TryProcessCommand(e, args))
                 {
                     await eventSystem.OnCommandDone(e, this);
-                    CommandUsed++;
-                    Log.Message($"{name} called from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
+                    TimesUsed++;
+                    Log.Message($"{Name} called from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
                 }
                 sw.Stop();
             }
@@ -99,7 +94,7 @@ namespace IA.Events
 
         private float GetCooldown(ulong id)
         {
-            float currentCooldown = (float)(DateTime.Now.AddSeconds(-cooldown) - lastTimeUsed[id]).TotalSeconds;
+            float currentCooldown = (float)(DateTime.Now.AddSeconds(-Cooldown) - lastTimeUsed[id]).TotalSeconds;
             return currentCooldown;
         }
 
@@ -107,7 +102,7 @@ namespace IA.Events
         {
             if (lastTimeUsed.ContainsKey(id))
             {
-                if (DateTime.Now.AddSeconds(-cooldown) >= lastTimeUsed[id])
+                if (DateTime.Now.AddSeconds(-Cooldown) >= lastTimeUsed[id])
                 {
                     lastTimeUsed[id] = DateTime.Now;
                     return false;
@@ -125,13 +120,13 @@ namespace IA.Events
         {
             try
             {
-                await processCommand(e, args);
+                await ProcessCommand(e, args);
                 return true;
             }
             catch (Exception ex)
             {
-                await e.Channel.SendMessage(errorMessage);
-                Log.ErrorAt(name, ex.Message + "\n" + ex.StackTrace);
+                await e.Channel.SendMessage(Metadata.errorMessage);
+                Log.ErrorAt(Name, ex.Message + "\n" + ex.StackTrace);
             }
             return false;
         }

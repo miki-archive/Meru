@@ -11,10 +11,7 @@ namespace IA.Events
             await (await e.GetDefaultChannel()).SendMessage("This server event has not been set up correctly.");
         };
 
-        public GuildEvent()
-        {
-            CommandUsed = 0;
-        }
+        public GuildEvent() { }
 
         public async Task CheckAsync(IDiscordGuild e)
         {

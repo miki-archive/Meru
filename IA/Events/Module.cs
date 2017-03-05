@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using IA.Database;
 using IA.SDK;
+using IA.SDK.Events;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -10,121 +11,87 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public class Module
+    public class RuntimeModule : IModule
     {
-        public ModuleInformation defaultInfo = new ModuleInformation();
+        public string Name { get; set; } = "";
+        public bool Enabled { get; set; } = true;
+
+        public MessageRecievedEventDelegate MessageRecieved { get; set; } = null;
+        public UserUpdatedEventDelegate UserUpdated { get; set; } = null;
+        public GuildUserEventDelegate UserJoinGuild { get; set; } = null;
+        public GuildUserEventDelegate UserLeaveGuild { get; set; } = null;
+
+        public List<ICommandEvent> Events { get; set; } = new List<ICommandEvent>();
 
         private Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
+
+        internal EventSystem EventSystem;
 
         public string SqlName
         {
             get
             {
-                return "module:" + defaultInfo.name;
+                return "module:" + Name;
             }
         }
 
         private bool isInstalled = false;
 
-        internal Module()
+        internal RuntimeModule() { }
+        public RuntimeModule(string name, bool enabled = true)
         {
+            Name = name;
+            Enabled = enabled;
+        }
+        public RuntimeModule(IModule info)
+        {
+            Name = info.Name;
+            Enabled = info.Enabled;
+            MessageRecieved = info.MessageRecieved;
+            UserUpdated = info.UserUpdated;
+            UserJoinGuild = info.UserJoinGuild;
+            UserLeaveGuild = info.UserLeaveGuild;
+            Events = info.Events;
+        }
+        public RuntimeModule(Action<IModule> info)
+        {
+            info.Invoke(this);
         }
 
-        public Module(string name, bool enabled = true)
+        public async Task InstallAsync(object bot)
         {
-            defaultInfo = new ModuleInformation();
-            defaultInfo.name = name;
-            defaultInfo.enabled = enabled;
-        }
+            Bot b = (Bot)bot;
+            Name = Name.ToLower();
 
-        public Module(Action<ModuleInformation> info)
-        {
-            info.Invoke(defaultInfo);
-        }
+            b.Events.Modules.Add(Name, this);
 
-        public Module(ModuleInstance addon)
-        {
-            defaultInfo = new ModuleInformation();
-            defaultInfo.name = addon.data.name.ToLower();
-            defaultInfo.enabled = addon.data.enabled;
-
-            defaultInfo.messageEvent = addon.data.messageRecieved;
-            defaultInfo.userUpdateEvent = addon.data.userUpdated;
-
-            defaultInfo.guildJoinEvent = addon.data.userJoin;
-            defaultInfo.guildLeaveEvent = addon.data.userLeave;
-
-            defaultInfo.events = new List<RuntimeCommandEvent>();
-            foreach (CommandEvent e in addon.data.events)
+            if (MessageRecieved != null)
             {
-                defaultInfo.events.Add(new RuntimeCommandEvent(x =>
-                {
-                    x.name = e.name;
-                    x.module = this;
-                    if (e.processCommand != null)
-                    {
-                        x.processCommand = e.processCommand;
-                    }
-                    x.accessibility = e.accessibility;
-                    x.requiresPermissions = e.requiresPermissions;
-                    x.usage = e.metadata.usage.ToArray();
-                    if (e.checkCommand != null)
-                    {
-                        x.checkCommand = e.checkCommand;
-                    }
-                    x.aliases = e.aliases;
-                    x.canBeDisabled = e.canBeDisabled;
-                    x.canBeOverridenByDefaultPrefix = e.canBeOverridenByDefaultPrefix;
-                    x.cooldown = e.cooldown;
-                    x.description = e.metadata.description;
-                    x.errorMessage = e.metadata.errorMessage;
-                    x.defaultEnabled = e.defaultEnabled;
-                }));
-            }
-        }
-
-        public string GetState()
-        {
-            return defaultInfo.name + ": " + (isInstalled ? "Installed" : "Uninstalled");
-        }
-
-        // TODO: either remove or use this for something.
-        public Task Initialize()
-        {
-            return Task.CompletedTask;
-        }
-
-        public async Task InstallAsync(Bot bot)
-        {
-            defaultInfo.name = defaultInfo.name.ToLower();
-            bot.Events.Modules.Add(defaultInfo.name, this);
-
-            if (defaultInfo.messageEvent != null)
-            {
-                bot.Client.MessageReceived += Module_MessageRecieved;
+                b.Client.MessageReceived += Module_MessageRecieved;
             }
 
-            if (defaultInfo.userUpdateEvent != null)
+            if (UserUpdated != null)
             {
-                bot.Client.UserUpdated += Module_UserUpdated;
+                b.Client.UserUpdated += Module_UserUpdated;
             }
 
-            if (defaultInfo.guildJoinEvent != null)
+            if (UserJoinGuild != null)
             {
-                bot.Client.UserJoined += Module_UserJoined;
+                b.Client.UserJoined += Module_UserJoined;
             }
 
-            if (defaultInfo.guildLeaveEvent != null)
+            if (UserLeaveGuild != null)
             {
-                bot.Client.UserLeft += Module_UserLeft;
+                b.Client.UserLeft += Module_UserLeft;
             }
 
-            defaultInfo.eventSystem = bot.Events;
+            EventSystem = b.Events;
 
-            foreach (RuntimeCommandEvent e in defaultInfo.events)
+            foreach (RuntimeCommandEvent e in Events)
             {
-                e.eventSystem = bot.Events;
-                defaultInfo.eventSystem.events.CommandEvents.Add(e.name, e);
+                e.eventSystem = b.Events;
+                ICommandEvent ev = new RuntimeCommandEvent(e);
+                EventSystem.events.CommandEvents.Add(ev.Name, ev);
             }
 
             isInstalled = true;
@@ -132,38 +99,41 @@ namespace IA.Events
             await Task.CompletedTask;
         }
 
-        public async Task UninstallAsync(Bot bot)
+        public async Task UninstallAsync(object bot)
         {
+            Bot b = (Bot)bot;
+
             if (!isInstalled)
             {
                 return;
             }
 
-            bot.Events.Modules.Remove(defaultInfo.name);
+            b.Events.Modules.Remove(Name);
 
-            foreach (RuntimeCommandEvent e in defaultInfo.events)
+            foreach (ICommandEvent e in Events)
             {
-                defaultInfo.eventSystem.events.CommandEvents.Remove(e.name);
+                ICommandEvent ev = new RuntimeCommandEvent(e);
+                EventSystem.events.CommandEvents.Remove(ev.Name);
             }
 
-            if (defaultInfo.messageEvent != null)
+            if (MessageRecieved != null)
             {
-                bot.Client.MessageReceived -= Module_MessageRecieved;
+                b.Client.MessageReceived -= Module_MessageRecieved;
             }
 
-            if (defaultInfo.userUpdateEvent != null)
+            if (UserUpdated != null)
             {
-                bot.Client.UserUpdated -= Module_UserUpdated;
+                b.Client.UserUpdated -= Module_UserUpdated;
             }
 
-            if (defaultInfo.guildJoinEvent != null)
+            if (UserJoinGuild != null)
             {
-                bot.Client.UserJoined -= Module_UserJoined;
+                b.Client.UserJoined -= Module_UserJoined;
             }
 
-            if (defaultInfo.guildLeaveEvent != null)
+            if (UserLeaveGuild != null)
             {
-                bot.Client.UserLeft -= Module_UserLeft;
+                b.Client.UserLeft -= Module_UserLeft;
             }
 
             isInstalled = false;
@@ -176,7 +146,7 @@ namespace IA.Events
 
             if (await IsEnabled(r.Guild.Id))
             {
-                await defaultInfo.guildJoinEvent(r.Guild, r);
+                await UserJoinGuild(r.Guild, r);
             }
         }
 
@@ -186,7 +156,7 @@ namespace IA.Events
 
             if (await IsEnabled(r.Guild.Id))
             {
-                await defaultInfo.guildLeaveEvent(r.Guild, r);
+                await UserLeaveGuild(r.Guild, r);
             }
         }
 
@@ -196,7 +166,7 @@ namespace IA.Events
             RuntimeUser usr2 = new RuntimeUser(arg2);
             if (await IsEnabled(usr1.Guild.Id))
             {
-                await defaultInfo.userUpdateEvent(usr1, usr2);
+                await UserUpdated(usr1, usr2);
             }
         }
 
@@ -207,13 +177,7 @@ namespace IA.Events
             {
                 try
                 {
-                    Task.Run(async () =>
-                    {
-                        Stopwatch s = new Stopwatch();
-                        s.Start();
-                        await defaultInfo.messageEvent(msg);
-                        s.Stop();
-                    });
+                    await MessageRecieved(msg);
                 }
                 catch (Exception ex)
                 {
@@ -224,7 +188,7 @@ namespace IA.Events
 
         public async Task SetEnabled(ulong serverid, bool enabled)
         {
-            if (defaultInfo.eventSystem.bot.SqlInformation != null)
+            if (EventSystem.bot.SqlInformation != null)
             {
                 if (this.enabled.ContainsKey(serverid))
                 {
@@ -240,9 +204,9 @@ namespace IA.Events
 
         public async Task<bool> IsEnabled(ulong id)
         {
-            if (defaultInfo.eventSystem.bot.SqlInformation == null)
+            if (EventSystem.bot.SqlInformation == null)
             {
-                return defaultInfo.enabled;
+                return Enabled;
             }
 
             if (enabled.ContainsKey(id))
@@ -253,9 +217,9 @@ namespace IA.Events
             int state = IsEventEnabled(id);
             if (state == -1)
             {
-                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, SqlName, id, defaultInfo.enabled);
-                enabled.Add(id, defaultInfo.enabled);
-                return defaultInfo.enabled;
+                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, SqlName, id, Enabled);
+                enabled.Add(id, Enabled);
+                return Enabled;
             }
             bool actualState = (state == 1) ? true : false;
 
@@ -266,9 +230,9 @@ namespace IA.Events
         // TODO: Query this.
         private int IsEventEnabled(ulong serverid)
         {
-            if (defaultInfo.eventSystem.bot.SqlInformation == null) return 1;
+            if (EventSystem.bot.SqlInformation == null) return 1;
 
-            MySqlConnection connection = new MySqlConnection(defaultInfo.eventSystem.bot.SqlInformation.GetConnectionString());
+            MySqlConnection connection = new MySqlConnection(EventSystem.bot.SqlInformation.GetConnectionString());
             MySqlCommand command = connection.CreateCommand();
             command.CommandText = $"SELECT enabled FROM event WHERE id=\"{serverid}\" AND name=\"{SqlName}\"";
 
