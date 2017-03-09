@@ -6,11 +6,11 @@ namespace IA.Events
 {
     internal class EventContainer
     {
-        public Dictionary<string, ICommandEvent> CommandEvents { private set; get; } = new Dictionary<string, RuntimeCommandEvent>();
+        public Dictionary<string, ICommandEvent> CommandEvents { private set; get; } = new Dictionary<string, ICommandEvent>();
         public Dictionary<string, CommandDoneEvent> CommandDoneEvents { private set; get; } = new Dictionary<string, CommandDoneEvent>();
 
-        public Dictionary<string, Event> MentionEvents { private set; get; } = new Dictionary<string, Event>();
-        public Dictionary<string, Event> ContinuousEvents { private set; get; } = new Dictionary<string, Event>();
+        public Dictionary<string, IEvent> MentionEvents { private set; get; } = new Dictionary<string, IEvent>();
+        public Dictionary<string, IEvent> ContinuousEvents { private set; get; } = new Dictionary<string, IEvent>();
 
         public Dictionary<string, GuildEvent> JoinServerEvents { private set; get; } = new Dictionary<string, GuildEvent>();
         public Dictionary<string, GuildEvent> LeaveServerEvents { private set; get; } = new Dictionary<string, GuildEvent>();

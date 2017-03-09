@@ -103,7 +103,7 @@ namespace IA
             {
                 Log.Message($"Connecting to shard {client.ShardId}");
                 await client.LoginAsync(TokenType.Bot, info.Token);
-                await client.ConnectAsync();
+                await client.StartAsync();
                 await Task.Delay(6000);
             }
         }

@@ -11,7 +11,7 @@ namespace IA.Database
 
         private SqlInformation info;
 
-        private PrefixValue defaultIdentifier;
+        private string defaultIdentifier;
 
         public Sql()
         {
@@ -25,12 +25,12 @@ namespace IA.Database
             defaultIdentifier = instance.defaultIdentifier;
         }
 
-        public Sql(SqlInformation info, PrefixValue defaultIdentifier)
+        public Sql(SqlInformation info, string defaultIdentifier)
         {
             this.info = info;
-            if (defaultIdentifier == null)
+            if (defaultIdentifier == "")
             {
-                this.defaultIdentifier = new PrefixValue(">");
+                this.defaultIdentifier = ">";
             }
             else
             {
@@ -51,7 +51,7 @@ namespace IA.Database
         /// <returns></returns>
         public static async Task<string> GetIdentifier(ulong server_id)
         {
-            string output = instance.defaultIdentifier.Value;
+            string output = instance.defaultIdentifier;
 
             await QueryAsync("SELECT i FROM identifier WHERE id=?id", x =>
             {

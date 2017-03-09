@@ -62,7 +62,7 @@ namespace IA.Addons
 
         public async Task LoadSpecific(Bot bot, string module)
         {
-            string s = CurrentDirectory + module + ".dll";
+            string s = CurrentDirectory + (module.EndsWith(".dll")?module:module + ".dll");
 
             Assembly addon = Assembly.Load(File.ReadAllBytes(s));
 
@@ -74,7 +74,7 @@ namespace IA.Addons
             if (currentAddon != null)
             {
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
-                aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance));
+                aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance), bot);
 
                 foreach (IModule nm in aInstance.Modules)
                 {
@@ -83,7 +83,7 @@ namespace IA.Addons
                         Log.Warning("Module already loaded, stopping load");
                         return;
                     }
-                    RuntimeModule newModule = nm as RuntimeModule;
+                    RuntimeModule newModule = new RuntimeModule(nm);
                     await newModule.InstallAsync(bot);
                 }
 
@@ -109,7 +109,7 @@ namespace IA.Addons
             if (currentAddon != null)
             {
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
-                aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance));
+                aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance), bot);
 
                 foreach (IModule nm in aInstance.Modules)
                 {
@@ -140,11 +140,11 @@ namespace IA.Addons
             if (currentAddon != null)
             {
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
-                aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance));
+                aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance), bot);
 
-                foreach (ModuleInstance nm in aInstance.Modules)
+                foreach (IModule nm in aInstance.Modules)
                 {
-                    Events.RuntimeModule mod = bot.Events.GetModuleByName(nm.Name);
+                    IModule mod = bot.Events.GetModuleByName(nm.Name);
 
                     if (mod != null)
                     {

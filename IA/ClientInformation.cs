@@ -10,7 +10,7 @@ namespace IA
         public string Version { get; set; } = "1.0.0";
 
         public string Token { get; set; } = "";
-        public PrefixValue Prefix { get; set; } = PrefixValue.Set(">");
+        public string Prefix { get; set; } = ">";
 
         public string CarbonitexKey { get; set; } = "";
         public string DiscordPwKey { get; set; } = "";

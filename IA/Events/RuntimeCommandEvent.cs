@@ -13,19 +13,25 @@ namespace IA.Events
     {
         public int Cooldown { get; set; }
 
-        public List<DiscordGuildPermission> GuildPermissions { get; set; }
+        public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
 
         public CheckCommandDelegate CheckCommand { get; set; } = (e, args, aliases) =>
         {
             return true;
         };
 
-        public ProcessCommandDelegate ProcessCommand { get; set; }
-
-        public RuntimeCommandEvent() { }
-        public RuntimeCommandEvent(ICommandEvent commandEvent)
+        public ProcessCommandDelegate ProcessCommand { get; set; } = async (e, args) =>
         {
 
+        };
+
+        public RuntimeCommandEvent() { }
+        public RuntimeCommandEvent(ICommandEvent commandEvent) : base(commandEvent)
+        {
+            CheckCommand = commandEvent?.CheckCommand;
+            Cooldown = commandEvent.Cooldown;
+            GuildPermissions = commandEvent?.GuildPermissions;
+            ProcessCommand = commandEvent?.ProcessCommand;
         }
         public RuntimeCommandEvent(Action<RuntimeCommandEvent> info) { info.Invoke(this);  }
 
@@ -39,17 +45,22 @@ namespace IA.Events
                 args = e.Content.Substring(e.Content.Split(' ')[0].Length + 1);
             }
 
-            string[] allAliases = new string[Aliases.Length + 1];
-            int i = 0;
+            string[] allAliases = null;
 
-            // loading aliases
-            foreach (string a in allAliases)
+            if (Aliases != null)
             {
-                allAliases[i] = a;
-                i++;
-            }
+                allAliases = new string[Aliases.Length + 1];
+                int i = 0;
 
-            allAliases[allAliases.Length - 1] = Name;
+                // loading aliases
+                foreach (string a in allAliases)
+                {
+                    allAliases[i] = a;
+                    i++;
+                }
+
+                allAliases[allAliases.Length - 1] = Name;
+            }
 
             if (enabled.ContainsKey(e.Channel.Id))
             {

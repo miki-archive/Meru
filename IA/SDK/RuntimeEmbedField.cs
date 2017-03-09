@@ -53,7 +53,7 @@ namespace IA.SDK
         {
             get
             {
-                return field.Value;
+                return field.Value.ToString();
             }
 
             set

@@ -24,7 +24,7 @@ namespace IA.SDK
         {
             get
             {
-                return user.AvatarUrl;
+                return user.GetAvatarUrl(AvatarFormat.Png);
             }
         }
 

@@ -87,10 +87,11 @@ namespace IA.Events
 
             EventSystem = b.Events;
 
-            foreach (RuntimeCommandEvent e in Events)
+            foreach (ICommandEvent e in Events)
             {
-                e.eventSystem = b.Events;
-                ICommandEvent ev = new RuntimeCommandEvent(e);
+                RuntimeCommandEvent ev = new RuntimeCommandEvent(e);
+                ev.eventSystem = b.Events;
+                ev.Module = this;
                 EventSystem.events.CommandEvents.Add(ev.Name, ev);
             }
 

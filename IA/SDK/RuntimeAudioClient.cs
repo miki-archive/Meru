@@ -43,7 +43,7 @@ namespace IA.SDK
 
         public async Task Disconnect()
         {
-            await client.DisconnectAsync();
+            await client.StopAsync();
         }
 
         public async Task Pause()

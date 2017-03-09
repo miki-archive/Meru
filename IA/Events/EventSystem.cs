@@ -12,7 +12,7 @@ namespace IA.Events
     public class EventSystem
     {
         public List<ulong> Developers = new List<ulong>();
-        public Dictionary<string, RuntimeModule> Modules { get; internal set; } = new Dictionary<string, RuntimeModule>();
+        public Dictionary<string, IModule> Modules { get; internal set; } = new Dictionary<string, IModule>();
         public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
 
         private Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
@@ -28,8 +28,8 @@ namespace IA.Events
         internal EventContainer events { private set; get; }
         private Sql sql;
 
-        public PrefixValue DefaultIdentifier { private set; get; }
-        public PrefixValue OverrideIdentifier { private set; get; }
+        public string DefaultIdentifier { private set; get; }
+        public string OverrideIdentifier { private set; get; }
 
         /// <summary>
         /// Constructor for EventSystem.
@@ -49,7 +49,7 @@ namespace IA.Events
 
             Sql.TryCreateTable("identifier(id BIGINT, i varchar(255))");
 
-            OverrideIdentifier = PrefixValue.Set(bot.Name.ToLower() + ".");
+            OverrideIdentifier = bot.Name.ToLower() + ".";
             DefaultIdentifier = bot.Identifier;
         }
 
@@ -166,7 +166,7 @@ namespace IA.Events
                         {
                             if (GetUserAccessibility(e) >= events.CommandEvents[command].Accessibility)
                             {
-                                Task.Run(() => events.CommandEvents[command].CheckCommand(e, identifier));
+                                Task.Run(() => events.CommandEvents[command].Check(e, identifier));
                                 return true;
                             }
                         }
@@ -178,7 +178,7 @@ namespace IA.Events
                     {
                         if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].Accessibility)
                         {
-                            Task.Run(() => events.CommandEvents[aliases[command]].CheckCommand(e, identifier));
+                            Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
                             return true;
                         }
                     }
@@ -258,7 +258,7 @@ namespace IA.Events
             }
         }
 
-        public RuntimeModule GetModuleByName(string name)
+        public IModule GetModuleByName(string name)
         {
             if (Modules.ContainsKey(name.ToLower()))
             {
@@ -277,15 +277,15 @@ namespace IA.Events
             return EventAccessibility.PUBLIC;
         }
 
-        public async Task<string> ListCommands(IDiscordMessage e)
+        public async Task<SortedDictionary<string, List<string>>> GetEventNames(IDiscordMessage e)
         {
-            Dictionary<string, List<string>> moduleEvents = new Dictionary<string, List<string>>();
+            SortedDictionary<string, List<string>> moduleEvents = new SortedDictionary<string, List<string>>();
 
             moduleEvents.Add("MISC", new List<string>());
 
             EventAccessibility userEventAccessibility = GetUserAccessibility(e);
 
-            foreach (Event ev in events.CommandEvents.Values)
+            foreach (ICommandEvent ev in events.CommandEvents.Values)
             {
                 if (await ev.IsEnabled(e.Channel.Id) && userEventAccessibility >= ev.Accessibility)
                 {
@@ -317,11 +317,15 @@ namespace IA.Events
 
             foreach (List<string> list in moduleEvents.Values)
             {
-                list.OrderBy(x =>
-                {
-                    return x;
-                });
+                list.Sort((x, y) => x.CompareTo(y));
             }
+
+            return moduleEvents;
+        }
+
+        public async Task<string> ListCommands(IDiscordMessage e)
+        {
+            SortedDictionary<string, List<string>> moduleEvents = await GetEventNames(e);
 
             string output = "";
             foreach (KeyValuePair<string, List<string>> items in moduleEvents)
@@ -336,10 +340,27 @@ namespace IA.Events
             }
             return output;
         }
+        public async Task<IDiscordEmbed> ListCommandsInEmbed(IDiscordMessage e)
+        {
+            SortedDictionary<string, List<string>> moduleEvents = await GetEventNames(e);
+
+            IDiscordEmbed embed = new RuntimeEmbed(new Discord.EmbedBuilder());
+
+            foreach (KeyValuePair<string, List<string>> items in moduleEvents)
+            {
+                embed.AddField(f =>
+                {
+                    f.Name = items.Key;
+                    f.Value = "```" + string.Join(", ", items.Value) + "```";
+                    f.IsInline = true;
+                });
+            }
+            return embed;
+        }
 
         public async Task LoadIdentifier(ulong server)
         {
-            string tempIdentifier = bot.Identifier.Value;
+            string tempIdentifier = bot.Identifier;
 
             if (bot.SqlInformation != null)
             {
@@ -347,7 +368,7 @@ namespace IA.Events
                 {
                     if (output == null)
                     {
-                        Sql.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier.Value);
+                        Sql.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier);
                     }
                     else
                     {
@@ -428,7 +449,7 @@ namespace IA.Events
                 return;
             }
 
-            if (await CheckIdentifier(message, OverrideIdentifier.Value, _message))
+            if (await CheckIdentifier(message, OverrideIdentifier, _message))
             {
                 return;
             }

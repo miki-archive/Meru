@@ -11,7 +11,7 @@ namespace IA.Events
     public class Event : IEvent
     {
         public string Name { get; set; } = "$command-not-named";
-        public string[] Aliases { get; set; }
+        public string[] Aliases { get; set; } = new string[] { };
 
         public EventAccessibility Accessibility { get; set; } = EventAccessibility.PUBLIC;
         public EventMetadata Metadata { get; set; } = new EventMetadata();

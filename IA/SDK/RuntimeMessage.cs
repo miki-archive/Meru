@@ -126,7 +126,7 @@ namespace IA.SDK
 
         public IDiscordEmbed CreateEmbed()
         {
-            return new RuntimeEmbedBuilder(new EmbedBuilder());
+            return new RuntimeEmbed(new EmbedBuilder());
         }
 
         public async Task DeleteAsync()

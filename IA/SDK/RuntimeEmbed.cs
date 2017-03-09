@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace IA.SDK
 {
-    public class RuntimeEmbedBuilder : IDiscordEmbed, IProxy<EmbedBuilder>
+    public class RuntimeEmbed : IDiscordEmbed, IProxy<EmbedBuilder>
     {
         public EmbedBuilder embed;
 
         public List<IEmbedField> fields = new List<IEmbedField>();
 
-        public RuntimeEmbedBuilder(EmbedBuilder e)
+        public RuntimeEmbed(EmbedBuilder e)
         {
             embed = e;
         }
@@ -105,19 +105,6 @@ namespace IA.SDK
             set
             {
                 embed.Url = value;
-            }
-        }
-
-        IEmbedAuthor IDiscordEmbed.Author
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
             }
         }
 

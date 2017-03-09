@@ -14,14 +14,16 @@ namespace IA.SDK
     {
         public string Name { get; set; } = "";
         public List<IModule> Modules { get; set; } = new List<IModule>();
+        Bot bot = null;
 
         public RuntimeAddonInstance()
         {
         }
-        public RuntimeAddonInstance(IAddonInstance i)
+        public RuntimeAddonInstance(IAddonInstance i, Bot bot)
         {
             Name = i.Name;
             Modules = i.Modules;
+            this.bot = bot;
         }
 
         public async Task QueryAsync(string text, QueryOutput output, params object[] parameters)
@@ -38,6 +40,10 @@ namespace IA.SDK
         {
             return await Bot.instance.Events.ListCommands(e);
         }
+        public async Task<IDiscordEmbed> ListCommandsInEmbed(IDiscordMessage e)
+        {
+            return await Bot.instance.Events.ListCommandsInEmbed(e);
+        }
 
         public ICommandEvent GetCommandEvent(string args)
         {
@@ -51,22 +57,22 @@ namespace IA.SDK
 
         public EventAccessibility GetUserAccessibility(IDiscordMessage message)
         {
-            throw new NotImplementedException();
+            return Bot.instance.Events.GetUserAccessibility(message);
         }
 
-        public Task<string> GetIdentifierAsync(ulong serverid)
+        public async Task<string> GetIdentifierAsync(ulong serverid)
         {
-            throw new NotImplementedException();
+            return await Bot.instance.Events.GetIdentifier(serverid);
         }
 
         public List<IModule> GetModules()
         {
-            throw new NotImplementedException();
+            return Bot.instance.Events.Modules.Values.ToList();
         }
 
-        public Task SetIdentifierAsync(IDiscordGuild guild, string identifier)
+        public async Task SetIdentifierAsync(IDiscordGuild guild, string identifier)
         {
-            throw new NotImplementedException();
+            await Bot.instance.Events.SetIdentifierAsync(guild, identifier);
         }
     }
 }

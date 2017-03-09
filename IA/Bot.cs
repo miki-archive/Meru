@@ -61,7 +61,11 @@ namespace IA
             }
             InitializeBot().GetAwaiter().GetResult();
         }
-
+        public Bot(ClientInformation info)
+        {
+            clientInformation = info;
+            InitializeBot().GetAwaiter().GetResult();
+        }
         public Bot(Action<ClientInformation> info)
         {
             clientInformation = new ClientInformation();
@@ -73,12 +77,10 @@ namespace IA
         {
             Events.Developers.Add(id);
         }
-
         public void AddDeveloper(IDiscordUser user)
         {
             Events.Developers.Add(user.Id);
         }
-
         public void AddDeveloper(IUser user)
         {
             Events.Developers.Add(user.Id);
@@ -87,7 +89,7 @@ namespace IA
         public async Task ConnectAsync()
         {
             await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
-            await Client.ConnectAsync();
+            await Client.StartAsync();
             await Task.Delay(-1);
         }
 
@@ -170,7 +172,7 @@ namespace IA
             Events = new EventSystem(x =>
             {
                 x.Name = clientInformation.Name;
-                x.Identifier.Value = clientInformation.Prefix.Value;
+                x.Identifier = clientInformation.Prefix;
                 x.SqlInformation = clientInformation.sqlInformation;
             });
 

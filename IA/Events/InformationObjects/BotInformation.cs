@@ -5,7 +5,7 @@ namespace IA.Events
     public class BotInformation
     {
         public string Name;
-        public PrefixValue Identifier = PrefixValue.Set(">");
+        public string Identifier = ">";
         public SqlInformation SqlInformation;
 
         public BotInformation()
