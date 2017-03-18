@@ -152,7 +152,7 @@ namespace IA.Events
             Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
-        private async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e, bool doRunCommand = true)
+        private async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e)
         {
             if (message.StartsWith(identifier))
             {
@@ -162,13 +162,10 @@ namespace IA.Events
                 {
                     if (await events.CommandEvents[command].IsEnabled(e.Channel.Id))
                     {
-                        if (doRunCommand)
+                        if (GetUserAccessibility(e) >= events.CommandEvents[command].Accessibility)
                         {
-                            if (GetUserAccessibility(e) >= events.CommandEvents[command].Accessibility)
-                            {
-                                Task.Run(() => events.CommandEvents[command].Check(e, identifier));
-                                return true;
-                            }
+                            Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+                            return true;
                         }
                     }
                 }
@@ -240,6 +237,7 @@ namespace IA.Events
             return events.GetEvent(id);
         }
 
+        // TODO: make better
         public async Task<string> GetIdentifier(ulong server_id)
         {
             if (identifier.ContainsKey(server_id))

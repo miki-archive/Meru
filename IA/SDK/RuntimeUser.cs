@@ -14,7 +14,6 @@ namespace IA.SDK
         public RuntimeUser()
         {
         }
-
         public RuntimeUser(IUser author)
         {
             user = author;

@@ -53,6 +53,7 @@ namespace IA.SDK
         public void CreateModule(Action<IModule> module)
         {
             IModule m = new RuntimeModule(module);
+            Modules.Add(m);
         }
 
         public EventAccessibility GetUserAccessibility(IDiscordMessage message)
