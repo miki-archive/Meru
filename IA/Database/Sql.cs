@@ -214,34 +214,6 @@ namespace IA.Database
                         ));
                     }
                 }
-
-                //if (splitString.Count > 1)
-                //{
-                //    if (splitString[1].StartsWith("?"))
-                //    {
-                //        string parameterName = splitString[1].Split(';')[0].TrimEnd(';', '?', ',', ')', '(');
-
-                //        if (parameters.Find(x => { return x.ParameterName == parameterName; }) == null)
-                //        {
-                //            parameters.Add(new MySqlParameter(parameterName, p[parameters.Count]));
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    if (splitSql[i].Contains("?"))
-                //    {
-                //        splitString = new List<string>();
-                //        splitString.AddRange(splitSql[i].Split('='));
-
-                //        string parameterName = splitString[1].Split(';')[0].TrimEnd(';', '?', ',', ')', '(');
-
-                //        if (parameters.Find(x => { return x.ParameterName == parameterName; }) == null)
-                //        {
-                //            parameters.Add(new MySqlParameter(parameterName, p[parameters.Count]));
-                //        }
-                //    }
-                //}
             }
 
             await Task.Run(async () => await PollQuery(connection, curCode, parameters, output));
