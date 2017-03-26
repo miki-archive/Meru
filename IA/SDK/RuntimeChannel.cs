@@ -1,12 +1,14 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using IA.SDK.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    internal class RuntimeMessageChannel : IDiscordMessageChannel, IProxy<IChannel>
+    public class RuntimeMessageChannel : IDiscordMessageChannel, IProxy<IChannel>
     {
         public IChannel channel;
 
@@ -81,10 +83,97 @@ namespace IA.SDK
         {
             return new RuntimeMessage(await (channel as IMessageChannel).SendFileAsync(path));
         }
-
         public async Task<IDiscordMessage> SendFileAsync(MemoryStream stream, string extension)
         {
             return new RuntimeMessage(await (channel as IMessageChannel)?.SendFileAsync(stream, extension));
+        }
+
+        // TODO: clean this | also, completely re-write this
+        public async Task SendOption(string message, IDiscordUser user, params Option[] reactionEmoji)
+        {
+            IDiscordMessage e = await SendMessage(message);
+            IMessage msg = (e as IProxy<IMessage>).ToNativeObject();
+
+            int output = -1;
+
+            for (int i = 0; i < reactionEmoji.Length; i++)
+            {
+                await (msg as IUserMessage).AddReactionAsync(reactionEmoji[i].emoji);
+            }
+
+            Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task> socketReaction = new Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task>(
+                async (cachableMessage, channel, reaction) =>
+            {
+                IUserMessage m = await cachableMessage.GetOrDownloadAsync();
+                if (m.Id == msg.Id && reaction.User.Value.Id == user.Id)
+                {
+                    for (int i = 0; i < reactionEmoji.Length; i++)
+                    {
+                        if (reactionEmoji[i].emoji == reaction.Emoji.Name)
+                        {
+                            output = i;
+                        }
+                    }
+                }
+            });
+
+            Bot.instance.Client.ReactionAdded += socketReaction;
+
+            int timeTaken = 0;
+            while(output == -1 || timeTaken > 10000)
+            {
+                await Task.Delay(100);
+                timeTaken += 100;
+            }
+            Bot.instance.Client.ReactionAdded -= socketReaction;
+
+            if (output != -1)
+            {
+                await reactionEmoji[output].output();
+            }
+        }
+        public async Task SendOption(IDiscordEmbed message, IDiscordUser user, params Option[] reactionEmoji)
+        {
+            IDiscordMessage e = await SendMessage(message);
+            IMessage msg = (e as IProxy<IMessage>).ToNativeObject();
+
+            int output = -1;
+
+            for (int i = 0; i < reactionEmoji.Length; i++)
+            {
+                await (msg as IUserMessage).AddReactionAsync(reactionEmoji[i].emoji);
+            }
+
+            Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task> socketReaction = new Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task>(
+                async (cachableMessage, channel, reaction) =>
+                {
+                    IUserMessage m = await cachableMessage.GetOrDownloadAsync();
+                    if (m.Id == msg.Id && reaction.User.Value.Id == user.Id)
+                    {
+                        for (int i = 0; i < reactionEmoji.Length; i++)
+                        {
+                            if (reactionEmoji[i].emoji == reaction.Emoji.Name)
+                            {
+                                output = i;
+                            }
+                        }
+                    }
+                });
+
+            Bot.instance.Client.ReactionAdded += socketReaction;
+
+            int timeTaken = 0;
+            while (output == -1 || timeTaken > 10000)
+            {
+                await Task.Delay(100);
+                timeTaken += 100;
+            }
+            Bot.instance.Client.ReactionAdded -= socketReaction;
+
+            if (output != -1)
+            {
+                await reactionEmoji[output].output();
+            }
         }
 
         public async Task<IDiscordMessage> SendMessage(string message)
@@ -94,7 +183,6 @@ namespace IA.SDK
 
             return m;
         }
-
         public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
             Log.Message("Sent message to channel " + channel.Name);

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+// TODO: clean this
 namespace IA.SDK
 {
     public class RuntimeUser : IDiscordUser, IProxy<IUser>
@@ -136,8 +137,7 @@ namespace IA.SDK
         public async Task SendFile(string path)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
-
-            //await c.SendFileAsync(path);
+            await c.SendFileAsync(path);
         }
 
         public async Task<IDiscordMessage> SendMessage(string message)

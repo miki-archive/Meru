@@ -86,6 +86,7 @@
     <Compile Include="SDK\RuntimeAudioClient.cs" />
     <Compile Include="SDK\RuntimeChannel.cs" />
     <Compile Include="SDK\RuntimeClient.cs" />
+    <Compile Include="SDK\RuntimeDiscordReaction.cs" />
     <Compile Include="SDK\RuntimeEmbed.cs" />
     <Compile Include="SDK\RuntimeEmbedAuthor.cs" />
     <Compile Include="SDK\RuntimeEmbedField.cs" />

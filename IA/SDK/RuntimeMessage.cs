@@ -86,11 +86,31 @@ namespace IA.SDK
 
         public int ShardId => client.ShardId;
 
+        // TODO: Implement
         public IDiscordAudioChannel VoiceChannel
         {
             get
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        public Dictionary<DiscordEmoji, int> Reactions
+        {
+            get
+            {
+                IReadOnlyDictionary<Emoji, int> x = (messageData as IUserMessage).Reactions;
+                Dictionary<DiscordEmoji, int> emojis = new Dictionary<DiscordEmoji, int>();
+                foreach(Emoji y in x.Keys)
+                {
+                    DiscordEmoji newEmoji = new DiscordEmoji();
+                    newEmoji.Id = y.Id;
+                    newEmoji.Name = y.Name;
+                    newEmoji.Url = y.Url;
+
+                    emojis.Add(newEmoji, x[y]);
+                }
+                return emojis;
             }
         }
 
@@ -124,6 +144,13 @@ namespace IA.SDK
             client = new RuntimeClient(c);
         }
 
+        public async Task AddReaction(string emoji)
+        {
+            await (messageData as IUserMessage).AddReactionAsync(Emoji.Parse(emoji));
+        }
+
+        // ---------------------------- important :( why don't I ever do what future me would do?!?!!?
+        // GET THIS SHIT OUTTA HERE.
         public IDiscordEmbed CreateEmbed()
         {
             return new RuntimeEmbed(new EmbedBuilder());
