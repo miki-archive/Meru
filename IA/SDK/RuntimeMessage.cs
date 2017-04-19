@@ -114,6 +114,8 @@ namespace IA.SDK
             }
         }
 
+        public IReadOnlyCollection<ulong> MentionedChannelIds => messageData.MentionedChannelIds;
+
         public RuntimeMessage(IMessage msg)
         {
             messageData = msg;

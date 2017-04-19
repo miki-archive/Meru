@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace IA.SDK
 {
-    public class RuntimeEmbed : IDiscordEmbed, IProxy<EmbedBuilder>
+    public class RuntimeEmbed : IDiscordEmbed, IProxy<EmbedBuilder>, IQuery<RuntimeEmbed>
     {
         public EmbedBuilder embed;
 
@@ -108,6 +108,12 @@ namespace IA.SDK
             }
         }
 
+        public string ThumbnailUrl
+        {
+            get => embed.ThumbnailUrl;
+            set => embed.ThumbnailUrl = value;
+        }
+
         public IDiscordEmbed AddField(Action<IEmbedField> field)
         {
             IEmbedField f = new RuntimeEmbedField("", "");
@@ -123,6 +129,17 @@ namespace IA.SDK
 
             return this;
         }
+        public IDiscordEmbed AddField(IEmbedField field)
+        {
+            embed.AddField(x =>
+            {
+                x.Name = field.Name;
+                x.Value = field.Value;
+                x.IsInline = field.IsInline;
+            });
+
+            return this;
+        }
 
         public IEmbedAuthor CreateAuthor()
         {
@@ -133,6 +150,57 @@ namespace IA.SDK
         public void CreateFooter()
         {
             embed.Footer = new EmbedFooterBuilder();
+        }
+
+        public RuntimeEmbed Query(string embed)
+        {
+            string[] cutEmbed = embed.Slice();
+
+            foreach (string x in cutEmbed)
+            {
+                switch (x.Split('{')[0].ToLower().Trim(' '))
+                {
+                    case "title":
+                        {
+                            Title = x.Peel();
+                        }
+                        break;
+                    case "description":
+                    case "desc":
+                        {
+                            Description = x.Peel();
+                        } break;
+                    case "url":
+                        {
+                            Url = x.Peel();
+                        } break;
+                    case "imageurl":
+                        {
+                            ImageUrl = x.Peel();
+                        } break;
+                    case "color":
+                    case "c":
+                        {
+                            string[] colorSplit = x.Peel().Split(',');
+                            Color = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
+                        } break;
+                    case "author":
+                        {
+                            Author = (Author as IQuery<RuntimeEmbedAuthor>).Query(x.Peel());
+                        } break;
+                    case "footer":
+                        {
+                            Footer = (Footer as IQuery<RuntimeEmbedFooter>).Query(x.Peel());
+                        } break;
+                    case "field":
+                        {
+                            RuntimeEmbedField em = new RuntimeEmbedField();
+                            AddField((em as IQuery<RuntimeEmbedField>).Query(x.Peel()));
+                        } break;
+                }
+            }
+
+            return this;
         }
 
         public EmbedBuilder ToNativeObject()

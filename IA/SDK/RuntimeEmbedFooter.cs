@@ -1,9 +1,10 @@
-﻿using Discord;
+﻿using System;
+using Discord;
 using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    public class RuntimeEmbedFooter : IEmbedFooter, IProxy<EmbedFooterBuilder>
+    public class RuntimeEmbedFooter : IEmbedFooter, IProxy<EmbedFooterBuilder>, IQuery<RuntimeEmbedFooter>
     {
         private EmbedFooterBuilder footer;
 
@@ -38,9 +39,43 @@ namespace IA.SDK
             }
         }
 
+        #region IQuery<this>
+        public RuntimeEmbedFooter Query(string query)
+        {
+            string[] cutEmbed = query.Split('}');
+
+            foreach (string x in cutEmbed)
+            {
+                string[] y = x.Split('{');
+
+                if (y.Length <= 1)
+                {
+                    continue;
+                }
+
+                switch (y[0].ToLower().Trim(' '))
+                {
+                    case "text":
+                        {
+                            Text = y[1];
+                        }
+                        break;
+                    case "icon":
+                        {
+                            IconUrl = y[1];
+                        }
+                        break;
+                }
+            }
+
+            return this;
+        }
+        #endregion
+        #region IProxy<EmbedFooterBuilder>
         public EmbedFooterBuilder ToNativeObject()
         {
             return footer;
         }
+        #endregion
     }
 }

@@ -79,8 +79,6 @@
     <Compile Include="Node\Node.cs" />
     <Compile Include="PrefixValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rest\RestClient.cs" />
-    <Compile Include="Rest\RestResponse.cs" />
     <Compile Include="SDK\RuntimeAddonInstance.cs" />
     <Compile Include="SDK\RuntimeAudioChannel.cs" />
     <Compile Include="SDK\RuntimeAudioClient.cs" />

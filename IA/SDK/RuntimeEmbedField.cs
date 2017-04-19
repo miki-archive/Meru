@@ -1,12 +1,17 @@
-﻿using Discord;
+﻿using System;
+using Discord;
 using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    public class RuntimeEmbedField : IEmbedField
+    public class RuntimeEmbedField : IEmbedField, IQuery<RuntimeEmbedField>
     {
         private EmbedFieldBuilder field;
 
+        public RuntimeEmbedField()
+        {
+            field = new EmbedFieldBuilder();
+        }
         public RuntimeEmbedField(IEmbedField f)
         {
             field = new EmbedFieldBuilder();
@@ -60,6 +65,42 @@ namespace IA.SDK
             {
                 field.Value = value;
             }
+        }
+
+        public RuntimeEmbedField Query(string query)
+        {
+            string[] cutEmbed = query.Split('}');
+
+            foreach (string x in cutEmbed)
+            {
+                string[] y = x.Split('{');
+
+                if (y.Length < 1)
+                {
+                    continue;
+                }
+
+                switch (y[0].ToLower().Trim(' '))
+                {
+                    case "name":
+                        {
+                            Name = y[1];
+                        }
+                        break;
+                    case "value":
+                        {
+                            Value = y[1];
+                        }
+                        break;
+                    case "inline":
+                        {
+                            IsInline = y[1] == "true" ? true : false;
+                        }
+                        break;
+                }
+            }
+
+            return this;
         }
     }
 }

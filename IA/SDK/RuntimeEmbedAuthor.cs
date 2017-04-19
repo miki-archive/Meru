@@ -1,9 +1,10 @@
-﻿using Discord;
+﻿using System;
+using Discord;
 using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    internal class RuntimeEmbedAuthor : IEmbedAuthor
+    internal class RuntimeEmbedAuthor : IEmbedAuthor, IQuery<RuntimeEmbedAuthor>
     {
         private EmbedAuthorBuilder author;
 
@@ -51,9 +52,50 @@ namespace IA.SDK
             }
         }
 
+        #region IQuery<this>
+
+        public RuntimeEmbedAuthor Query(string query)
+        {
+            string[] cutEmbed = query.Split('}');
+
+            foreach (string x in cutEmbed)
+            {
+                string[] y = x.Split('{');
+
+                if (y.Length <= 1)
+                {
+                    continue;
+                }
+
+                switch (y[0].ToLower().Trim(' '))
+                {
+                    case "name":
+                        {
+                            Name = y[1];
+                        }
+                        break;
+                    case "icon":
+                        {
+                            IconUrl = y[1];
+                        }
+                        break;
+                    case "url":
+                        {
+                            Url = y[1];
+                        }
+                        break;
+                }
+            }
+
+            return this;
+        }
+        #endregion
+        #region IProxy<EmbedAuthorBuilder>
+
         public EmbedAuthorBuilder ToNativeObject()
         {
             return author;
         }
+        #endregion
     }
 }
