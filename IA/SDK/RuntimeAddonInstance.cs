@@ -75,5 +75,15 @@ namespace IA.SDK
         {
             await Bot.instance.Events.SetIdentifierAsync(guild, identifier);
         }
+
+        public int GetGuildCount()
+        {
+            return Bot.instance.Client.Guilds.Count;
+        }
+
+        public ulong GetBotId()
+        {
+            return Bot.instance.Client.CurrentUser.Id;
+        }
     }
 }
