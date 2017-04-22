@@ -12,9 +12,6 @@ namespace IA
         public string Token { get; set; } = "";
         public string Prefix { get; set; } = ">";
 
-        public string CarbonitexKey { get; set; } = "";
-        public string DiscordPwKey { get; set; } = "";
-
         public int ShardCount { get; set; } = 1;
 
         internal int ShardId { get; set; } = -1;
