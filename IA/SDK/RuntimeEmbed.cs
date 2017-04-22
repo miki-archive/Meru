@@ -1,4 +1,5 @@
 ﻿using Discord;
+using IA.SDK.Extensions;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -110,8 +111,20 @@ namespace IA.SDK
 
         public string ThumbnailUrl
         {
-            get => embed.ThumbnailUrl;
-            set => embed.ThumbnailUrl = value;
+            get { return embed.ThumbnailUrl; }
+            set { embed.ThumbnailUrl = value; }
+        }
+string IDiscordEmbed.ThumbnailUrl
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public IDiscordEmbed AddField(Action<IEmbedField> field)
