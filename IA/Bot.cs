@@ -40,8 +40,8 @@ namespace IA
             }
         }
 
+        public const string VersionNumber = "1.6";
         public const string VersionText = "IA v" + VersionNumber;
-        public const string VersionNumber = "1.5.5";
 
         public static Bot instance;
 
