@@ -20,6 +20,8 @@ namespace IA.Events
         public UserUpdatedEventDelegate UserUpdated { get; set; } = null;
         public GuildUserEventDelegate UserJoinGuild { get; set; } = null;
         public GuildUserEventDelegate UserLeaveGuild { get; set; } = null;
+        public GuildEventDelegate JoinedGuild { get; set; } = null;
+        public GuildEventDelegate LeftGuild { get; set; } = null;
 
         public List<ICommandEvent> Events { get; set; } = new List<ICommandEvent>();
 
@@ -85,6 +87,16 @@ namespace IA.Events
                 b.Client.UserLeft += Module_UserLeft;
             }
 
+            if (JoinedGuild != null)
+            {
+                b.Client.JoinedGuild += Module_JoinedGuild;
+            }
+
+            if (LeftGuild != null)
+            {
+                b.Client.LeftGuild += Module_LeftGuild;
+            }
+
             EventSystem = b.Events;
 
             foreach (ICommandEvent e in Events)
@@ -137,8 +149,38 @@ namespace IA.Events
                 b.Client.UserLeft -= Module_UserLeft;
             }
 
+            if (JoinedGuild != null)
+            {
+                b.Client.JoinedGuild -= Module_JoinedGuild;
+            }
+
+            if (LeftGuild != null)
+            {
+                b.Client.LeftGuild -= Module_LeftGuild;
+            }
+
             isInstalled = false;
             await Task.CompletedTask;
+        }
+
+        private async Task Module_JoinedGuild(SocketGuild arg)
+        {
+            RuntimeGuild r = new RuntimeGuild(arg);
+
+            if (await IsEnabled(r.Id))
+            {
+                await JoinedGuild(r);
+            }
+        }
+
+        private async Task Module_LeftGuild(SocketGuild arg)
+        {
+            RuntimeGuild r = new RuntimeGuild(arg);
+
+            if (await IsEnabled(r.Id))
+            {
+                await LeftGuild(r);
+            }
         }
 
         private async Task Module_UserJoined(SocketGuildUser arg)
