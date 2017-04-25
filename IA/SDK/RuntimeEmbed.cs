@@ -12,6 +12,10 @@ namespace IA.SDK
 
         public List<IEmbedField> fields = new List<IEmbedField>();
 
+        public RuntimeEmbed()
+        {
+            embed = new EmbedBuilder();
+        }
         public RuntimeEmbed(EmbedBuilder e)
         {
             embed = e;

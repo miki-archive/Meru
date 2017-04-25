@@ -95,12 +95,12 @@ namespace IA.SDK
             }
         }
 
-        public Dictionary<DiscordEmoji, int> Reactions
+        public Dictionary<DiscordEmoji, DiscordReactionMetadata> Reactions
         {
             get
             {
-                IReadOnlyDictionary<Emoji, int> x = (messageData as IUserMessage).Reactions;
-                Dictionary<DiscordEmoji, int> emojis = new Dictionary<DiscordEmoji, int>();
+                IReadOnlyDictionary<Emoji, ReactionMetadata> x = (messageData as IUserMessage).Reactions;
+                Dictionary<DiscordEmoji, DiscordReactionMetadata> emojis = new Dictionary<DiscordEmoji, DiscordReactionMetadata>();
                 foreach(Emoji y in x.Keys)
                 {
                     DiscordEmoji newEmoji = new DiscordEmoji();
@@ -108,7 +108,11 @@ namespace IA.SDK
                     newEmoji.Name = y.Name;
                     newEmoji.Url = y.Url;
 
-                    emojis.Add(newEmoji, x[y]);
+                    DiscordReactionMetadata metadata = new DiscordReactionMetadata();
+                    metadata.IsMe = x[y].IsMe;
+                    metadata.ReactionCount = x[y].ReactionCount;
+
+                    emojis.Add(newEmoji, metadata);
                 }
                 return emojis;
             }
@@ -123,9 +127,7 @@ namespace IA.SDK
             if (msg.Author != null) user = new RuntimeUser(msg.Author);
             if(msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
             IGuild g = (messageData.Author as IGuildUser)?.Guild;
-
-            client = new RuntimeClient((msg as SocketMessage)?.Discord);
-
+            
             if (g != null)
             {
                 guild = new RuntimeGuild(g);

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using IA.SDK.Interfaces;
 using IA.SDK.Events;
 using IA.Events;
+using Discord;
 
 namespace IA.SDK
 {
@@ -81,9 +82,12 @@ namespace IA.SDK
             return Bot.instance.Client.Guilds.Count;
         }
 
-        public ulong GetBotId()
+        public ulong GetBotId(IDiscordGuild guild)
         {
-            return Bot.instance.Client.CurrentUser.Id;
+            Bot b = Bot.instance;
+            ulong id = b.Client.GetShardFor((guild as IProxy<IGuild>).ToNativeObject()).CurrentUser.Id;
+
+            return id;
         }
     }
 }

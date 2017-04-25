@@ -62,7 +62,7 @@ namespace IA.Addons
 
         public async Task LoadSpecific(Bot bot, string module)
         {
-            string s = CurrentDirectory + (module.EndsWith(".dll")?module:module + ".dll");
+            string s = CurrentDirectory + (module.EndsWith(".dll") ? module : module + ".dll");
 
             Assembly addon = Assembly.Load(File.ReadAllBytes(s));
 

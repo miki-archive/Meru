@@ -24,7 +24,7 @@ namespace IA.SDK
         {
             get
             {
-                return user.GetAvatarUrl(AvatarFormat.Png);
+                return user.GetAvatarUrl();
             }
         }
 
@@ -173,7 +173,7 @@ namespace IA.SDK
 
         public async Task AddRoleAsync(IDiscordRole role)
         {
-            await (user as IGuildUser).AddRolesAsync((role as IProxy<IRole>).ToNativeObject());
+            await (user as IGuildUser).AddRolesAsync(new List<IRole> { (role as IProxy<IRole>).ToNativeObject() });
         }
 
         public async Task RemoveRoleAsync(IDiscordRole role)
@@ -181,7 +181,7 @@ namespace IA.SDK
             IRole r = (role as IProxy<IRole>).ToNativeObject();
             IGuildUser u = (user as IGuildUser);
 
-            await u.RemoveRolesAsync(r);
+            await u.RemoveRolesAsync(new List<IRole> { r });
         }
 
         public IUser ToNativeObject()

@@ -53,6 +53,8 @@ namespace IA.Events
             UserUpdated = info.UserUpdated;
             UserJoinGuild = info.UserJoinGuild;
             UserLeaveGuild = info.UserLeaveGuild;
+            JoinedGuild = info.JoinedGuild;
+            LeftGuild = info.LeftGuild;
             Events = info.Events;
         }
         public RuntimeModule(Action<IModule> info)
@@ -169,7 +171,14 @@ namespace IA.Events
 
             if (await IsEnabled(r.Id))
             {
-                await JoinedGuild(r);
+                try
+                {
+                    await JoinedGuild(r);
+                }
+                catch (Exception e)
+                {
+
+                }
             }
         }
 

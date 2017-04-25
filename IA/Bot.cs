@@ -5,6 +5,7 @@ using IA.Database;
 using IA.Events;
 using IA.FileHandling;
 using IA.SDK;
+using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
 using System.Diagnostics;
@@ -244,7 +245,7 @@ namespace IA
         {
             try
             {
-                RuntimeMessage r = new RuntimeMessage(arg, arg.Discord);
+                RuntimeMessage r = new RuntimeMessage(arg, Client.GetShardFor((((arg as IUserMessage).Channel) as IGuildChannel).Guild));
 
                 if (r.Content.Contains(r.Bot.Id.ToString()))
                 {

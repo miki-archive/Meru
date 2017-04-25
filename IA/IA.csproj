@@ -104,19 +104,28 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Discord.Net.Commands, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Commands.1.0.0-rc-00623\lib\netstandard1.3\Discord.Net.Commands.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Commands.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Commands.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-rc-00623\lib\netstandard1.3\Discord.Net.Core.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rest, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-rc-00623\lib\netstandard1.3\Discord.Net.Rest.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Rest.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rpc, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-rc-00623\lib\netstandard1.3\Discord.Net.Rpc.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Rpc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Discord.Net.Webhook, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Webhook.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Webhook.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.WebSocket, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-rc-00623\lib\netstandard1.3\Discord.Net.WebSocket.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.WebSocket.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\Google.Protobuf.3.0.0\lib\net45\Google.Protobuf.dll</HintPath>

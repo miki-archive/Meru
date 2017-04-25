@@ -136,8 +136,8 @@ namespace IA.Events
             }
             catch (Exception ex)
             {
-                await e.Channel.SendMessage(Metadata.errorMessage);
                 Log.ErrorAt(Name, ex.Message + "\n" + ex.StackTrace);
+                await (Module as RuntimeModule).EventSystem.OnCommandError(ex, this, e);
             }
             return false;
         }

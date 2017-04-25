@@ -11,6 +11,8 @@ namespace IA.Events
 {
     public class EventSystem
     {
+        public delegate Task ExceptionDelegate(Exception ex, ICommandEvent command, IDiscordMessage message);
+
         public List<ulong> Developers = new List<ulong>();
         public Dictionary<string, IModule> Modules { get; internal set; } = new Dictionary<string, IModule>();
         public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
@@ -27,6 +29,11 @@ namespace IA.Events
 
         internal EventContainer events { private set; get; }
         private Sql sql;
+
+        public ExceptionDelegate OnCommandError = async (ex, command, msg) =>
+        {
+            await msg.Channel.SendMessage(command.Metadata.errorMessage);
+        };
 
         public string DefaultIdentifier { private set; get; }
         public string OverrideIdentifier { private set; get; }

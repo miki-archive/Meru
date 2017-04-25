@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Miki
+namespace IA
 {
     public class Mathm
     {
