@@ -37,11 +37,11 @@ namespace IA.SDK
             return Bot.instance.Version;
         }
 
-        public async Task<string> ListCommands(IDiscordMessage e)
+        public async Task<string> ListCommandsAsync(IDiscordMessage e)
         {
             return await Bot.instance.Events.ListCommands(e);
         }
-        public async Task<IDiscordEmbed> ListCommandsInEmbed(IDiscordMessage e)
+        public async Task<IDiscordEmbed> ListCommandsInEmbedAsync(IDiscordMessage e)
         {
             return await Bot.instance.Events.ListCommandsInEmbed(e);
         }

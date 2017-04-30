@@ -14,7 +14,7 @@ namespace IA.SDK
 
         private Queue<IAudio> queue = new Queue<IAudio>();
 
-        public static async Task<RuntimeAudioClient> Create(RuntimeUser u)
+        public static async Task<RuntimeAudioClient> CreateAsync(RuntimeUser u)
         {
             return new RuntimeAudioClient(await (u.ToNativeObject() as IGuildUser).VoiceChannel?.ConnectAsync());
         }
@@ -41,24 +41,24 @@ namespace IA.SDK
             }
         }
 
-        public async Task Disconnect()
+        public async Task DisconnectAsync()
         {
             await client.StopAsync();
         }
 
-        public async Task Pause()
+        public async Task PauseAsync()
         {
             await Task.CompletedTask;
             //TODO Add Pause
         }
 
-        public async Task Play(IAudio audio, bool skipIfPlaying = false)
+        public async Task PlayAsync(IAudio audio, bool skipIfPlaying = false)
         {
             await Task.CompletedTask;
             //TODO Add Play
         }
 
-        public async Task PlayFile(string file)
+        public async Task PlayFileAsync(string file)
         {
             var ffmpeg = new ProcessStartInfo
             {
@@ -79,7 +79,7 @@ namespace IA.SDK
         }
 
 
-        public async Task Skip()
+        public async Task SkipAsync()
         {
             await Task.CompletedTask;
             //TODO Add Skip
@@ -99,7 +99,7 @@ namespace IA.SDK
             await Task.CompletedTask;
         }
 
-        public async Task Connect(IDiscordAudioChannel v)
+        public async Task ConnectAsync(IDiscordAudioChannel v)
         {
             client = ((await v.ConnectAsync()) as IProxy<IAudioClient>).ToNativeObject();
         }

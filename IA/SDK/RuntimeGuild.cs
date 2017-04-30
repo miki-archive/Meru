@@ -79,7 +79,7 @@ namespace IA.SDK
             guild = g;
         }
 
-        public async Task<IDiscordMessageChannel> GetDefaultChannel()
+        public async Task<IDiscordMessageChannel> GetDefaultChannelAsync()
         {
             return new RuntimeMessageChannel(await guild.GetDefaultChannelAsync());
         }
@@ -89,7 +89,7 @@ namespace IA.SDK
             return new RuntimeUser(await guild.GetUserAsync(user_id));
         }
 
-        public async Task<List<IDiscordMessageChannel>> GetChannels()
+        public async Task<List<IDiscordMessageChannel>> GetChannelsAsync()
         {
             List<IGuildChannel> channels = (await guild.GetChannelsAsync()).ToList();
             List<IDiscordMessageChannel> rChannels = new List<IDiscordMessageChannel>();
