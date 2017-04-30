@@ -19,7 +19,6 @@ namespace IA.Events
         {
             return true;
         };
-
         public ProcessCommandDelegate ProcessCommand { get; set; } = async (e, args) =>
         {
 
@@ -37,15 +36,15 @@ namespace IA.Events
 
         public async Task Check(IDiscordMessage e, string identifier = "")
         {
-            // declaring variables
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
+            string[] allAliases = null;
+
             if (e.Content.Split(' ').Length > 1)
             {
                 args = e.Content.Substring(e.Content.Split(' ')[0].Length + 1);
             }
 
-            string[] allAliases = null;
 
             if (Aliases != null)
             {

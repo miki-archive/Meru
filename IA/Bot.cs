@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+
 using IA.Addons;
 using IA.Database;
 using IA.Events;
@@ -90,7 +91,14 @@ namespace IA
         public async Task ConnectAsync()
         {
             await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
-            await Client.StartAsync();
+
+            foreach(DiscordSocketClient client in Client.Shards)
+            {
+                await client.StartAsync();
+                // 10 seconds wait
+                await Task.Delay(10000);
+            }
+
             await Task.Delay(-1);
         }
 
@@ -166,7 +174,7 @@ namespace IA
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
                 TotalShards = clientInformation.ShardCount,
-                LogLevel = LogSeverity.Debug,
+                LogLevel = LogSeverity.Info,                
             });
 
             Events = new EventSystem(x =>
@@ -187,7 +195,7 @@ namespace IA
             }
 
             Application.ThreadException +=
-               new ThreadExceptionEventHandler(Application_ThreadException);
+               new ThreadExceptionEventHandler(Application_ThreadException);       
 
             Client.MessageReceived += async (a) =>
             {
@@ -195,18 +203,21 @@ namespace IA
             };
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
-//            Client.UserUpdated += async (u1, u2) => { Log.Done($"UPDATED {u1.Username}"); };
 
             foreach (DiscordSocketClient c in Client.Shards)
             {
                 c.Ready += async () =>
                 {
+                    c.Disconnected += async (e) =>
+                    {
+                        Log.ErrorAt(c.ShardId + "| Disconnected", e.Message);
+                    };
                     Log.Message($"shard {c.ShardId} connected!");
                     await c.SetGameAsync($"{c.ShardId}/{GetTotalShards()} | >help");
                 };
             }
 
- //           Client.Log += Client_Log;
+            Client.Log += Client_Log;
         }
 
         private void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
@@ -237,7 +248,10 @@ namespace IA
 
         private async Task Client_Log(LogMessage arg)
         {
+            Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(arg.Message);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(arg.Exception);
             await Task.CompletedTask;
         }
 

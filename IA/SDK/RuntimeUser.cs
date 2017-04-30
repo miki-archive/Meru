@@ -224,5 +224,19 @@ namespace IA.SDK
                 x.Nickname = text;
             });
         }
+
+        public string GetAvatarUrl(DiscordAvatarType type = DiscordAvatarType.PNG, ushort size = 128)
+        {
+            ImageFormat i = ImageFormat.Png;
+            if (type == DiscordAvatarType.GIF) i = ImageFormat.Gif;
+
+            return user.GetAvatarUrl(i, size);
+        }
+
+        public async Task Unban(IDiscordGuild guild)
+        {
+            IGuild x = (guild as IProxy<IGuild>).ToNativeObject();
+            await x.RemoveBanAsync(user);
+        }
     }
 }

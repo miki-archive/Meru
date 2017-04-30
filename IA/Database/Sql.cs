@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using IA.Models;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -49,19 +50,17 @@ namespace IA.Database
         /// </summary>
         /// <param name="server_id">server id</param>
         /// <returns></returns>
-        public static async Task<string> GetIdentifier(ulong server_id)
+        public static async Task<string> GetIdentifier(ulong guildId)
         {
-            string output = instance.defaultIdentifier;
-
-            await QueryAsync("SELECT i FROM identifier WHERE id=?id", x =>
+            using (var context = new IdentifierContext())
             {
-                if (x != null)
+                Identifier i = await context.Identifiers.FindAsync(guildId);
+                if(i == null)
                 {
-                    output = x.GetString("i");
+                    i = context.Identifiers.Add(new Identifier() { GuildId = guildId, Value = instance.defaultIdentifier });
                 }
-            }, server_id);
-
-            return output;
+                return i.Value;
+            }
         }
 
         /// <summary>

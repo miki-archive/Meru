@@ -1,4 +1,5 @@
 ﻿using IA.Database;
+using IA.Models;
 using IA.SDK;
 using IA.SDK.Events;
 using IA.SDK.Interfaces;
@@ -17,7 +18,7 @@ namespace IA.Events
         public Dictionary<string, IModule> Modules { get; internal set; } = new Dictionary<string, IModule>();
         public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
 
-        private Dictionary<ulong, string> identifier = new Dictionary<ulong, string>();
+        private Dictionary<ulong, string> identifierCache = new Dictionary<ulong, string>();
         private Dictionary<string, string> aliases = new Dictionary<string, string>();
 
         private List<ulong> ignore = new List<ulong>();
@@ -54,8 +55,6 @@ namespace IA.Events
             events = new EventContainer();
             sql = new Sql(bot.SqlInformation, bot.Identifier);
 
-            Sql.TryCreateTable("identifier(id BIGINT, i varchar(255))");
-
             OverrideIdentifier = bot.Name.ToLower() + ".";
             DefaultIdentifier = bot.Identifier;
         }
@@ -77,8 +76,6 @@ namespace IA.Events
                 }
             }
             events.CommandEvents.Add(newEvent.Name.ToLower(), newEvent);
-
-            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddCommandDoneEvent(Action<CommandDoneEvent> info)
@@ -94,8 +91,6 @@ namespace IA.Events
                 }
             }
             events.CommandDoneEvents.Add(newEvent.Name.ToLower(), newEvent);
-
-            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddContinuousEvent(Action<ContinuousEvent> info)
@@ -105,7 +100,6 @@ namespace IA.Events
             newEvent.eventSystem = this;
             events.ContinuousEvents.Add(newEvent.Name.ToLower(), newEvent);
 
-            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddJoinEvent(Action<GuildEvent> info)
@@ -121,8 +115,6 @@ namespace IA.Events
                 }
             }
             events.JoinServerEvents.Add(newEvent.Name.ToLower(), newEvent);
-
-            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddLeaveEvent(Action<GuildEvent> info)
@@ -138,8 +130,6 @@ namespace IA.Events
                 }
             }
             events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
-
-            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         public void AddMentionEvent(Action<RuntimeCommandEvent> info)
@@ -155,8 +145,6 @@ namespace IA.Events
                 }
             }
             events.MentionEvents.Add(newEvent.Name.ToLower(), newEvent);
-
-            Sql.TryCreateTable("event(name VARCHAR(255), id BIGINT, enabled BOOLEAN)");
         }
 
         private async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e)
@@ -244,22 +232,16 @@ namespace IA.Events
             return events.GetEvent(id);
         }
 
-        // TODO: make better
-        public async Task<string> GetIdentifier(ulong server_id)
+        public async Task<string> GetIdentifier(ulong guildId)
         {
-            if (identifier.ContainsKey(server_id))
+            using (var context = new IdentifierContext())
             {
-                string returnIdentifier = identifier[server_id];
-                if (returnIdentifier == "mention")
+                Identifier i = await context.Identifiers.FindAsync(guildId);
+                if (i == null)
                 {
-                    // returnIdentifier = Bot.instance.Client.CurrentUser.Mention;
+                    i = context.Identifiers.Add(new Identifier() { GuildId = guildId, Value = DefaultIdentifier });
                 }
-
-                return returnIdentifier;
-            }
-            else
-            {
-                return await Sql.GetIdentifier(server_id);
+                return i.Value;
             }
         }
 
@@ -382,7 +364,7 @@ namespace IA.Events
                 }, server);
             }
 
-            identifier.Add(server, tempIdentifier);
+            identifierCache.Add(server, tempIdentifier);
         }
 
         public async Task OnCommandDone(IDiscordMessage e, RuntimeCommandEvent commandEvent)
@@ -442,14 +424,14 @@ namespace IA.Events
                 return;
             }
 
-            if (!identifier.ContainsKey(_message.Guild.Id))
+            if (!identifierCache.ContainsKey(_message.Guild.Id))
             {
                 await LoadIdentifier(_message.Guild.Id);
             }
 
             string message = _message.Content.ToLower();
 
-            if (await CheckIdentifier(message, identifier[_message.Guild.Id], _message))
+            if (await CheckIdentifier(message, identifierCache[_message.Guild.Id], _message))
             {
                 return;
             }
@@ -462,13 +444,13 @@ namespace IA.Events
 
         public async Task SetIdentifierAsync(IDiscordGuild e, string prefix)
         {
-            if (identifier.ContainsKey(e.Id))
+            if (identifierCache.ContainsKey(e.Id))
             {
-                identifier[e.Id] = prefix.ToLower();
+                identifierCache[e.Id] = prefix.ToLower();
             }
             else
             {
-                identifier.Add(e.Id, prefix.ToLower());
+                identifierCache.Add(e.Id, prefix.ToLower());
             }
 
             await Task.Run(() => Sql.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));

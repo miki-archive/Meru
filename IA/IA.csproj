@@ -76,6 +76,7 @@
     <Compile Include="FileHandling\FileReader.cs" />
     <Compile Include="FileHandling\FileWriter.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="Models\IdentifierContext.cs" />
     <Compile Include="Node\Node.cs" />
     <Compile Include="PrefixValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -104,28 +105,38 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Discord.Net.Commands, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Commands.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Commands.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Commands.1.0.0-rc2-00716\lib\netstandard1.1\Discord.Net.Commands.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Core.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-rc2-00716\lib\net45\Discord.Net.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Discord.Net.Providers.WS4Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Providers.WS4Net.1.0.0-rc2-00716\lib\net45\Discord.Net.Providers.WS4Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rest, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Rest.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-rc2-00716\lib\net45\Discord.Net.Rest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rpc, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Rpc.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-rc2-00716\lib\net45\Discord.Net.Rpc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Webhook, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Webhook.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.Webhook.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Webhook.1.0.0-rc2-00716\lib\netstandard1.1\Discord.Net.Webhook.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.WebSocket, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-rc2-00705\lib\netstandard1.3\Discord.Net.WebSocket.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-rc2-00716\lib\net45\Discord.Net.WebSocket.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\Google.Protobuf.3.0.0\lib\net45\Google.Protobuf.dll</HintPath>
@@ -145,7 +156,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.AppContext.4.1.0\lib\net46\System.AppContext.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\System.AppContext.4.3.0\lib\net46\System.AppContext.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -156,8 +167,8 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.Install" />
-    <Reference Include="System.Console, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.Console.4.0.0\lib\net46\System.Console.dll</HintPath>
+    <Reference Include="System.Console, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.Console.4.3.0\lib\net46\System.Console.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Data" />
@@ -167,8 +178,8 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Design" />
-    <Reference Include="System.Globalization.Calendars, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.Globalization.Calendars.4.0.1\lib\net46\System.Globalization.Calendars.dll</HintPath>
+    <Reference Include="System.Globalization.Calendars, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.Globalization.Calendars.4.3.0\lib\net46\System.Globalization.Calendars.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Interactive.Async, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
@@ -180,8 +191,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.IO.Compression.ZipFile.4.0.1\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.IO.FileSystem, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -214,8 +225,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.Runtime.InteropServices.RuntimeInformation.4.0.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
@@ -243,6 +254,14 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml.ReaderWriter, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\System.Xml.ReaderWriter.4.3.0\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Audio\" />
