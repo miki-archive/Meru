@@ -137,6 +137,10 @@ namespace IA.Events
             {
                 Log.ErrorAt(Name, ex.Message + "\n" + ex.StackTrace);
                 await (Module as RuntimeModule).EventSystem.OnCommandError(ex, this, e);
+                if(Debugger.IsAttached)
+                {
+                    throw ex;
+                }
             }
             return false;
         }

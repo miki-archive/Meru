@@ -234,6 +234,10 @@ namespace IA.Events
                 catch (Exception ex)
                 {
                     Log.ErrorAt("module@message", ex.Message);
+                    if(Debugger.IsAttached)
+                    {
+                        throw ex;
+                    }
                 }
             }
         }
