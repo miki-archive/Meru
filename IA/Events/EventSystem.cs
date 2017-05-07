@@ -162,6 +162,10 @@ namespace IA.Events
                             Task.Run(() => events.CommandEvents[command].Check(e, identifier));
                             return true;
                         }
+                        else
+                        {
+                            await OnCommandDone(e, events.CommandEvents[command], false);   
+                        }
                     }
                 }
                 else if (aliases.ContainsKey(command))
@@ -367,13 +371,13 @@ namespace IA.Events
             identifierCache.Add(server, tempIdentifier);
         }
 
-        public async Task OnCommandDone(IDiscordMessage e, RuntimeCommandEvent commandEvent)
+        public async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
         {
             foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
             {
                 try
                 {
-                    await ev.processEvent(e, commandEvent);
+                    await ev.processEvent(e, commandEvent, success);
                 }
                 catch (Exception ex)
                 {
