@@ -52,7 +52,7 @@ namespace IA.Database
         /// <returns></returns>
         public static async Task<string> GetIdentifier(ulong guildId)
         {
-            using (var context = new IdentifierContext())
+            using (var context = new IAContext())
             {
                 Identifier i = await context.Identifiers.FindAsync(guildId);
                 if(i == null)

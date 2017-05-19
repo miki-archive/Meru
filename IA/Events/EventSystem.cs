@@ -212,11 +212,6 @@ namespace IA.Events
             return newModule;
         }
 
-        /// <summary>
-        /// Gets only command events as commandevent value
-        /// </summary>
-        /// <param name="id">event id</param>
-        /// <returns>CommandEvent from local database</returns>
         public ICommandEvent GetCommandEvent(string id)
         {
             if (events.CommandEvents.ContainsKey(id))
@@ -226,11 +221,6 @@ namespace IA.Events
             return null;
         }
 
-        /// <summary>
-        /// Gets event and returns as base value.
-        /// </summary>
-        /// <param name="id">event id</param>
-        /// <returns>Event from local database</returns>
         public IEvent GetEvent(string id)
         {
             return events.GetEvent(id);
@@ -238,7 +228,7 @@ namespace IA.Events
 
         public async Task<string> GetIdentifier(ulong guildId)
         {
-            using (var context = new IdentifierContext())
+            using (var context = new IAContext())
             {
                 Identifier i = await context.Identifiers.FindAsync(guildId);
                 if (i == null)
@@ -457,7 +447,19 @@ namespace IA.Events
                 identifierCache.Add(e.Id, prefix.ToLower());
             }
 
-            await Task.Run(() => Sql.Query("UPDATE identifier SET i=?i WHERE id=?id;", null, prefix, e.Id));
+            using (var context = new IAContext())
+            {
+                Identifier i = await context.Identifiers.FindAsync(e.Id.ToDbLong());
+                if(i == null)
+                {
+                    context.Identifiers.Add(new Identifier() { __GuildId = e.Id.ToDbLong(), Value = prefix });
+                }
+                else
+                {
+                    i.Value = prefix;
+                }
+                await context.SaveChangesAsync();
+            }
         }
 
         public async Task StartGame(ulong id, GameEvent game)

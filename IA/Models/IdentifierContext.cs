@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace IA.Models
 {
-    class IdentifierContext : DbContext
+    class IAContext : DbContext
     {
         public DbSet<Identifier> Identifiers { get; set; }
     }
