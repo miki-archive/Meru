@@ -25,8 +25,6 @@ namespace IA
         /// </summary>
         public LogLevel FileLogLevel = LogLevel.ERROR;
 
-        public SqlInformation sqlInformation;
-
         public bool CanLog(LogLevel level)
         {
             return ConsoleLogLevel <= level;
@@ -35,11 +33,6 @@ namespace IA
         public bool CanFileLog(LogLevel level)
         {
             return FileLogLevel <= level;
-        }
-
-        public string GetSQLConnectionString()
-        {
-            return sqlInformation.GetConnectionString();
         }
     }
 

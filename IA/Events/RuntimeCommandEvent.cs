@@ -65,6 +65,7 @@ namespace IA.Events
             {
                 if (!enabled[e.Channel.Id])
                 {
+                    Log.WarningAt(Name, " is disabled");
                     return;
                 }
             }
@@ -72,6 +73,7 @@ namespace IA.Events
             if (IsOnCooldown(e.Author.Id))
             {
                 await e.Channel.SendMessage($"Sorry, this command is still on cooldown for {-GetCooldown(e.Author.Id)} seconds!");
+                Log.WarningAt(Name, " is on cooldown");
                 return;
             }
 

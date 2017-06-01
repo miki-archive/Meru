@@ -98,7 +98,7 @@ namespace IA.SDK
 
             for (int i = 0; i < reactionEmoji.Length; i++)
             {
-                await (msg as IUserMessage).AddReactionAsync(reactionEmoji[i].emoji);
+                await (msg as IUserMessage).AddReactionAsync(new Emoji(reactionEmoji[i].emoji));
             }
 
             Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task> socketReaction = new Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task>(
@@ -109,7 +109,7 @@ namespace IA.SDK
                 {
                     for (int i = 0; i < reactionEmoji.Length; i++)
                     {
-                        if (reactionEmoji[i].emoji == reaction.Emoji.Name)
+                        if (reactionEmoji[i].emoji == reaction.Emote.Name)
                         {
                             output = i;
                         }
@@ -141,7 +141,7 @@ namespace IA.SDK
 
             for (int i = 0; i < reactionEmoji.Length; i++)
             {
-                await (msg as IUserMessage).AddReactionAsync(reactionEmoji[i].emoji);
+                await (msg as IUserMessage).AddReactionAsync(new Emoji(reactionEmoji[i].emoji));
             }
 
             Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task> socketReaction = new Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task>(
@@ -152,7 +152,7 @@ namespace IA.SDK
                     {
                         for (int i = 0; i < reactionEmoji.Length; i++)
                         {
-                            if (reactionEmoji[i].emoji == reaction.Emoji.Name)
+                            if (reactionEmoji[i].emoji == reaction.Emote.Name)
                             {
                                 output = i;
                             }

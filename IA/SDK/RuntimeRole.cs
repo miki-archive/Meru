@@ -3,7 +3,7 @@ using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    internal class RuntimeRole : IDiscordRole, IProxy<IRole>
+    public class RuntimeRole : IDiscordRole, IProxy<IRole>
     {
         private IRole role;
 

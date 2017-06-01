@@ -99,14 +99,12 @@ namespace IA.SDK
         {
             get
             {
-                IReadOnlyDictionary<Emoji, ReactionMetadata> x = (messageData as IUserMessage).Reactions;
+                IReadOnlyDictionary<IEmote, ReactionMetadata> x = (messageData as IUserMessage).Reactions;
                 Dictionary<DiscordEmoji, DiscordReactionMetadata> emojis = new Dictionary<DiscordEmoji, DiscordReactionMetadata>();
                 foreach(Emoji y in x.Keys)
                 {
                     DiscordEmoji newEmoji = new DiscordEmoji();
-                    newEmoji.Id = y.Id;
                     newEmoji.Name = y.Name;
-                    newEmoji.Url = y.Url;
 
                     DiscordReactionMetadata metadata = new DiscordReactionMetadata();
                     metadata.IsMe = x[y].IsMe;
@@ -150,7 +148,7 @@ namespace IA.SDK
 
         public async Task AddReaction(string emoji)
         {
-            await (messageData as IUserMessage).AddReactionAsync(Emoji.Parse(emoji));
+            await (messageData as IUserMessage).AddReactionAsync(new Emoji(emoji));
         }
 
         // ---------------------------- important :( why don't I ever do what future me would do?!?!!?

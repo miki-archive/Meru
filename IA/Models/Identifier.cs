@@ -9,11 +9,6 @@ using System.Threading.Tasks;
 
 namespace IA.Models
 {
-    class IAContext : DbContext
-    {
-        public DbSet<Identifier> Identifiers { get; set; }
-    }
-
     class Identifier
     {
         [Key]

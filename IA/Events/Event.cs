@@ -1,4 +1,5 @@
-﻿using IA.Database;
+﻿using IA.Models;
+using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
 using MySql.Data.MySqlClient;
@@ -47,19 +48,27 @@ namespace IA.Events
             info.Invoke(this);
         }
 
-        public async Task SetEnabled(ulong serverid, bool enabled)
+        public async Task SetEnabled(ulong channelId, bool enabled)
         {
-            if (eventSystem.bot.SqlInformation != null)
+            if (this.enabled.ContainsKey(channelId))
             {
-                if (this.enabled.ContainsKey(serverid))
+                this.enabled[channelId] = enabled;
+            }
+            else
+            {
+                this.enabled.Add(channelId, enabled);
+            }
+
+            using (var context = new IAContext())
+            {
+                context.Set<CommandState>().AsNoTracking();
+                CommandState state = await context.CommandStates.FindAsync(Name, channelId.ToDbLong());
+                if (state == null)
                 {
-                    this.enabled[serverid] = enabled;
+                    state = context.CommandStates.Add(new CommandState() { ChannelId = channelId.ToDbLong(), CommandName = Name, State = DefaultEnabled });
                 }
-                else
-                {
-                    this.enabled.Add(serverid, enabled);
-                }
-                await Sql.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, Name);
+                state.State = enabled;
+                await context.SaveChangesAsync();
             }
         }
 
@@ -70,57 +79,23 @@ namespace IA.Events
                 if (!await Module.IsEnabled(id)) return false;
             }
 
-            if (eventSystem.bot.SqlInformation == null)
-            {
-                return DefaultEnabled;
-            }
-
             if (enabled.ContainsKey(id))
             {
                 return enabled[id];
             }
 
-            int state = IsEventEnabled(id);
-            if (state == -1)
+            using (var context = new IAContext())
             {
-                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, Name, id, DefaultEnabled);
-                enabled.Add(id, DefaultEnabled);
-                return DefaultEnabled;
+                context.Set<CommandState>().AsNoTracking();
+
+                CommandState state = await context.CommandStates.FindAsync(Name, id.ToDbLong());
+                if (state == null)
+                {
+                    state = context.CommandStates.Add(new CommandState() { ChannelId = id.ToDbLong(), CommandName = Name, State = DefaultEnabled });
+                    await context.SaveChangesAsync();
+                }
+                return state.State;
             }
-            bool actualState = (state == 1) ? true : false;
-
-            enabled.Add(id, actualState);
-            return actualState;
-        }
-
-        // TODO: Query this.
-        public int IsEventEnabled(ulong serverid)
-        {
-            if (eventSystem.bot.SqlInformation == null) return 1;
-
-            MySqlConnection connection = new MySqlConnection(eventSystem.bot.SqlInformation.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{serverid}\" AND name=\"{Name}\"";
-
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-
-            bool output = false;
-            string check = "";
-
-            while (r.Read())
-            {
-                output = r.GetBoolean(0);
-                check = "ok";
-                break;
-            }
-            connection.Close();
-
-            if (check == "")
-            {
-                return -1;
-            }
-            return output ? 1 : 0;
         }
     }
 }

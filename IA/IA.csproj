@@ -51,17 +51,32 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
-    <Compile Include="Database\Sql.cs" />
-    <Compile Include="Database\SQLInformation.cs" />
     <Compile Include="Events\CommandDoneEvent.cs" />
     <Compile Include="Events\RuntimeCommandEvent.cs" />
     <Compile Include="Events\ContinuousEvent.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\GameEvent.cs" />
-    <Compile Include="Events\Module.cs" />
-    <Compile Include="Events\ModuleInformation.cs" />
+    <Compile Include="Events\RuntimeModule.cs" />
     <Compile Include="Events\UserEvent.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Extension Methods\Mathm.cs" />
@@ -78,7 +93,15 @@
     <Compile Include="FileHandling\FileReader.cs" />
     <Compile Include="FileHandling\FileWriter.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="Models\IdentifierContext.cs" />
+    <Compile Include="Migrations\201705272224068_Add-States.cs" />
+    <Compile Include="Migrations\201705272224068_Add-States.Designer.cs">
+      <DependentUpon>201705272224068_Add-States.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\CommandState.cs" />
+    <Compile Include="Models\Context\IAContext.cs" />
+    <Compile Include="Models\Identifier.cs" />
+    <Compile Include="Models\ModuleState.cs" />
     <Compile Include="Node\Node.cs" />
     <Compile Include="PrefixValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -107,32 +130,26 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Discord.Net.Commands, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Commands.1.0.0-rc2-00716\lib\netstandard1.1\Discord.Net.Commands.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Commands.1.0.0-rc3-00746\lib\netstandard1.1\Discord.Net.Commands.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-rc2-00716\lib\net45\Discord.Net.Core.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-rc3-00746\lib\net45\Discord.Net.Core.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Providers.WS4Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Providers.WS4Net.1.0.0-rc2-00716\lib\net45\Discord.Net.Providers.WS4Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rest, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-rc2-00716\lib\net45\Discord.Net.Rest.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rest.1.0.0-rc3-00746\lib\net45\Discord.Net.Rest.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Rpc, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-rc2-00716\lib\net45\Discord.Net.Rpc.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Rpc.1.0.0-rc3-00746\lib\net45\Discord.Net.Rpc.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Webhook, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Webhook.1.0.0-rc2-00716\lib\netstandard1.1\Discord.Net.Webhook.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Webhook.1.0.0-rc3-00746\lib\netstandard1.1\Discord.Net.Webhook.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.WebSocket, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-rc2-00716\lib\net45\Discord.Net.WebSocket.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.WebSocket.1.0.0-rc3-00746\lib\net45\Discord.Net.WebSocket.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
@@ -144,6 +161,12 @@
       <HintPath>..\..\miki-sourcecode\packages\Google.Protobuf.3.0.0\lib\net45\Google.Protobuf.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection, Version=1.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\Microsoft.Extensions.DependencyInjection.1.1.1\lib\netstandard1.1\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=1.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\Microsoft.Extensions.DependencyInjection.Abstractions.1.1.1\lib\netstandard1.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
       <Private>True</Private>
@@ -152,9 +175,8 @@
       <HintPath>..\..\miki-sourcecode\packages\MySql.Data.6.9.9\lib\net45\MySql.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\miki-sourcecode\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -162,7 +184,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.Collections.Immutable.1.3.0\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\System.Collections.Immutable.1.3.1\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
@@ -185,8 +207,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Interactive.Async, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\System.Interactive.Async.3.1.0\lib\net46\System.Interactive.Async.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\miki-sourcecode\packages\System.Interactive.Async.3.1.1\lib\net46\System.Interactive.Async.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.Compression, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll</HintPath>
@@ -277,6 +298,11 @@
       <Project>{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}</Project>
       <Name>IA.SDK</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201705272224068_Add-States.resx">
+      <DependentUpon>201705272224068_Add-States.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

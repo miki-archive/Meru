@@ -1,12 +1,15 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using IA.Database;
+using IA.Models;
+using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -15,6 +18,9 @@ namespace IA.Events
     {
         public string Name { get; set; } = "";
         public bool Enabled { get; set; } = true;
+        public bool CanBeDisabled { get; set; } = true;
+
+        public Mutex threadLock;
 
         public MessageRecievedEventDelegate MessageRecieved { get; set; } = null;
         public UserUpdatedEventDelegate UserUpdated { get; set; } = null;
@@ -49,6 +55,7 @@ namespace IA.Events
         {
             Name = info.Name;
             Enabled = info.Enabled;
+            CanBeDisabled = info.CanBeDisabled;
             MessageRecieved = info.MessageRecieved;
             UserUpdated = info.UserUpdated;
             UserJoinGuild = info.UserJoinGuild;
@@ -71,7 +78,7 @@ namespace IA.Events
 
             if (MessageRecieved != null)
             {
-                b.Client.MessageReceived += Module_MessageRecieved;
+                b.Client.MessageReceived += Module_MessageReceived;
             }
 
             if (UserUpdated != null)
@@ -133,7 +140,7 @@ namespace IA.Events
 
             if (MessageRecieved != null)
             {
-                b.Client.MessageReceived -= Module_MessageRecieved;
+                b.Client.MessageReceived -= Module_MessageReceived;
             }
 
             if (UserUpdated != null)
@@ -222,14 +229,14 @@ namespace IA.Events
             }
         }
 
-        private async Task Module_MessageRecieved(IMessage message)
+        private async Task Module_MessageReceived(IMessage message)
         {
             RuntimeMessage msg = new RuntimeMessage(message);
-            if (await IsEnabled(msg.Guild.Id))
+            if (IsEnabled(msg.Guild.Id).GetAwaiter().GetResult())
             {
                 try
                 {
-                    await MessageRecieved(msg);
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(InternalMessageReceived), msg);
                 }
                 catch (Exception ex)
                 {
@@ -238,75 +245,53 @@ namespace IA.Events
             }
         }
 
-        public async Task SetEnabled(ulong serverid, bool enabled)
+        private void InternalMessageReceived(object o)
         {
-            if (EventSystem.bot.SqlInformation != null)
+            RuntimeMessage msg = o as RuntimeMessage;
+            MessageRecieved(msg);
+        }
+
+        public async Task SetEnabled(ulong serverId, bool enabled)
+        {
+            if (this.enabled.ContainsKey(serverId))
             {
-                if (this.enabled.ContainsKey(serverid))
+                this.enabled[serverId] = enabled;
+            }
+            else
+            {
+                this.enabled.Add(serverId, enabled);
+            }
+
+            using (var context = IAContext.CreateNoCache())
+            {
+                ModuleState state = await context.ModuleStates.FindAsync(Name, serverId.ToDbLong());
+                if (state == null)
                 {
-                    this.enabled[serverid] = enabled;
+                    state = context.ModuleStates.Add(new ModuleState() { ChannelId = serverId.ToDbLong(), ModuleName = SqlName, State = Enabled });
                 }
-                else
-                {
-                    this.enabled.Add(serverid, enabled);
-                }
-                await Sql.QueryAsync($"UPDATE event SET enabled=?enabled WHERE id=?id AND name=?name;", null, enabled, serverid, SqlName);
+                state.State = enabled;
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task<bool> IsEnabled(ulong id)
         {
-            if (EventSystem.bot.SqlInformation == null)
-            {
-                return Enabled;
-            }
-
             if (enabled.ContainsKey(id))
             {
                 return enabled[id];
             }
 
-            int state = IsEventEnabled(id);
-            if (state == -1)
+            using (var context = IAContext.CreateNoCache())
             {
-                await Sql.QueryAsync("INSERT INTO event(name, id, enabled) VALUES(?name, ?id, ?enabled);", null, SqlName, id, Enabled);
-                enabled.Add(id, Enabled);
-                return Enabled;
+                ModuleState state = await context.ModuleStates.FindAsync(SqlName, id.ToDbLong());
+                if (state == null)
+                {
+                    state = context.ModuleStates.Add(new ModuleState() { ChannelId = id.ToDbLong(), ModuleName = SqlName, State = Enabled });
+                    context.SaveChanges();
+                }
+                enabled.Add(id, state.State);
+                return state.State;
             }
-            bool actualState = (state == 1) ? true : false;
-
-            enabled.Add(id, actualState);
-            return actualState;
-        }
-
-        // TODO: Query this.
-        private int IsEventEnabled(ulong serverid)
-        {
-            if (EventSystem.bot.SqlInformation == null) return 1;
-
-            MySqlConnection connection = new MySqlConnection(EventSystem.bot.SqlInformation.GetConnectionString());
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"SELECT enabled FROM event WHERE id=\"{serverid}\" AND name=\"{SqlName}\"";
-
-            connection.Open();
-            MySqlDataReader r = command.ExecuteReader();
-
-            bool output = false;
-            string check = "";
-
-            while (r.Read())
-            {
-                output = r.GetBoolean(0);
-                check = "ok";
-                break;
-            }
-            connection.Close();
-
-            if (check == "")
-            {
-                return -1;
-            }
-            return output ? 1 : 0;
         }
     }
 }

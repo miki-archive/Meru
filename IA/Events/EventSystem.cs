@@ -1,10 +1,11 @@
-﻿using IA.Database;
-using IA.Models;
+﻿using IA.Models;
+using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Objects;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,7 +30,6 @@ namespace IA.Events
         public BotInformation bot;
 
         internal EventContainer events { private set; get; }
-        private Sql sql;
 
         public ExceptionDelegate OnCommandError = async (ex, command, msg) =>
         {
@@ -53,7 +53,6 @@ namespace IA.Events
 
             bot = new BotInformation(botInfo);
             events = new EventContainer();
-            sql = new Sql(bot.SqlInformation, bot.Identifier);
 
             OverrideIdentifier = bot.Name.ToLower() + ".";
             DefaultIdentifier = bot.Identifier;
@@ -159,7 +158,7 @@ namespace IA.Events
                     {
                         if (GetUserAccessibility(e) >= events.CommandEvents[command].Accessibility)
                         {
-                            Task.Run(() => events.CommandEvents[command].Check(e, identifier));
+                            await Task.Run(() => events.CommandEvents[command].Check(e, identifier)).ConfigureAwait(true);
                             return true;
                         }
                         else
@@ -174,7 +173,7 @@ namespace IA.Events
                     {
                         if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].Accessibility)
                         {
-                            Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier));
+                            await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier)).ConfigureAwait(true);
                             return true;
                         }
                     }
@@ -343,19 +342,14 @@ namespace IA.Events
         {
             string tempIdentifier = bot.Identifier;
 
-            if (bot.SqlInformation != null)
+            using (var context = IAContext.CreateNoCache())
             {
-                Sql.Query("SELECT i FROM identifier WHERE id=?id", output =>
+                Identifier i = await context.Identifiers.FindAsync(server.ToDbLong());
+                if(i == null)
                 {
-                    if (output == null)
-                    {
-                        Sql.Query("INSERT INTO identifier VALUES(?server_id, ?prefix)", null, server, bot.Identifier);
-                    }
-                    else
-                    {
-                        tempIdentifier = output.GetString("i");
-                    }
-                }, server);
+                    i = context.Identifiers.Add(new Identifier() { __GuildId = server.ToDbLong(), Value = bot.Identifier });
+                }
+                tempIdentifier = i.Value;
             }
 
             identifierCache.Add(server, tempIdentifier);
@@ -447,7 +441,7 @@ namespace IA.Events
                 identifierCache.Add(e.Id, prefix.ToLower());
             }
 
-            using (var context = new IAContext())
+            using (var context = IAContext.CreateNoCache())
             {
                 Identifier i = await context.Identifiers.FindAsync(e.Id.ToDbLong());
                 if(i == null)

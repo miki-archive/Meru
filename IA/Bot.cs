@@ -2,7 +2,6 @@
 using Discord.WebSocket;
 
 using IA.Addons;
-using IA.Database;
 using IA.Events;
 using IA.FileHandling;
 using IA.SDK;
@@ -24,7 +23,6 @@ namespace IA
         public DiscordShardedClient Client { private set; get; }
 
         public EventSystem Events { private set; get; }
-        public Sql Sql { private set; get; }
 
         public string Name
         {
@@ -174,17 +172,14 @@ namespace IA
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
                 TotalShards = clientInformation.ShardCount,
-                LogLevel = LogSeverity.Info,                
+                LogLevel = LogSeverity.Info,                 
             });
 
             Events = new EventSystem(x =>
             {
                 x.Name = clientInformation.Name;
                 x.Identifier = clientInformation.Prefix;
-                x.SqlInformation = clientInformation.sqlInformation;
             });
-
-            Sql = new Sql(clientInformation.sqlInformation, clientInformation.Prefix);
 
             Addons = new AddonManager();
             await Addons.Load(this);
@@ -197,10 +192,6 @@ namespace IA
             Application.ThreadException +=
                new ThreadExceptionEventHandler(Application_ThreadException);       
 
-            Client.MessageReceived += async (a) =>
-            {
-                Task.Run(() => Client_MessageReceived(a));
-            };
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
 
@@ -212,6 +203,12 @@ namespace IA
                     {
                         Log.ErrorAt(c.ShardId + "| Disconnected", e.Message);
                     };
+
+                    c.MessageReceived += async (e) =>
+                    {
+                        Task.Run(() => Client_MessageReceived(e));
+                    };
+ 
                     Log.Message($"shard {c.ShardId} connected!");
                     await c.SetGameAsync($"{c.ShardId}/{GetTotalShards()} | >help");
                 };

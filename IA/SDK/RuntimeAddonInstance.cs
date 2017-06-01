@@ -1,5 +1,4 @@
-﻿using IA.Database;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,11 +24,6 @@ namespace IA.SDK
             Name = i.Name;
             Modules = i.Modules;
             this.bot = bot;
-        }
-
-        public async Task QueryAsync(string text, QueryOutput output, params object[] parameters)
-        {
-            await Sql.QueryAsync(text, output, parameters);
         }
 
         public string GetBotVersion()

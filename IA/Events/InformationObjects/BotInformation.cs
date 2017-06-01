@@ -6,7 +6,6 @@ namespace IA.Events
     {
         public string Name;
         public string Identifier = ">";
-        public SqlInformation SqlInformation;
 
         public BotInformation()
         {
