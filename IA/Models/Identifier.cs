@@ -12,30 +12,14 @@ namespace IA.Models
     class Identifier
     {
         [Key]
-        [Column("guild_id")]
-        public long __GuildId { get; set; }
+        [Column("GuildId")]
+        public long GuildId { get; set; }
+
+        [Key]
+        [Column("IdentifierId")]
+        public string DefaultValue { get; set; }
 
         [Column("identifier")]
         public string Value { get; set; }
-
-        [NotMapped]
-        public ulong GuildId
-        {
-            get
-            {
-                unchecked
-                {
-                    return (ulong)__GuildId;
-                }
-            }
-
-            set
-            {
-                unchecked
-                {
-                    __GuildId = (long)value;
-                }
-            }
-        }
     }
 }

@@ -10,7 +10,6 @@ namespace IA
         public string Version { get; set; } = "1.0.0";
 
         public string Token { get; set; } = "";
-        public string Prefix { get; set; } = ">";
 
         public int ShardCount { get; set; } = 1;
 

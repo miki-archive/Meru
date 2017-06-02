@@ -19,6 +19,7 @@ namespace IA.Events
         public Dictionary<string, IModule> Modules { get; internal set; } = new Dictionary<string, IModule>();
         public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
 
+        private Dictionary<string, PrefixInstance> prefixCache = new Dictionary<string, PrefixInstance>();
         private Dictionary<ulong, string> identifierCache = new Dictionary<ulong, string>();
         private Dictionary<string, string> aliases = new Dictionary<string, string>();
 
@@ -146,43 +147,6 @@ namespace IA.Events
             events.MentionEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
-        private async Task<bool> CheckIdentifier(string message, string identifier, IDiscordMessage e)
-        {
-            if (message.StartsWith(identifier))
-            {
-                string command = message.Substring(identifier.Length).Split(' ')[0].ToLower();
-
-                if (events.CommandEvents.ContainsKey(command))
-                {
-                    if (await events.CommandEvents[command].IsEnabled(e.Channel.Id))
-                    {
-                        if (GetUserAccessibility(e) >= events.CommandEvents[command].Accessibility)
-                        {
-                            await Task.Run(() => events.CommandEvents[command].Check(e, identifier)).ConfigureAwait(true);
-                            return true;
-                        }
-                        else
-                        {
-                            await OnCommandDone(e, events.CommandEvents[command], false);   
-                        }
-                    }
-                }
-                else if (aliases.ContainsKey(command))
-                {
-                    if (await events.CommandEvents[aliases[command]].IsEnabled(e.Channel.Id))
-                    {
-                        if (GetUserAccessibility(e) >= events.CommandEvents[aliases[command]].Accessibility)
-                        {
-                            await Task.Run(() => events.CommandEvents[aliases[command]].Check(e, identifier)).ConfigureAwait(true);
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-            return false;
-        }
-
         public int CommandsUsed()
         {
             int output = 0;
@@ -225,14 +189,15 @@ namespace IA.Events
             return events.GetEvent(id);
         }
 
-        public async Task<string> GetIdentifier(ulong guildId)
+        public async Task<string> GetIdentifier(ulong guildId, PrefixInstance prefix)
         {
             using (var context = new IAContext())
             {
                 Identifier i = await context.Identifiers.FindAsync(guildId);
                 if (i == null)
                 {
-                    i = context.Identifiers.Add(new Identifier() { GuildId = guildId, Value = DefaultIdentifier });
+                    i = context.Identifiers.Add(new Identifier() { GuildId = guildId.ToDbLong(), Value = prefix.DefaultValue });
+                    await context.SaveChangesAsync();
                 }
                 return i.Value;
             }
@@ -338,23 +303,6 @@ namespace IA.Events
             return embed;
         }
 
-        public async Task LoadIdentifier(ulong server)
-        {
-            string tempIdentifier = bot.Identifier;
-
-            using (var context = IAContext.CreateNoCache())
-            {
-                Identifier i = await context.Identifiers.FindAsync(server.ToDbLong());
-                if(i == null)
-                {
-                    i = context.Identifiers.Add(new Identifier() { __GuildId = server.ToDbLong(), Value = bot.Identifier });
-                }
-                tempIdentifier = i.Value;
-            }
-
-            identifierCache.Add(server, tempIdentifier);
-        }
-
         public async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
         {
             foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
@@ -412,48 +360,72 @@ namespace IA.Events
                 return;
             }
 
-            if (!identifierCache.ContainsKey(_message.Guild.Id))
+            foreach (PrefixInstance prefix in prefixCache.Values)
             {
-                await LoadIdentifier(_message.Guild.Id);
-            }
-
-            string message = _message.Content.ToLower();
-
-            if (await CheckIdentifier(message, identifierCache[_message.Guild.Id], _message))
-            {
-                return;
-            }
-
-            if (await CheckIdentifier(message, OverrideIdentifier, _message))
-            {
-                return;
+                await TryRunCommandAsync(_message, prefix);
             }
         }
 
-        public async Task SetIdentifierAsync(IDiscordGuild e, string prefix)
+        public async Task<bool> TryRunCommandAsync(IDiscordMessage msg, PrefixInstance prefix)
         {
-            if (identifierCache.ContainsKey(e.Id))
-            {
-                identifierCache[e.Id] = prefix.ToLower();
-            }
-            else
-            {
-                identifierCache.Add(e.Id, prefix.ToLower());
-            }
+            string identifier = await prefix.GetForGuild(msg.Guild.Id);
+            string message = msg.Content.ToLower();
 
-            using (var context = IAContext.CreateNoCache())
+            if (msg.Content.StartsWith(identifier))
             {
-                Identifier i = await context.Identifiers.FindAsync(e.Id.ToDbLong());
-                if(i == null)
+                string command = message
+                    .Substring(identifier.Length)
+                    .Split(' ')
+                    .First();
+
+                command = (aliases.ContainsKey(command)) ? aliases[command] : command;
+                ICommandEvent eventInstance = GetCommandEvent(command);
+                if(eventInstance == null)
                 {
-                    context.Identifiers.Add(new Identifier() { __GuildId = e.Id.ToDbLong(), Value = prefix });
+                    return false;
+                }
+
+                if (GetUserAccessibility(msg) >= events.CommandEvents[command].Accessibility)
+                {
+                    if (await events.CommandEvents[command].IsEnabled(msg.Channel.Id))
+                    {
+                        await Task.Run(() => events.CommandEvents[command].Check(msg, identifier)).ConfigureAwait(true);
+                        return true;
+                    }
                 }
                 else
                 {
-                    i.Value = prefix;
+                    await OnCommandDone(msg, events.CommandEvents[command], false);
                 }
-                await context.SaveChangesAsync();
+                return false;
             }
+            return false;
+        }
+
+        /// <summary>
+        /// Register a prefix for the bot
+        /// </summary>
+        /// <param name="prefix">prefix name</param>
+        /// <param name="canBeChanged"></param>
+        /// <param name="defaultPrefix"></param>
+        /// <param name="forceExecuteCommands"></param>
+        /// <returns></returns>
+        public PrefixInstance RegisterPrefixInstance(string prefix, bool canBeChanged = true, bool defaultPrefix = false, bool forceExecuteCommands = false)
+        {
+            PrefixInstance newPrefix = new PrefixInstance(prefix.ToLower(), canBeChanged, defaultPrefix, forceExecuteCommands);
+            prefixCache.Add(prefix, newPrefix);
+            return newPrefix;
+        }
+
+        public PrefixInstance GetPrefixInstance(string defaultPrefix)
+        {
+            string prefix = defaultPrefix.ToLower();
+
+            if(prefixCache.ContainsKey(prefix))
+            {
+                return prefixCache[prefix];
+            }
+            return null;
         }
 
         public async Task StartGame(ulong id, GameEvent game)

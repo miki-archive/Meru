@@ -90,12 +90,13 @@ namespace IA
         {
             await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
 
-            foreach(DiscordSocketClient client in Client.Shards)
+            await Client.StartAsync();
+            /*foreach(DiscordSocketClient client in Client.Shards)
             {
                 await client.StartAsync();
                 // 10 seconds wait
                 await Task.Delay(10000);
-            }
+            }*/
 
             await Task.Delay(-1);
         }
@@ -178,7 +179,6 @@ namespace IA
             Events = new EventSystem(x =>
             {
                 x.Name = clientInformation.Name;
-                x.Identifier = clientInformation.Prefix;
             });
 
             Addons = new AddonManager();
