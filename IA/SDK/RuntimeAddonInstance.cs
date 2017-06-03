@@ -58,7 +58,7 @@ namespace IA.SDK
 
         public async Task<string> GetIdentifierAsync(ulong serverid)
         {
-            return await Bot.instance.Events.GetIdentifier(serverid);
+            return await Bot.instance.Events.GetIdentifier(serverid, PrefixInstance.Default);
         }
 
         public List<IModule> GetModules()
@@ -66,9 +66,11 @@ namespace IA.SDK
             return Bot.instance.Events.Modules.Values.ToList();
         }
 
-        public async Task SetIdentifierAsync(IDiscordGuild guild, string identifier)
+        public async Task SetIdentifierAsync(IDiscordGuild guild, string defaultPrefix, string newPrefix)
         {
-            await Bot.instance.Events.SetIdentifierAsync(guild, identifier);
+            await Bot.instance.Events
+                .GetPrefixInstance(defaultPrefix)
+                .ChangeForGuildAsync(guild.Id, newPrefix);
         }
 
         public int GetGuildCount()

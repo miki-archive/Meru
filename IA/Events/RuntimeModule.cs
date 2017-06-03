@@ -283,10 +283,11 @@ namespace IA.Events
 
             using (var context = IAContext.CreateNoCache())
             {
-                ModuleState state = await context.ModuleStates.FindAsync(SqlName, id.ToDbLong());
+                long guildId = id.ToDbLong();
+                ModuleState state = await context.ModuleStates.FindAsync(SqlName, guildId);
                 if (state == null)
                 {
-                    state = context.ModuleStates.Add(new ModuleState() { ChannelId = id.ToDbLong(), ModuleName = SqlName, State = Enabled });
+                    state = context.ModuleStates.Add(new ModuleState() { ChannelId = guildId, ModuleName = SqlName, State = Enabled });
                     context.SaveChanges();
                 }
                 enabled.Add(id, state.State);

@@ -12,11 +12,11 @@ namespace IA.Models
     class Identifier
     {
         [Key]
-        [Column("GuildId")]
+        [Column("GuildId", Order = 0)]
         public long GuildId { get; set; }
 
         [Key]
-        [Column("IdentifierId")]
+        [Column("IdentifierId", Order = 1)]
         public string DefaultValue { get; set; }
 
         [Column("identifier")]

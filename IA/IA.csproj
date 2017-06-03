@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
     <Compile Include="Events\CommandDoneEvent.cs" />
+    <Compile Include="Events\PrefixInstance.cs" />
     <Compile Include="Events\RuntimeCommandEvent.cs" />
     <Compile Include="Events\ContinuousEvent.cs" />
     <Compile Include="Events\Event.cs" />
@@ -96,6 +97,10 @@
     <Compile Include="Migrations\201705272224068_Add-States.cs" />
     <Compile Include="Migrations\201705272224068_Add-States.Designer.cs">
       <DependentUpon>201705272224068_Add-States.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201706030134503_Rework-Prefix.cs" />
+    <Compile Include="Migrations\201706030134503_Rework-Prefix.Designer.cs">
+      <DependentUpon>201706030134503_Rework-Prefix.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\CommandState.cs" />
@@ -302,6 +307,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201705272224068_Add-States.resx">
       <DependentUpon>201705272224068_Add-States.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706030134503_Rework-Prefix.resx">
+      <DependentUpon>201706030134503_Rework-Prefix.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -10,21 +10,35 @@ namespace IA.Events
 {
     public class PrefixInstance
     {
+        public static PrefixInstance Default = null;
+
         public short Id { internal set; get; }
         public string Value { internal set; get; }
         public string DefaultValue { internal set; get; }
 
         public bool Changable { internal set; get; }
-        public bool Default { internal set; get; }
         public bool ForceCommandExecution { internal set; get; }
 
-        internal PrefixInstance(string value, bool changable, bool defaultPrefix, bool forceExec)
+        public bool IsDefault => this == Default;
+
+        internal PrefixInstance(string value, bool changable, bool forceExec)
         {
             Value = value;
             DefaultValue = value;
             Changable = changable;
-            Default = defaultPrefix;
             ForceCommandExecution = forceExec;
+        }
+
+        public void RegisterAsDefault()
+        {
+            if (Default == null)
+            {
+                Default = this;
+            }
+            else
+            {
+                Log.WarningAt("SetDefaultPrefix", "Default prefix is already defined!");
+            }
         }
 
         public async Task ChangeForGuildAsync(ulong id, string prefix)

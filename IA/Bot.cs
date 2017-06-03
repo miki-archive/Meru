@@ -90,13 +90,12 @@ namespace IA
         {
             await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
 
-            await Client.StartAsync();
-            /*foreach(DiscordSocketClient client in Client.Shards)
+            foreach(DiscordSocketClient client in Client.Shards)
             {
                 await client.StartAsync();
                 // 10 seconds wait
                 await Task.Delay(10000);
-            }*/
+            }
 
             await Task.Delay(-1);
         }
@@ -173,13 +172,20 @@ namespace IA
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
                 TotalShards = clientInformation.ShardCount,
-                LogLevel = LogSeverity.Info,                 
+                LogLevel = LogSeverity.Info,
+                ConnectionTimeout = 30000
             });
 
             Events = new EventSystem(x =>
             {
                 x.Name = clientInformation.Name;
             });
+
+            Events.RegisterPrefixInstance(">").RegisterAsDefault();
+            // fallback prefix
+            Events.RegisterPrefixInstance("miki.", false);
+            // debug prefix
+            Events.RegisterPrefixInstance("fmiki.", false, true);
 
             Addons = new AddonManager();
             await Addons.Load(this);

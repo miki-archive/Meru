@@ -59,6 +59,7 @@ namespace IA.Events
             DefaultIdentifier = bot.Identifier;
         }
 
+        [Obsolete("pls never use this.")]
         public void AddCommandEvent(Action<RuntimeCommandEvent> info)
         {
             RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
@@ -156,7 +157,6 @@ namespace IA.Events
             }
             return output;
         }
-
         public int CommandsUsed(string eventName)
         {
             return events.GetEvent(eventName).TimesUsed;
@@ -362,7 +362,10 @@ namespace IA.Events
 
             foreach (PrefixInstance prefix in prefixCache.Values)
             {
-                await TryRunCommandAsync(_message, prefix);
+                if(await TryRunCommandAsync(_message, prefix))
+                {
+                    break;
+                }
             }
         }
 
@@ -380,14 +383,15 @@ namespace IA.Events
 
                 command = (aliases.ContainsKey(command)) ? aliases[command] : command;
                 ICommandEvent eventInstance = GetCommandEvent(command);
-                if(eventInstance == null)
+
+                if (eventInstance == null)
                 {
                     return false;
                 }
 
                 if (GetUserAccessibility(msg) >= events.CommandEvents[command].Accessibility)
                 {
-                    if (await events.CommandEvents[command].IsEnabled(msg.Channel.Id))
+                    if (await events.CommandEvents[command].IsEnabled(msg.Channel.Id) || prefix.ForceCommandExecution && GetUserAccessibility(msg) >= EventAccessibility.DEVELOPERONLY)
                     {
                         await Task.Run(() => events.CommandEvents[command].Check(msg, identifier)).ConfigureAwait(true);
                         return true;
@@ -397,7 +401,6 @@ namespace IA.Events
                 {
                     await OnCommandDone(msg, events.CommandEvents[command], false);
                 }
-                return false;
             }
             return false;
         }
@@ -410,9 +413,12 @@ namespace IA.Events
         /// <param name="defaultPrefix"></param>
         /// <param name="forceExecuteCommands"></param>
         /// <returns></returns>
-        public PrefixInstance RegisterPrefixInstance(string prefix, bool canBeChanged = true, bool defaultPrefix = false, bool forceExecuteCommands = false)
+        public PrefixInstance RegisterPrefixInstance(string prefix, bool canBeChanged = true, bool forceExecuteCommands = false)
         {
-            PrefixInstance newPrefix = new PrefixInstance(prefix.ToLower(), canBeChanged, defaultPrefix, forceExecuteCommands);
+            PrefixInstance newPrefix = new PrefixInstance(prefix.ToLower(), canBeChanged, forceExecuteCommands);
+
+
+
             prefixCache.Add(prefix, newPrefix);
             return newPrefix;
         }
@@ -428,14 +434,18 @@ namespace IA.Events
             return null;
         }
 
-        public async Task StartGame(ulong id, GameEvent game)
+        public async Task<string> GetPrefixValueAsync(string defaultPrefix, ulong guildId)
         {
-            if (GameEvents.ContainsKey(id))
+            PrefixInstance instance = prefixCache
+                .First(prefix => prefix.Value.IsDefault)
+                .Value;
+
+            if(instance == null)
             {
-                return;
+                return "no";
             }
-            GameEvents.Add(id, game);
-            await Task.CompletedTask;
+
+            return await instance.GetForGuild(guildId);
         }
     }
 }
