@@ -102,6 +102,10 @@
     <Compile Include="Migrations\201706030134503_Rework-Prefix.Designer.cs">
       <DependentUpon>201706030134503_Rework-Prefix.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201706031712080_pls-werk.cs" />
+    <Compile Include="Migrations\201706031712080_pls-werk.Designer.cs">
+      <DependentUpon>201706031712080_pls-werk.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\CommandState.cs" />
     <Compile Include="Models\Context\IAContext.cs" />
@@ -141,7 +145,7 @@
       <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Core.1.0.0-rc3-00746\lib\net45\Discord.Net.Core.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Providers.WS4Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Providers.WS4Net.1.0.0-rc2-00716\lib\net45\Discord.Net.Providers.WS4Net.dll</HintPath>
+      <HintPath>..\..\miki-sourcecode\packages\Discord.Net.Providers.WS4Net.1.0.0-rc3-00746\lib\net45\Discord.Net.Providers.WS4Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Discord.Net.Rest, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -310,6 +314,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706030134503_Rework-Prefix.resx">
       <DependentUpon>201706030134503_Rework-Prefix.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706031712080_pls-werk.resx">
+      <DependentUpon>201706031712080_pls-werk.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

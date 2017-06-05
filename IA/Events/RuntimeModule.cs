@@ -113,6 +113,12 @@ namespace IA.Events
                 RuntimeCommandEvent ev = new RuntimeCommandEvent(e);
                 ev.eventSystem = b.Events;
                 ev.Module = this;
+
+                foreach(string alias in e.Aliases)
+                {
+                    ev.eventSystem.aliases.Add(alias.ToLower(), ev.Name.ToLower());
+                }
+
                 EventSystem.events.CommandEvents.Add(ev.Name, ev);
             }
 
@@ -136,6 +142,10 @@ namespace IA.Events
             {
                 ICommandEvent ev = new RuntimeCommandEvent(e);
                 EventSystem.events.CommandEvents.Remove(ev.Name);
+                foreach (string x in e.Aliases)
+                {
+                    EventSystem.aliases.Add(x.ToLower(), Name.ToLower());
+                }
             }
 
             if (MessageRecieved != null)
@@ -232,7 +242,7 @@ namespace IA.Events
         private async Task Module_MessageReceived(IMessage message)
         {
             RuntimeMessage msg = new RuntimeMessage(message);
-            if (IsEnabled(msg.Guild.Id).GetAwaiter().GetResult())
+            if (await IsEnabled(msg.Guild.Id))
             {
                 try
                 {
@@ -287,8 +297,7 @@ namespace IA.Events
                 ModuleState state = await context.ModuleStates.FindAsync(SqlName, guildId);
                 if (state == null)
                 {
-                    state = context.ModuleStates.Add(new ModuleState() { ChannelId = guildId, ModuleName = SqlName, State = Enabled });
-                    context.SaveChanges();
+                    return Enabled;
                 }
                 enabled.Add(id, state.State);
                 return state.State;

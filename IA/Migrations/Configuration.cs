@@ -9,7 +9,7 @@ namespace IA.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
         }
 
         protected override void Seed(IA.Models.Context.IAContext context)

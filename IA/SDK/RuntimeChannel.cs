@@ -194,15 +194,15 @@ namespace IA.SDK
         {
             try
             {
-                Log.Message("Sent message to channel " + channel.Name);
+                Log.Message("Sent embed to channel " + channel.Name);
                 return new RuntimeMessage(
                     await (channel as IMessageChannel)
                     .SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>)
                     .ToNativeObject()));
             }
-            catch
+            catch(Exception ex)
             {
-                Log.ErrorAt("SendMessage", "failed to send");
+                Log.ErrorAt("SendMessage", ex.Message);
             }
             return null;
         }

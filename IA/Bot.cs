@@ -173,7 +173,7 @@ namespace IA
             {
                 TotalShards = clientInformation.ShardCount,
                 LogLevel = LogSeverity.Info,
-                ConnectionTimeout = 30000
+                ConnectionTimeout = 300000
             });
 
             Events = new EventSystem(x =>
@@ -205,18 +205,23 @@ namespace IA
             {
                 c.Ready += async () =>
                 {
-                    c.Disconnected += async (e) =>
-                    {
-                        Log.ErrorAt(c.ShardId + "| Disconnected", e.Message);
-                    };
-
-                    c.MessageReceived += async (e) =>
-                    {
-                        Task.Run(() => Client_MessageReceived(e));
-                    };
- 
-                    Log.Message($"shard {c.ShardId} connected!");
+                    Log.Message($"shard {c.ShardId} ready!");
                     await c.SetGameAsync($"{c.ShardId}/{GetTotalShards()} | >help");
+                };
+
+                c.Connected += async () =>
+                {
+                    Log.Message($"shard {c.ShardId} connected!");
+                };
+
+                c.MessageReceived += async (e) =>
+                {
+                    Task.Run(() => Client_MessageReceived(e));
+                };
+
+                c.Disconnected += async (e) =>
+                {
+                    Log.ErrorAt(c.ShardId + "| Disconnected", e.Message);
                 };
             }
 
@@ -241,12 +246,6 @@ namespace IA
             RuntimeGuild g = new RuntimeGuild(arg);
 
             Task.Run(() => Events.OnGuildLeave(g));
-        }
-
-        private async Task Client_Disconnected(Exception arg)
-        {
-            Log.Error("Disconnected!");
-            await Task.CompletedTask;
         }
 
         private async Task Client_Log(LogMessage arg)

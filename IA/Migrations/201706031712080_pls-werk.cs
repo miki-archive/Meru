@@ -3,7 +3,7 @@ namespace IA.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class ReworkPrefix : DbMigration
+    public partial class plswerk : DbMigration
     {
         public override void Up()
         {
@@ -14,7 +14,7 @@ namespace IA.Migrations
             AddColumn("dbo.Identifiers", "IdentifierId", c => c.String(nullable: false, maxLength: 128, defaultValue: ">"));
             AddPrimaryKey("dbo.Identifiers", new[] { "GuildId", "IdentifierId" });
         }
-        
+
         public override void Down()
         {
             AddColumn("dbo.Identifiers", "guild_id", c => c.Long(nullable: false, identity: true));

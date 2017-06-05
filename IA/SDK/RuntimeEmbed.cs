@@ -118,18 +118,6 @@ namespace IA.SDK
             get { return embed.ThumbnailUrl; }
             set { embed.ThumbnailUrl = value; }
         }
-string IDiscordEmbed.ThumbnailUrl
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public IDiscordEmbed AddField(Action<IEmbedField> field)
         {
@@ -155,6 +143,18 @@ string IDiscordEmbed.ThumbnailUrl
                 x.IsInline = field.IsInline;
             });
 
+            return this;
+        }
+
+        public IDiscordEmbed AddField(string title, string value)
+        {
+            embed.AddField(title, value);
+            return this;
+        }
+
+        public IDiscordEmbed AddInlineField(string title, string value)
+        {
+            embed.AddInlineField(title, value);
             return this;
         }
 
@@ -217,6 +217,54 @@ string IDiscordEmbed.ThumbnailUrl
                 }
             }
 
+            return this;
+        }
+
+        public IDiscordEmbed SetAuthor(string name, string imageurl, string url)
+        {
+            embed.Author = new EmbedAuthorBuilder() { Name = name, IconUrl = imageurl, Url = url };
+            return this;
+        }
+
+        public IDiscordEmbed SetColor(Color color)
+        {
+            Color = color;
+            return this;
+        }
+
+        public IDiscordEmbed SetDescription(string description)
+        {
+            Description = description;
+            return this;
+        }
+
+        public IDiscordEmbed SetFooter(string text, string iconurl)
+        {
+            embed.Footer = new EmbedFooterBuilder() { Text = text, IconUrl = iconurl };
+            return this;
+        }
+
+        public IDiscordEmbed SetImageUrl(string url)
+        {
+            ImageUrl = url;
+            return this;
+        }
+
+        public IDiscordEmbed SetThumbnailUrl(string url)
+        {
+            ThumbnailUrl = url;
+            return this;
+        }
+
+        public IDiscordEmbed SetTitle(string title)
+        {
+            Title = title;
+            return this;
+        }
+
+        public IDiscordEmbed SetUrl(string url)
+        {
+            Url = url;
             return this;
         }
 

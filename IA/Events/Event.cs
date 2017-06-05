@@ -59,9 +59,8 @@ namespace IA.Events
                 this.enabled.Add(channelId, enabled);
             }
 
-            using (var context = new IAContext())
+            using (var context = IAContext.CreateNoCache())
             {
-                context.Set<CommandState>().AsNoTracking();
                 CommandState state = await context.CommandStates.FindAsync(Name, channelId.ToDbLong());
                 if (state == null)
                 {
@@ -84,15 +83,12 @@ namespace IA.Events
                 return enabled[id];
             }
 
-            using (var context = new IAContext())
+            using (var context = IAContext.CreateNoCache())
             {
-                context.Set<CommandState>().AsNoTracking();
-
                 CommandState state = await context.CommandStates.FindAsync(Name, id.ToDbLong());
                 if (state == null)
                 {
-                    state = context.CommandStates.Add(new CommandState() { ChannelId = id.ToDbLong(), CommandName = Name, State = DefaultEnabled });
-                    await context.SaveChangesAsync();
+                    return DefaultEnabled;
                 }
                 return state.State;
             }

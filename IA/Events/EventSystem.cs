@@ -21,7 +21,7 @@ namespace IA.Events
 
         private Dictionary<string, PrefixInstance> prefixCache = new Dictionary<string, PrefixInstance>();
         private Dictionary<ulong, string> identifierCache = new Dictionary<ulong, string>();
-        private Dictionary<string, string> aliases = new Dictionary<string, string>();
+        internal Dictionary<string, string> aliases = new Dictionary<string, string>();
 
         private List<ulong> ignore = new List<ulong>();
 
@@ -379,9 +379,12 @@ namespace IA.Events
                 string command = message
                     .Substring(identifier.Length)
                     .Split(' ')
-                    .First();
+                    .First();   
 
                 command = (aliases.ContainsKey(command)) ? aliases[command] : command;
+
+                Log.Message(command);
+
                 ICommandEvent eventInstance = GetCommandEvent(command);
 
                 if (eventInstance == null)
@@ -393,7 +396,7 @@ namespace IA.Events
                 {
                     if (await events.CommandEvents[command].IsEnabled(msg.Channel.Id) || prefix.ForceCommandExecution && GetUserAccessibility(msg) >= EventAccessibility.DEVELOPERONLY)
                     {
-                        await Task.Run(() => events.CommandEvents[command].Check(msg, identifier)).ConfigureAwait(true);
+                        Task.Run(() => events.CommandEvents[command].Check(msg, identifier)); 
                         return true;
                     }
                 }
