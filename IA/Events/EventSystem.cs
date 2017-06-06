@@ -371,7 +371,7 @@ namespace IA.Events
 
         public async Task<bool> TryRunCommandAsync(IDiscordMessage msg, PrefixInstance prefix)
         {
-            string identifier = await prefix.GetForGuild(msg.Guild.Id);
+            string identifier = await prefix.GetForGuildAsync(msg.Guild.Id);
             string message = msg.Content.ToLower();
 
             if (msg.Content.StartsWith(identifier))
@@ -448,7 +448,7 @@ namespace IA.Events
                 return "no";
             }
 
-            return await instance.GetForGuild(guildId);
+            return await instance.GetForGuildAsync(guildId);
         }
     }
 }

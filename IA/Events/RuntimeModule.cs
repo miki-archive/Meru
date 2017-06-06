@@ -246,19 +246,13 @@ namespace IA.Events
             {
                 try
                 {
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(InternalMessageReceived), msg);
+                    Task.Run(() => MessageRecieved(msg));
                 }
                 catch (Exception ex)
                 {
                     Log.ErrorAt("module@message", ex.Message);
                 }
             }
-        }
-
-        private void InternalMessageReceived(object o)
-        {
-            RuntimeMessage msg = o as RuntimeMessage;
-            MessageRecieved(msg);
         }
 
         public async Task SetEnabled(ulong serverId, bool enabled)

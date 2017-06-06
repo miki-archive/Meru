@@ -63,7 +63,7 @@ namespace IA.Events
             }
         }
 
-        public async Task<string> GetForGuild(ulong id)
+        public async Task<string> GetForGuildAsync(ulong id)
         {
             if(Changable)
             {
