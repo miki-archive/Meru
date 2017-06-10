@@ -127,6 +127,12 @@ namespace IA.Events
             await Task.CompletedTask;
         }
 
+        public RuntimeModule AddCommand(ICommandEvent command)
+        {
+            Events.Add(command);
+            return this;
+        }
+
         public async Task UninstallAsync(object bot)
         {
             Bot b = (Bot)bot;

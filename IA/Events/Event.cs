@@ -36,7 +36,6 @@ namespace IA.Events
             Name = eventObject.Name;
             Aliases = eventObject.Aliases;
             Accessibility = eventObject.Accessibility;
-            Metadata = eventObject.Metadata;
             OverridableByDefaultPrefix = eventObject.OverridableByDefaultPrefix;
             CanBeDisabled = eventObject.CanBeDisabled;
             DefaultEnabled = eventObject.DefaultEnabled;
@@ -92,6 +91,24 @@ namespace IA.Events
                 }
                 return state.State;
             }
+        }
+
+        public IEvent SetName(string name)
+        {
+            Name = name;
+            return this;
+        }
+
+        public IEvent SetAliases(params string[] aliases)
+        {
+            Aliases = aliases;
+            return this;
+        }
+
+        public IEvent SetAccessibility(EventAccessibility accessibility)
+        {
+            Accessibility = accessibility;
+            return this;
         }
     }
 }

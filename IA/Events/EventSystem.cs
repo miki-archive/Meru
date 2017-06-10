@@ -34,7 +34,6 @@ namespace IA.Events
 
         public ExceptionDelegate OnCommandError = async (ex, command, msg) =>
         {
-            await msg.Channel.SendMessage(command.Metadata.errorMessage);
         };
 
         public string DefaultIdentifier { private set; get; }

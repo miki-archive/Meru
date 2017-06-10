@@ -1,8 +1,10 @@
 ﻿using Discord;
+using Discord.Rest;
 using IA.SDK.Extensions;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace IA.SDK
 {
@@ -164,9 +166,22 @@ namespace IA.SDK
             return Author;
         }
 
-        public void CreateFooter()
+        public IDiscordEmbed CreateAuthor(string text, string iconUrl, string url)
+        {
+            embed.Author = new EmbedAuthorBuilder().WithName(text).WithIconUrl(iconUrl).WithUrl(url);
+            return this;
+        }
+
+        public IEmbedFooter CreateFooter()
         {
             embed.Footer = new EmbedFooterBuilder();
+            return Footer;
+        }
+
+        public IDiscordEmbed CreateFooter(string text, string iconUrl)
+        {
+            embed.Footer = new EmbedFooterBuilder().WithText(text).WithIconUrl(iconUrl);
+            return this;
         }
 
         public RuntimeEmbed Query(string embed)
@@ -218,6 +233,17 @@ namespace IA.SDK
             }
 
             return this;
+        }
+
+        public async Task<IDiscordMessage> SendToChannel(ulong channelId)
+        {
+            return new RuntimeMessage(await (Bot.instance.Client.GetChannel(channelId) as IMessageChannel).SendMessageAsync("", false, embed));
+        }
+
+        public async Task<IDiscordMessage> SendToUser(ulong userId)
+        {
+            RestDMChannel channel = await (Bot.instance.Client.GetUser(userId).CreateDMChannelAsync());
+            return new RuntimeMessage(await channel.SendMessageAsync("", false, embed));
         }
 
         public IDiscordEmbed SetAuthor(string name, string imageurl, string url)

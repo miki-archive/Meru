@@ -11,53 +11,19 @@ namespace IA.SDK
     {
         public IGuild guild = null;
 
-        public string AvatarUrl
-        {
-            get
-            {
-                return guild.IconUrl;
-            }
-        }
+        public string AvatarUrl => guild.IconUrl;
 
-        public ulong Id
-        {
-            get
-            {
-                return guild.Id;
-            }
-        }
+        public ulong Id => guild.Id;
 
-        public string Name
-        {
-            get
-            {
-                return guild.Name;
-            }
-        }
+        public string Name => guild.Name;
 
-        public uint ChannelCount
-        {
-            get
-            {
-                return (uint)guild.GetChannelsAsync().GetAwaiter().GetResult().Count;
-            }
-        }
+        public uint ChannelCount => (uint) guild.GetChannelsAsync().GetAwaiter().GetResult().Count;
 
-        public uint UserCount
-        {
-            get
-            {
-                return (uint)guild.GetUsersAsync().GetAwaiter().GetResult().Count;
-            }
-        }
+        public uint VoiceChannelCount => (uint)guild.GetVoiceChannelsAsync().GetAwaiter().GetResult().Count;
 
-        public IDiscordUser Owner
-        {
-            get
-            {
-                return new RuntimeUser(guild.GetOwnerAsync().GetAwaiter().GetResult());
-            }
-        }
+        public uint UserCount => (uint)guild.GetUsersAsync().GetAwaiter().GetResult().Count;
+
+        public IDiscordUser Owner => new RuntimeUser(guild.GetOwnerAsync().GetAwaiter().GetResult());
 
         public List<IDiscordRole> Roles
         {

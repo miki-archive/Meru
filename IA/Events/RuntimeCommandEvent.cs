@@ -11,6 +11,7 @@ namespace IA.Events
 {
     public class RuntimeCommandEvent : Event, ICommandEvent
     {
+        public Dictionary<string, ProcessCommandDelegate> CommandPool { get; set; } = new Dictionary<string, ProcessCommandDelegate>();
         public int Cooldown { get; set; }
 
         public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
@@ -25,12 +26,14 @@ namespace IA.Events
         };
 
         public RuntimeCommandEvent() { }
+        public RuntimeCommandEvent(string name) { Name = name; }
         public RuntimeCommandEvent(ICommandEvent commandEvent) : base(commandEvent)
         {
             CheckCommand = commandEvent?.CheckCommand;
             Cooldown = commandEvent.Cooldown;
             GuildPermissions = commandEvent?.GuildPermissions;
             ProcessCommand = commandEvent?.ProcessCommand;
+            CommandPool = commandEvent?.CommandPool;
         }
         public RuntimeCommandEvent(Action<RuntimeCommandEvent> info) { info.Invoke(this);  }
 
@@ -39,10 +42,12 @@ namespace IA.Events
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
             string[] allAliases = null;
+            string[] arguments = new string[0];
 
             if (e.Content.Split(' ').Length > 1)
             {
                 args = e.Content.Substring(e.Content.Split(' ')[0].Length + 1);
+                arguments = args.Split(' ');
             }
 
 
@@ -91,10 +96,21 @@ namespace IA.Events
 
             if (CheckCommand(e, command, allAliases))
             {
+                ProcessCommandDelegate targetCommand = ProcessCommand;
+
+                if(arguments.Length > 0)
+                {
+                    if(CommandPool.ContainsKey(arguments[0]))
+                    {
+                        targetCommand = CommandPool[arguments[0]];
+                        args = args.Substring((arguments[0].Length == args.Length) ? arguments[0].Length : arguments[0].Length + 1);
+                    }
+                }
+
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
 
-                if (await TryProcessCommand(e, args))
+                if (await TryProcessCommand(targetCommand, e, args))
                 {
                     await eventSystem.OnCommandDone(e, this);
                     TimesUsed++;
@@ -128,23 +144,65 @@ namespace IA.Events
             }
         }
 
-        private async Task<bool> TryProcessCommand(IDiscordMessage e, string args)
+        private async Task<bool> TryProcessCommand(ProcessCommandDelegate cmd, IDiscordMessage e, string args)
         {
             try
             {
-                await ProcessCommand(e, args);
+                await cmd(e, args);
                 return true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Log.ErrorAt(Name, ex.Message + "\n" + ex.StackTrace);
-                await (Module as RuntimeModule).EventSystem.OnCommandError(ex, this, e);
-                if(Debugger.IsAttached)
-                {
-                    throw ex;
-                }
             }
             return false;
+        }
+
+        public ICommandEvent SetCooldown(int seconds)
+        {
+            Cooldown = seconds;
+            return this;
+        }
+
+        public ICommandEvent SetPermissions(params DiscordGuildPermission[] permissions)
+        {
+            GuildPermissions.AddRange(permissions);
+            return this;
+        }
+
+        public ICommandEvent On(string args, ProcessCommandDelegate command)
+        {
+            CommandPool.Add(args, command);
+            return this;
+        }
+
+        public ICommandEvent Default(ProcessCommandDelegate command)
+        {
+            ProcessCommand = command;
+            return this;
+        }
+
+        new public ICommandEvent SetName(string name)
+        {
+            Name = name;
+            return this;
+        }
+
+        new public ICommandEvent SetAccessibility(EventAccessibility accessibility)
+        {
+            Accessibility = accessibility;
+            return this;
+        }
+
+        new public ICommandEvent SetAliases(params string[] aliases)
+        {
+            Aliases = aliases;
+            return this;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
