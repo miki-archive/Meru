@@ -213,5 +213,10 @@ namespace IA.SDK
         {
             return channel;
         }
+
+        public async Task SendTyping()
+        {
+            await (channel as IMessageChannel).TriggerTypingAsync();
+        }
     }
 }
