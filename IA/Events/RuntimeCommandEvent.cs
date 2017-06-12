@@ -41,7 +41,7 @@ namespace IA.Events
         {
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
-            string[] allAliases = null;
+            List<string> allAliases = new List<string>();
             string[] arguments = new string[0];
 
             if (e.Content.Split(' ').Length > 1)
@@ -50,20 +50,18 @@ namespace IA.Events
                 arguments = args.Split(' ');
             }
 
+            if(Module != null)
+            {
+                if(Module.Nsfw && !e.Channel.Nsfw)
+                {
+                    return;
+                }
+            }
 
             if (Aliases != null)
             {
-                allAliases = new string[Aliases.Length + 1];
-                int i = 0;
-
-                // loading aliases
-                foreach (string a in allAliases)
-                {
-                    allAliases[i] = a;
-                    i++;
-                }
-
-                allAliases[allAliases.Length - 1] = Name;
+                allAliases.AddRange(Aliases);
+                allAliases.Add(Name);
             }
 
             if (enabled.ContainsKey(e.Channel.Id))
@@ -94,7 +92,7 @@ namespace IA.Events
                 }
             }
 
-            if (CheckCommand(e, command, allAliases))
+            if (CheckCommand(e, command, allAliases.ToArray()))
             {
                 ProcessCommandDelegate targetCommand = ProcessCommand;
 

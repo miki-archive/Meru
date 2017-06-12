@@ -382,8 +382,6 @@ namespace IA.Events
 
                 command = (aliases.ContainsKey(command)) ? aliases[command] : command;
 
-                Log.Message(command);
-
                 ICommandEvent eventInstance = GetCommandEvent(command);
 
                 if (eventInstance == null)

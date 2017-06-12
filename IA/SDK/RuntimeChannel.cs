@@ -41,6 +41,8 @@ namespace IA.SDK
             }
         }
 
+        public bool Nsfw => channel.IsNsfw;
+
         public async Task DeleteMessagesAsync(List<IDiscordMessage> messages)
         {
             List<IMessage> m = new List<IMessage>();

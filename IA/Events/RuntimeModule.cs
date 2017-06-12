@@ -17,6 +17,7 @@ namespace IA.Events
     public class RuntimeModule : IModule
     {
         public string Name { get; set; } = "";
+        public bool Nsfw { get; set; } = false;
         public bool Enabled { get; set; } = true;
         public bool CanBeDisabled { get; set; } = true;
 
@@ -203,6 +204,12 @@ namespace IA.Events
 
                 }
             }
+        }
+
+        public RuntimeModule SetNsfw(bool val)
+        {
+            Nsfw = val;
+            return this;
         }
 
         private async Task Module_LeftGuild(SocketGuild arg)
