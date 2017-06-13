@@ -91,9 +91,9 @@ namespace IA.SDK
         }
 
         // TODO: clean this | also, completely re-write this
-        public async Task SendOption(string message, IDiscordUser user, params Option[] reactionEmoji)
+        public async Task SendOptionAsync(string message, IDiscordUser user, params Option[] reactionEmoji)
         {
-            IDiscordMessage e = await SendMessage(message);
+            IDiscordMessage e = await SendMessageAsync(message);
             IMessage msg = (e as IProxy<IMessage>).ToNativeObject();
 
             int output = -1;
@@ -134,9 +134,9 @@ namespace IA.SDK
                 await reactionEmoji[output].output();
             }
         }
-        public async Task SendOption(IDiscordEmbed message, IDiscordUser user, params Option[] reactionEmoji)
+        public async Task SendOptionAsync(IDiscordEmbed message, IDiscordUser user, params Option[] reactionEmoji)
         {
-            IDiscordMessage e = await SendMessage(message);
+            IDiscordMessage e = await SendMessageAsync(message);
             IMessage msg = (e as IProxy<IMessage>).ToNativeObject();
 
             int output = -1;
@@ -178,7 +178,7 @@ namespace IA.SDK
             }
         }
 
-        public async Task<IDiscordMessage> SendMessage(string message)
+        public async Task<IDiscordMessage> SendMessageAsync(string message)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace IA.SDK
             }
             return null;
         }
-        public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
+        public async Task<IDiscordMessage> SendMessageAsync(IDiscordEmbed embed)
         {
             try
             {

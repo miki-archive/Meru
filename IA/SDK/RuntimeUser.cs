@@ -123,24 +123,24 @@ namespace IA.SDK
             }
         }
 
-        public async Task Kick()
+        public async Task KickAsync()
         {
             await (user as IGuildUser).KickAsync();
         }
 
-        public async Task Ban(IDiscordGuild g)
+        public async Task BanAsync(IDiscordGuild g)
         {
             IGuild x = (g as IProxy<IGuild>).ToNativeObject();
             await x.AddBanAsync(user);
         }
 
-        public async Task SendFile(string path)
+        public async Task SendFileAsync(string path)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
             await c.SendFileAsync(path);
         }
 
-        public async Task<IDiscordMessage> SendMessage(string message)
+        public async Task<IDiscordMessage> SendMessageAsync(string message)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
 
@@ -149,7 +149,7 @@ namespace IA.SDK
             return m;
         }
 
-        public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
+        public async Task<IDiscordMessage> SendMessageAsync(IDiscordEmbed embed)
         {
             IDMChannel c = await user.CreateDMChannelAsync();
             IMessage m = await c.SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>).ToNativeObject());
@@ -217,7 +217,7 @@ namespace IA.SDK
             await u.RemoveRolesAsync(roleList);
         }
 
-        public async Task SetNickname(string text)
+        public async Task SetNicknameAsync(string text)
         {
             await (user as IGuildUser).ModifyAsync(x =>
             {
