@@ -1,2 +1,2 @@
-# IA
-Framework for discord bots.
+# Meru
+Framework for ~~discord~~ bots.
