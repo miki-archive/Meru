@@ -153,6 +153,7 @@ namespace IA.SDK
 
         // ---------------------------- important :( why don't I ever do what future me would do?!?!!?
         // GET THIS SHIT OUTTA HERE.
+        // One day..
         public IDiscordEmbed CreateEmbed()
         {
             return new RuntimeEmbed(new EmbedBuilder());
@@ -168,6 +169,13 @@ namespace IA.SDK
             await (messageData as IUserMessage)?.ModifyAsync(x =>
             {
                 x.Content = message;
+            });
+        }
+        public async Task ModifyAsync(IDiscordEmbed embed)
+        {
+            await (messageData as IUserMessage)?.ModifyAsync(x =>
+            {
+                x.Embed = ((embed as RuntimeEmbed) as IProxy<EmbedBuilder>).ToNativeObject().Build();
             });
         }
 
