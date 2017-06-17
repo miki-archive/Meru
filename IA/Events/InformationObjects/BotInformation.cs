@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IA.Events
+namespace Meru.Events
 {
     public class BotInformation
     {

@@ -1,9 +1,9 @@
-﻿using IA.SDK.Events;
-using IA.SDK.Interfaces;
+﻿using Meru.SDK.Events;
+using Meru.SDK.Interfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace IA.Events
+namespace Meru.Events
 {
     public delegate Task ProcessCommandDoneEvent(IDiscordMessage m, ICommandEvent e, bool success);
 

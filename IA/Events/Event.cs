@@ -1,13 +1,13 @@
-﻿using IA.Models;
-using IA.Models.Context;
-using IA.SDK;
-using IA.SDK.Events;
+﻿using Meru.Models;
+using Meru.Models.Context;
+using Meru.SDK;
+using Meru.SDK.Events;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IA.Events
+namespace Meru.Events
 {
     public class Event : IEvent
     {

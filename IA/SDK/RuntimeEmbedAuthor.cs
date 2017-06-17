@@ -1,9 +1,9 @@
 ﻿using System;
 using Discord;
-using IA.SDK.Interfaces;
-using IA.SDK.Extensions;
+using Meru.SDK.Interfaces;
+using Meru.SDK.Extensions;
 
-namespace IA.SDK
+namespace Meru.SDK
 {
     internal class RuntimeEmbedAuthor : IEmbedAuthor, IQuery<RuntimeEmbedAuthor>
     {

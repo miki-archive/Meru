@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace IA.FileHandling
+namespace Meru.FileHandling
 {
     public class FileWriter : IDisposable
     {
@@ -15,13 +15,13 @@ namespace IA.FileHandling
             {
                 filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
                 file = new StreamWriter(new FileStream(filePath + ".config", FileMode.Create));
-                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+                file.WriteLine($"# {fileName} created with {DiscordClient.VersionText}");
             }
             else
             {
                 filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
                 file = new StreamWriter(new FileStream(filePath, FileMode.Create));
-                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+                file.WriteLine($"# {fileName} created with {DiscordClient.VersionText}");
             }
         }
 
@@ -32,13 +32,13 @@ namespace IA.FileHandling
             {
                 filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
                 file = new StreamWriter(new FileStream(filePath + ".config", FileMode.Create));
-                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+                file.WriteLine($"# {fileName} created with {DiscordClient.VersionText}");
             }
             else
             {
                 filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
                 file = new StreamWriter(new FileStream(filePath, FileMode.Create));
-                file.WriteLine($"# {fileName} created with {Bot.VersionText}");
+                file.WriteLine($"# {fileName} created with {DiscordClient.VersionText}");
             }
         }
 

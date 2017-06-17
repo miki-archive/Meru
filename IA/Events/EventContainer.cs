@@ -1,8 +1,8 @@
-﻿using IA.SDK.Events;
+﻿using Meru.SDK.Events;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace IA.Events
+namespace Meru.Events
 {
     internal class EventContainer
     {

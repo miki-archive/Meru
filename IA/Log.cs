@@ -1,8 +1,8 @@
-﻿using IA.FileHandling;
+﻿using Meru.FileHandling;
 using System;
 using System.IO;
 
-namespace IA
+namespace Meru
 {
     public class Log
     {

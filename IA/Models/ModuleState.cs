@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IA.Models
+namespace Meru.Models
 {
     [Table("ModuleStates")]
     class ModuleState

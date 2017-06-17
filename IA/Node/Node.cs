@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace IA.Node
+namespace Meru.Node
 {
     public class Node
     {

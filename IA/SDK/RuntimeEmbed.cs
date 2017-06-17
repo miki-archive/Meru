@@ -1,12 +1,12 @@
 ﻿using Discord;
 using Discord.Rest;
-using IA.SDK.Extensions;
-using IA.SDK.Interfaces;
+using Meru.SDK.Extensions;
+using Meru.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IA.SDK
+namespace Meru.SDK
 {
     public class RuntimeEmbed : IDiscordEmbed, IProxy<EmbedBuilder>, IQuery<RuntimeEmbed>
     {
@@ -25,10 +25,7 @@ namespace IA.SDK
 
         public IEmbedAuthor Author
         {
-            get
-            {
-                return new RuntimeEmbedAuthor(embed.Author);
-            }
+            get => new RuntimeEmbedAuthor(embed.Author);
             set
             {
                 embed.Author.Name = value.Name;
@@ -39,15 +36,8 @@ namespace IA.SDK
 
         public Color Color
         {
-            get
-            {
-                return new Color(embed.Color.Value.R, embed.Color.Value.G, embed.Color.Value.B);
-            }
-
-            set
-            {
-                embed.Color = new Discord.Color(value.R, value.G, value.B);
-            }
+            get => new Color(embed.Color.Value.R, embed.Color.Value.G, embed.Color.Value.B);
+            set => embed.Color = new Discord.Color(value.R, value.G, value.B);
         }
 
         public string Description
@@ -91,34 +81,20 @@ namespace IA.SDK
 
         public string Title
         {
-            get
-            {
-                return embed.Title;
-            }
-
-            set
-            {
-                embed.Title = value;
-            }
+            get => embed.Title;
+            set => embed.Title = value;
         }
 
         public string Url
         {
-            get
-            {
-                return embed.Url;
-            }
-
-            set
-            {
-                embed.Url = value;
-            }
+            get => embed.Url;
+            set => embed.Url = value;
         }
 
         public string ThumbnailUrl
         {
-            get { return embed.ThumbnailUrl; }
-            set { embed.ThumbnailUrl = value; }
+            get => embed.ThumbnailUrl;
+            set => embed.ThumbnailUrl = value;
         }
 
         public IDiscordEmbed AddField(Action<IEmbedField> field)
@@ -237,12 +213,12 @@ namespace IA.SDK
 
         public async Task<IDiscordMessage> SendToChannel(ulong channelId)
         {
-            return new RuntimeMessage(await (Bot.instance.Client.GetChannel(channelId) as IMessageChannel).SendMessageAsync("", false, embed));
+            return new RuntimeMessage(await (DiscordClient.Instance.GetChannel(channelId) as IMessageChannel).SendMessageAsync("", false, embed));
         }
 
         public async Task<IDiscordMessage> SendToUser(ulong userId)
         {
-            RestDMChannel channel = await (Bot.instance.Client.GetUser(userId).CreateDMChannelAsync());
+            RestDMChannel channel = await (DiscordClient.Instance.GetUser(userId).CreateDMChannelAsync());
             return new RuntimeMessage(await channel.SendMessageAsync("", false, embed));
         }
 
@@ -256,6 +232,10 @@ namespace IA.SDK
         {
             Color = color;
             return this;
+        }
+        public IDiscordEmbed SetColor(float r, float g, float b)
+        {
+            return SetColor(new Color(r, g, b));
         }
 
         public IDiscordEmbed SetDescription(string description)

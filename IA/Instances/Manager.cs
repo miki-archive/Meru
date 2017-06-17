@@ -1,22 +1,22 @@
-﻿using IA.Internal;
+﻿using Meru.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace IA
+namespace Meru
 {
     internal class Manager : IpcSocket
     {
         private AppDomain app = AppDomain.CurrentDomain;
-        private Bot bot = null;
+        private DiscordClient bot = null;
 
         private List<Shard> shard = new List<Shard>();
 
         private int shardCount;
 
-        public Manager(int shard_count, Bot bot)
+        public Manager(int shard_count, DiscordClient bot)
         {
             shardCount = shard_count;
 

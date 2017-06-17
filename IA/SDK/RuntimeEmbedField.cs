@@ -1,8 +1,8 @@
 ﻿using System;
 using Discord;
-using IA.SDK.Interfaces;
+using Meru.SDK.Interfaces;
 
-namespace IA.SDK
+namespace Meru.SDK
 {
     public class RuntimeEmbedField : IEmbedField, IQuery<RuntimeEmbedField>
     {

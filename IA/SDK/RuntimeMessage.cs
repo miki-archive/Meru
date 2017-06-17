@@ -1,11 +1,11 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using IA.SDK.Interfaces;
+using Meru.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IA.SDK
+namespace Meru.SDK
 {
     public class RuntimeMessage : IDiscordMessage, IProxy<IMessage>
     {
@@ -36,7 +36,7 @@ namespace IA.SDK
         {
             get
             {
-                return new RuntimeUser((Guild.GetUserAsync(IA.Bot.instance.Client.GetShard(0).CurrentUser.Id).GetAwaiter().GetResult() as IProxy<IUser>).ToNativeObject());
+                return new RuntimeUser((Guild.GetUserAsync(Meru.DiscordClient.Instance.Client.GetShard(0).CurrentUser.Id).GetAwaiter().GetResult() as IProxy<IUser>).ToNativeObject());
             }
         }
 

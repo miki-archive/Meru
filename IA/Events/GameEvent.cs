@@ -1,9 +1,9 @@
-﻿using IA.SDK;
-using IA.SDK.Interfaces;
+﻿using Meru.SDK;
+using Meru.SDK.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IA.Events
+namespace Meru.Events
 {
     public class GameEvent
     {
