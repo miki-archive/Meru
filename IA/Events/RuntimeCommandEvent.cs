@@ -1,13 +1,13 @@
-﻿using Meru.SDK;
-using Meru.SDK.Events;
-using Meru.SDK.Interfaces;
+﻿using IA.SDK;
+using IA.SDK.Events;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Meru.Events
+namespace IA.Events
 {
     public class RuntimeCommandEvent : Event, ICommandEvent
     {

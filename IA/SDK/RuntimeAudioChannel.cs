@@ -1,12 +1,12 @@
 ﻿using Discord;
-using Meru.SDK.Interfaces;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Meru.SDK
+namespace IA.SDK
 {
     class RuntimeAudioChannel : IDiscordAudioChannel
     {

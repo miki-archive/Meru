@@ -1,11 +1,11 @@
 ﻿using Discord;
-using Meru.SDK.Interfaces;
+using IA.SDK.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
 
-namespace Meru.SDK
+namespace IA.SDK
 {
     public class RuntimeGuild : IDiscordGuild, IProxy<IGuild>
     {

@@ -1,12 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Meru.SDK;
-using Meru.SDK.Interfaces;
+using IA.SDK;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Meru
+namespace IA
 {
     // TODO: Either throw it away or keep it for later.
     public class ShardedClient

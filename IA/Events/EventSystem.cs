@@ -1,15 +1,15 @@
-﻿using Meru.Models;
-using Meru.Models.Context;
-using Meru.SDK;
-using Meru.SDK.Events;
-using Meru.SDK.Interfaces;
+﻿using IA.Models;
+using IA.Models.Context;
+using IA.SDK;
+using IA.SDK.Events;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Objects;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Meru.Events
+namespace IA.Events
 {
     public class EventSystem
     {

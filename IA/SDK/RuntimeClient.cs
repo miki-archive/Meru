@@ -1,10 +1,10 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Meru.SDK.Interfaces;
+using IA.SDK.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Meru.SDK
+namespace IA.SDK
 {
     public class RuntimeClient : Interfaces.IDiscordClient
     {

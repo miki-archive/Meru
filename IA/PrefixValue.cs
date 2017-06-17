@@ -1,4 +1,4 @@
-﻿namespace Meru
+﻿namespace IA
 {
     public class PrefixValue
     {

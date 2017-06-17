@@ -1,10 +1,10 @@
-﻿using Meru.Internal;
+﻿using IA.Internal;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Meru
+namespace IA
 {
     internal class Shard : IpcSocket
     {
@@ -15,7 +15,7 @@ namespace Meru
         /// Create a new shard
         /// </summary>
         /// <param name="shard_id">shard id</param>
-        public Shard(int shard_id, DiscordClient bot)
+        public Shard(int shard_id, Bot bot)
         {
             Log.Message("Starting shard " + shard_id);
             id = shard_id;
@@ -25,7 +25,7 @@ namespace Meru
         /// <summary>
         /// Opens a new shard.
         /// </summary>
-        public async Task OpenShardAsync(DiscordClient bot)
+        public async Task OpenShardAsync(Bot bot)
         {
             ProcessStartInfo info = new ProcessStartInfo()
             {

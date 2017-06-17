@@ -1,8 +1,8 @@
-﻿using Meru.SDK;
-using Meru.SDK.Interfaces;
+﻿using IA.SDK;
+using IA.SDK.Interfaces;
 using System.Threading.Tasks;
 
-namespace Meru.Events
+namespace IA.Events
 {
     public class GuildEvent : Event
     {

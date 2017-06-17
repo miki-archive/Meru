@@ -1,12 +1,12 @@
 ﻿using Discord;
 using Discord.Audio;
-using Meru.SDK.Interfaces;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace Meru.SDK
+namespace IA.SDK
 {
     public class RuntimeAudioClient : IDiscordAudioClient, IProxy<IAudioClient>
     {

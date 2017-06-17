@@ -1,10 +1,10 @@
-﻿using Meru.Events;
-using Meru.SDK;
+﻿using IA.Events;
+using IA.SDK;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Meru.Addons
+namespace IA.Addons
 {
     public class AddonManager
     {
@@ -13,7 +13,7 @@ namespace Meru.Addons
         /// <summary>
         /// Loads addons in ./modules folder
         /// </summary>
-        public async Task Load(Client bot)
+        public async Task Load(Bot bot)
         {
             if (!Directory.Exists(CurrentDirectory) || Directory.GetFiles(CurrentDirectory).Length == 0)
             {
@@ -55,12 +55,12 @@ namespace Meru.Addons
                 }
                 catch
                 {
-                    Log.Warning($"Module {newS} is not compatible with this version (v{DiscordClient.VersionNumber})");
+                    Log.Warning($"Module {newS} is not compatible with this version (v{Bot.VersionNumber})");
                 }
             }
         }
 
-        public async Task LoadSpecific(Client bot, string module)
+        public async Task LoadSpecific(Bot bot, string module)
         {
             string s = CurrentDirectory + (module.EndsWith(".dll") ? module : module + ".dll");
 
@@ -95,7 +95,7 @@ namespace Meru.Addons
             }
         }
 
-        public async Task Reload(DiscordClient bot, string module)
+        public async Task Reload(Bot bot, string module)
         {
             string s = CurrentDirectory + module + ".dll";
 
@@ -126,7 +126,7 @@ namespace Meru.Addons
             }
         }
 
-        public async Task Unload(Client bot, string module)
+        public async Task Unload(Bot bot, string module)
         {
             string s = CurrentDirectory + module + ".dll";
 

@@ -1,12 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
 
-using Meru.Addons;
-using Meru.Events;
-using Meru.FileHandling;
-using Meru.SDK;
-using Meru.SDK.Events;
-using Meru.SDK.Interfaces;
+using IA.Addons;
+using IA.Events;
+using IA.FileHandling;
+using IA.SDK;
+using IA.SDK.Events;
+using IA.SDK.Interfaces;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -14,15 +14,42 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Meru
+namespace IA
 {
-    public class DiscordClient : Client
+    public class Bot
     {
+        public AddonManager Addons { private set; get; }
+
         public DiscordShardedClient Client { private set; get; }
+
+        public EventSystem Events { private set; get; }
+
+        public string Name
+        {
+            get
+            {
+                return clientInformation.Name;
+            }
+        }
+
+        public string Version
+        {
+            get
+            {
+                return clientInformation.Version;
+            }
+        }
+
+        public const string VersionNumber = "1.6";
+        public const string VersionText = "IA v" + VersionNumber;
+
+        public static Bot instance;
+
+        private ClientInformation clientInformation;
 
         private string currentPath = Directory.GetCurrentDirectory();
 
-        public DiscordClient()
+        public Bot()
         {
             if (!File.Exists(currentPath + "/preferences.config"))
             {
@@ -32,18 +59,18 @@ namespace Meru
             {
                 clientInformation = LoadPreferenceFile();
             }
-            Init().GetAwaiter().GetResult();
+            InitializeBot().GetAwaiter().GetResult();
         }
-        public DiscordClient(ClientInformation info)
+        public Bot(ClientInformation info)
         {
             clientInformation = info;
-            Init().GetAwaiter().GetResult();
+            InitializeBot().GetAwaiter().GetResult();
         }
-        public DiscordClient(Action<ClientInformation> info)
+        public Bot(Action<ClientInformation> info)
         {
             clientInformation = new ClientInformation();
             info.Invoke(clientInformation);
-            Init().GetAwaiter().GetResult();
+            InitializeBot().GetAwaiter().GetResult();
         }
 
         public void AddDeveloper(ulong id)
@@ -134,11 +161,42 @@ namespace Meru
             return outputBotInfo;
         }
 
-        protected override async Task Init()
+        private async Task InitializeBot()
         {
+            instance = this;
+
             Log.InitializeLogging(clientInformation);
 
-            Log.Message("IA v" + VersionNumber);
+            Log.Message(VersionText);
+
+            Client = new DiscordShardedClient(new DiscordSocketConfig()
+            {
+                TotalShards = clientInformation.ShardCount,
+                LogLevel = LogSeverity.Info,
+                ConnectionTimeout = 300000
+            });
+
+            Events = new EventSystem(x =>
+            {
+                x.Name = clientInformation.Name;
+            });
+
+            Events.RegisterPrefixInstance(">").RegisterAsDefault();
+            // fallback prefix
+            Events.RegisterPrefixInstance("miki.", false);
+            // debug prefix
+            Events.RegisterPrefixInstance("fmiki.", false, true);
+
+            Addons = new AddonManager();
+            await Addons.Load(this);
+
+            if (clientInformation.EventLoaderMethod != null)
+            {
+                await clientInformation.EventLoaderMethod(this);
+            }
+
+            Application.ThreadException +=
+               new ThreadExceptionEventHandler(Application_ThreadException);       
 
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;

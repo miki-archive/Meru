@@ -1,12 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Meru.SDK.Interfaces;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Meru.SDK
+namespace IA.SDK
 {
     public class RuntimeMessageChannel : IDiscordMessageChannel, IProxy<IChannel>
     {
@@ -119,7 +119,7 @@ namespace Meru.SDK
                 }
             });
 
-            DiscordClient.Instance.Client.ReactionAdded += socketReaction;
+            Bot.instance.Client.ReactionAdded += socketReaction;
 
             int timeTaken = 0;
             while(output == -1 || timeTaken > 10000)
@@ -127,7 +127,7 @@ namespace Meru.SDK
                 await Task.Delay(100);
                 timeTaken += 100;
             }
-            DiscordClient.Instance.Client.ReactionAdded -= socketReaction;
+            Bot.instance.Client.ReactionAdded -= socketReaction;
 
             if (output != -1)
             {
@@ -162,7 +162,7 @@ namespace Meru.SDK
                     }
                 });
 
-            DiscordClient.Instance.Client.ReactionAdded += socketReaction;
+            Bot.instance.Client.ReactionAdded += socketReaction;
 
             int timeTaken = 0;
             while (output == -1 || timeTaken > 10000)
@@ -170,7 +170,7 @@ namespace Meru.SDK
                 await Task.Delay(100);
                 timeTaken += 100;
             }
-            DiscordClient.Instance.Client.ReactionAdded -= socketReaction;
+            Bot.instance.Client.ReactionAdded -= socketReaction;
 
             if (output != -1)
             {

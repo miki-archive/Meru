@@ -1,12 +1,12 @@
-﻿using Meru.Models;
-using Meru.Models.Context;
+﻿using IA.Models;
+using IA.Models.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Meru.Events
+namespace IA.Events
 {
     public class PrefixInstance
     {

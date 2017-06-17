@@ -7,8 +7,8 @@
     <ProjectGuid>{E4B74DD1-8CCB-4FCC-9BDE-0F79C43211E7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Meru</RootNamespace>
-    <AssemblyName>Meru</AssemblyName>
+    <RootNamespace>IA</RootNamespace>
+    <AssemblyName>IA</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -71,10 +71,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
-    <Compile Include="API\DiscordMessageAPI.cs" />
-    <Compile Include="Clients\Client.cs" />
-    <Compile Include="API\IMessageAPI.cs" />
-    <Compile Include="Clients\SlackClient.cs" />
     <Compile Include="Events\CommandDoneEvent.cs" />
     <Compile Include="Events\PrefixInstance.cs" />
     <Compile Include="Events\RuntimeCommandEvent.cs" />
@@ -83,7 +79,7 @@
     <Compile Include="Events\GameEvent.cs" />
     <Compile Include="Events\RuntimeModule.cs" />
     <Compile Include="Events\UserEvent.cs" />
-    <Compile Include="Clients\DiscordClient.cs" />
+    <Compile Include="Bot.cs" />
     <Compile Include="Extension Methods\Mathm.cs" />
     <Compile Include="Extension\LongExtensions.cs" />
     <Compile Include="Extension\UlongExtensions.cs" />
@@ -190,9 +186,6 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="SlackAPI, Version=1.0.5.93, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki\packages\SlackAPI.1.0.5.93\lib\net45\SlackAPI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">

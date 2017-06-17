@@ -1,4 +1,4 @@
-namespace Meru.Migrations
+namespace IA.Migrations
 {
     using System;
     using System.Data.Entity.Migrations;

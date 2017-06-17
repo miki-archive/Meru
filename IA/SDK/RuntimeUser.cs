@@ -1,12 +1,12 @@
 ﻿using Discord;
-using Meru.SDK.Interfaces;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 // TODO: clean this
-namespace Meru.SDK
+namespace IA.SDK
 {
     public class RuntimeUser : IDiscordUser, IProxy<IUser>
     {

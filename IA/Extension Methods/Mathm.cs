@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Meru
+namespace IA
 {
     public class Mathm
     {

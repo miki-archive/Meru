@@ -1,9 +1,9 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Meru.Models;
-using Meru.Models.Context;
-using Meru.SDK;
-using Meru.SDK.Events;
+using IA.Models;
+using IA.Models.Context;
+using IA.SDK;
+using IA.SDK.Events;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Meru.Events
+namespace IA.Events
 {
     public class RuntimeModule : IModule
     {
@@ -72,7 +72,7 @@ namespace Meru.Events
 
         public async Task InstallAsync(object bot)
         {
-            DiscordClient b = (DiscordClient)bot;
+            Bot b = (Bot)bot;
             Name = Name.ToLower();
 
             b.Events.Modules.Add(Name, this);
@@ -136,7 +136,7 @@ namespace Meru.Events
 
         public async Task UninstallAsync(object bot)
         {
-            DiscordClient b = (DiscordClient)bot;
+            Bot b = (Bot)bot;
 
             if (!isInstalled)
             {

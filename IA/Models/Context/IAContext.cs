@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Meru.Models.Context
+namespace IA.Models.Context
 {
     class IAContext : DbContext
     {

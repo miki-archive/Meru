@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Meru.Events
+namespace IA.Events
 {
     public delegate void ContinuousProcessEvent();
 

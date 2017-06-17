@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Meru
+namespace IA
 {
-    public delegate Task LoadEvents(Client bot);
+    public delegate Task LoadEvents(Bot bot);
 
     public class ClientInformation
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Meru.FileHandling
+namespace IA.FileHandling
 {
     public class FileReader : IDisposable
     {
