@@ -149,8 +149,7 @@ namespace IA.SDK
             Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task> socketReaction = new Func<Cacheable<IUserMessage, ulong>, ISocketMessageChannel, SocketReaction, Task>(
                 async (cachableMessage, channel, reaction) =>
                 {
-                    IUserMessage m = await cachableMessage.GetOrDownloadAsync();
-                    if (m.Id == msg.Id && reaction.User.Value.Id == user.Id)
+                    if (cachableMessage.Id == msg.Id && reaction.User.Value.Id == user.Id)
                     {
                         for (int i = 0; i < reactionEmoji.Length; i++)
                         {
