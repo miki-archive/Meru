@@ -13,6 +13,11 @@ namespace IA.Models.Context
         public DbSet<CommandState> CommandStates { get; set; }
         public DbSet<ModuleState> ModuleStates { get; set; }
 
+        public IAContext() : base()
+        {
+        
+        }
+
         internal static IAContext CreateNoCache()
         {
             IAContext m = new IAContext();

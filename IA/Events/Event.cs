@@ -18,7 +18,7 @@ namespace IA.Events
         public EventMetadata Metadata { get; set; } = new EventMetadata();
 
         public bool OverridableByDefaultPrefix { get; set; } = false;
-        public bool CanBeDisabled { get; set; } = false;
+        public bool CanBeDisabled { get; set; } = true;
         public bool DefaultEnabled { get; set; } = true;
   
         public IModule Module { get; set; }

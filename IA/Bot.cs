@@ -172,8 +172,7 @@ namespace IA
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
                 TotalShards = clientInformation.ShardCount,
-                LogLevel = LogSeverity.Info,
-                ConnectionTimeout = 300000
+                LogLevel = LogSeverity.Info
             });
 
             Events = new EventSystem(x =>
@@ -211,7 +210,7 @@ namespace IA
 
                 c.Connected += async () =>
                 {
-                    Log.Message($"shard {c.ShardId} connected!");
+                    Log.Message($"{c.ShardId}| Connected!");
                 };
 
                 c.MessageReceived += async (e) =>
@@ -279,7 +278,7 @@ namespace IA
             }
             catch (Exception e)
             {
-                Log.ErrorAt("messagerecieved", e.Message);
+                Log.ErrorAt("messagerecieved", e.ToString());
             }
         }
     }
