@@ -23,6 +23,9 @@ namespace IA.Events
         private Dictionary<ulong, string> identifierCache = new Dictionary<ulong, string>();
         internal Dictionary<string, string> aliases = new Dictionary<string, string>();
 
+        List<CommandHandler> commandHandlers = new List<CommandHandler>();
+        Dictionary<ulong, CommandHandler> privateCommandHandlers = new Dictionary<ulong, CommandHandler>();
+
         private List<ulong> ignore = new List<ulong>();
 
         /// <summary>
@@ -32,9 +35,7 @@ namespace IA.Events
 
         internal EventContainer events { private set; get; }
 
-        public ExceptionDelegate OnCommandError = async (ex, command, msg) =>
-        {
-        };
+        public ExceptionDelegate OnCommandError = async (ex, command, msg) => { };
 
         public string DefaultIdentifier { private set; get; }
         public string OverrideIdentifier { private set; get; }
@@ -53,9 +54,6 @@ namespace IA.Events
 
             bot = new BotInformation(botInfo);
             events = new EventContainer();
-
-            OverrideIdentifier = bot.Name.ToLower() + ".";
-            DefaultIdentifier = bot.Identifier;
         }
 
         [Obsolete("pls never use this.")]
@@ -302,72 +300,6 @@ namespace IA.Events
             return embed;
         }
 
-        public async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
-        {
-            foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
-            {
-                try
-                {
-                    await ev.processEvent(e, commandEvent, success);
-                }
-                catch (Exception ex)
-                {
-                    Log.ErrorAt($"commanddone@{ev.Name}", ex.Message);
-                }
-            }
-        }
-
-        public async Task OnGuildLeave(IDiscordGuild e)
-        {
-            foreach (GuildEvent ev in events.LeaveServerEvents.Values)
-            {
-                if (await ev.IsEnabled(e.Id))
-                {
-                    await ev.CheckAsync(e);
-                }
-            }
-        }
-
-        public async Task OnGuildJoin(IDiscordGuild e)
-        {
-            foreach (GuildEvent ev in events.JoinServerEvents.Values)
-            {
-                if (await ev.IsEnabled(e.Id))
-                {
-                    await ev.CheckAsync(e);
-                }
-            }
-        }
-
-        public async Task OnPrivateMessage(IDiscordMessage arg)
-        {
-            await Task.CompletedTask;
-        }
-
-        public async Task OnMention(IDiscordMessage e)
-        {
-            foreach (RuntimeCommandEvent ev in events.MentionEvents.Values)
-            {
-                await ev.Check(e);
-            }
-        }
-
-        public async Task OnMessageRecieved(IDiscordMessage _message)
-        {
-            if (_message.Author.IsBot)
-            {
-                return;
-            }
-
-            foreach (PrefixInstance prefix in prefixCache.Values)
-            {
-                if(await TryRunCommandAsync(_message, prefix))
-                {
-                    break;
-                }
-            }
-        }
-
         public async Task<bool> TryRunCommandAsync(IDiscordMessage msg, PrefixInstance prefix)
         {
             string identifier = await prefix.GetForGuildAsync(msg.Guild.Id);
@@ -405,14 +337,6 @@ namespace IA.Events
             return false;
         }
 
-        /// <summary>
-        /// Register a prefix for the bot
-        /// </summary>
-        /// <param name="prefix">prefix name</param>
-        /// <param name="canBeChanged"></param>
-        /// <param name="defaultPrefix"></param>
-        /// <param name="forceExecuteCommands"></param>
-        /// <returns></returns>
         public PrefixInstance RegisterPrefixInstance(string prefix, bool canBeChanged = true, bool forceExecuteCommands = false)
         {
             PrefixInstance newPrefix = new PrefixInstance(prefix.ToLower(), canBeChanged, forceExecuteCommands);
@@ -447,5 +371,70 @@ namespace IA.Events
 
             return await instance.GetForGuildAsync(guildId);
         }
+
+        #region events
+
+        public async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
+        {
+            foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
+            {
+                try
+                {
+                    await ev.processEvent(e, commandEvent, success);
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorAt($"commanddone@{ev.Name}", ex.Message);
+                }
+            }
+        }
+        public async Task OnGuildLeave(IDiscordGuild e)
+        {
+            foreach (GuildEvent ev in events.LeaveServerEvents.Values)
+            {
+                if (await ev.IsEnabled(e.Id))
+                {
+                    await ev.CheckAsync(e);
+                }
+            }
+        }
+        public async Task OnGuildJoin(IDiscordGuild e)
+        {
+            foreach (GuildEvent ev in events.JoinServerEvents.Values)
+            {
+                if (await ev.IsEnabled(e.Id))
+                {
+                    await ev.CheckAsync(e);
+                }
+            }
+        }
+        public async Task OnPrivateMessage(IDiscordMessage arg)
+        {
+            await Task.CompletedTask;
+        }
+        public async Task OnMention(IDiscordMessage e)
+        {
+            foreach (RuntimeCommandEvent ev in events.MentionEvents.Values)
+            {
+                await ev.Check(e);
+            }
+        }
+        public async Task OnMessageRecieved(IDiscordMessage _message)
+        {
+            if (_message.Author.IsBot)
+            {
+                return;
+            }
+
+            foreach (PrefixInstance prefix in prefixCache.Values)
+            {
+                if (await TryRunCommandAsync(_message, prefix))
+                {
+                    break;
+                }
+            }
+        }
+
+        #endregion
     }
 }

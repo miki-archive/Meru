@@ -16,14 +16,8 @@ namespace IA.Events
 
         public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
 
-        public CheckCommandDelegate CheckCommand { get; set; } = (e, args, aliases) =>
-        {
-            return true;
-        };
-        public ProcessCommandDelegate ProcessCommand { get; set; } = async (e, args) =>
-        {
-
-        };
+        public CheckCommandDelegate CheckCommand { get; set; } = (e, args, aliases) => true;
+        public ProcessCommandDelegate ProcessCommand { get; set; } = async (e, args) => { };
 
         public RuntimeCommandEvent() { }
         public RuntimeCommandEvent(string name) { Name = name; }

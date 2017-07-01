@@ -2,6 +2,7 @@
 using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
+using IA.SDK.Interfaces;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,14 @@ namespace IA.Events
                 }
                 state.State = enabled;
                 await context.SaveChangesAsync();
+            }
+        }
+        public async Task SetEnabledAll(IDiscordGuild guildId, bool enabled)
+        {
+            List<IDiscordMessageChannel> channels = await guildId.GetChannels();
+            foreach(IDiscordMessageChannel c in channels)
+            {
+                await SetEnabled(c.Id, enabled);
             }
         }
 
