@@ -21,8 +21,8 @@ namespace IA.Events
 
         private Dictionary<string, PrefixInstance> prefixCache = new Dictionary<string, PrefixInstance>();
         private Dictionary<ulong, string> identifierCache = new Dictionary<ulong, string>();
-        internal Dictionary<string, string> aliases = new Dictionary<string, string>();
 
+        public CommandHandler Commands;
         List<CommandHandler> commandHandlers = new List<CommandHandler>();
         Dictionary<ulong, CommandHandler> privateCommandHandlers = new Dictionary<ulong, CommandHandler>();
 
@@ -36,9 +36,6 @@ namespace IA.Events
         internal EventContainer events { private set; get; }
 
         public ExceptionDelegate OnCommandError = async (ex, command, msg) => { };
-
-        public string DefaultIdentifier { private set; get; }
-        public string OverrideIdentifier { private set; get; }
 
         /// <summary>
         /// Constructor for EventSystem.
@@ -54,26 +51,7 @@ namespace IA.Events
 
             bot = new BotInformation(botInfo);
             events = new EventContainer();
-        }
-
-        [Obsolete("pls never use this.")]
-        public void AddCommandEvent(Action<RuntimeCommandEvent> info)
-        {
-            RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
-            info.Invoke(newEvent);
-            newEvent.eventSystem = this;
-            if (newEvent.Metadata.usage[0] == "usage not set!")
-            {
-                newEvent.Metadata.usage[0] = newEvent.Name;
-            }
-            if (newEvent.Aliases.Length > 0)
-            {
-                foreach (string s in newEvent.Aliases)
-                {
-                    aliases.Add(s, newEvent.Name.ToLower());
-                }
-            }
-            events.CommandEvents.Add(newEvent.Name.ToLower(), newEvent);
+            Commands = new CommandHandler(this);
         }
 
         public void AddCommandDoneEvent(Action<CommandDoneEvent> info)
@@ -85,7 +63,7 @@ namespace IA.Events
             {
                 foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.Name.ToLower());
+                    Commands.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
             events.CommandDoneEvents.Add(newEvent.Name.ToLower(), newEvent);
@@ -109,7 +87,7 @@ namespace IA.Events
             {
                 foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.Name.ToLower());
+                    Commands.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
             events.JoinServerEvents.Add(newEvent.Name.ToLower(), newEvent);
@@ -124,25 +102,10 @@ namespace IA.Events
             {
                 foreach (string s in newEvent.Aliases)
                 {
-                    aliases.Add(s, newEvent.Name.ToLower());
+                    Commands.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
             events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
-        }
-
-        public void AddMentionEvent(Action<RuntimeCommandEvent> info)
-        {
-            RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
-            info.Invoke(newEvent);
-            newEvent.eventSystem = this;
-            if (newEvent.Aliases.Length > 0)
-            {
-                foreach (string s in newEvent.Aliases)
-                {
-                    aliases.Add(s, newEvent.Name.ToLower());
-                }
-            }
-            events.MentionEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
         public int CommandsUsed()
@@ -170,15 +133,6 @@ namespace IA.Events
             newModule.EventSystem = this;
             Modules.Add(newModule.Name, newModule);
             return newModule;
-        }
-
-        public ICommandEvent GetCommandEvent(string id)
-        {
-            if (events.CommandEvents.ContainsKey(id))
-            {
-                return events.CommandEvents[id];
-            }
-            return null;
         }
 
         public IEvent GetEvent(string id)
@@ -210,22 +164,13 @@ namespace IA.Events
             return null;
         }
 
-        public EventAccessibility GetUserAccessibility(IDiscordMessage e)
-        {
-            if (e.Channel == null) return EventAccessibility.PUBLIC;
-
-            if (Developers.Contains(e.Author.Id)) return EventAccessibility.DEVELOPERONLY;
-            if (e.Author.HasPermissions(e.Channel, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
-            return EventAccessibility.PUBLIC;
-        }
-
         public async Task<SortedDictionary<string, List<string>>> GetEventNames(IDiscordMessage e)
         {
             SortedDictionary<string, List<string>> moduleEvents = new SortedDictionary<string, List<string>>();
 
             moduleEvents.Add("MISC", new List<string>());
 
-            EventAccessibility userEventAccessibility = GetUserAccessibility(e);
+            EventAccessibility userEventAccessibility = Commands.GetUserAccessibility(e);
 
             foreach (ICommandEvent ev in events.CommandEvents.Values)
             {
@@ -238,7 +183,7 @@ namespace IA.Events
                             moduleEvents.Add(ev.Module.Name.ToUpper(), new List<string>());
                         }
 
-                        if (GetUserAccessibility(e) >= ev.Accessibility)
+                        if (Commands.GetUserAccessibility(e) >= ev.Accessibility)
                         {
                             moduleEvents[ev.Module.Name.ToUpper()].Add(ev.Name);
                         }
@@ -300,49 +245,9 @@ namespace IA.Events
             return embed;
         }
 
-        public async Task<bool> TryRunCommandAsync(IDiscordMessage msg, PrefixInstance prefix)
-        {
-            string identifier = await prefix.GetForGuildAsync(msg.Guild.Id);
-            string message = msg.Content.ToLower();
-
-            if (msg.Content.StartsWith(identifier))
-            {
-                string command = message
-                    .Substring(identifier.Length)
-                    .Split(' ')
-                    .First();   
-
-                command = (aliases.ContainsKey(command)) ? aliases[command] : command;
-
-                ICommandEvent eventInstance = GetCommandEvent(command);
-
-                if (eventInstance == null)
-                {
-                    return false;
-                }
-
-                if (GetUserAccessibility(msg) >= events.CommandEvents[command].Accessibility)
-                {
-                    if (await events.CommandEvents[command].IsEnabled(msg.Channel.Id) || prefix.ForceCommandExecution && GetUserAccessibility(msg) >= EventAccessibility.DEVELOPERONLY)
-                    {
-                        Task.Run(() => events.CommandEvents[command].Check(msg, identifier)); 
-                        return true;
-                    }
-                }
-                else
-                {
-                    await OnCommandDone(msg, events.CommandEvents[command], false);
-                }
-            }
-            return false;
-        }
-
         public PrefixInstance RegisterPrefixInstance(string prefix, bool canBeChanged = true, bool forceExecuteCommands = false)
         {
             PrefixInstance newPrefix = new PrefixInstance(prefix.ToLower(), canBeChanged, forceExecuteCommands);
-
-
-
             prefixCache.Add(prefix, newPrefix);
             return newPrefix;
         }
@@ -426,12 +331,9 @@ namespace IA.Events
                 return;
             }
 
-            foreach (PrefixInstance prefix in prefixCache.Values)
+            foreach (CommandHandler c in commandHandlers)
             {
-                if (await TryRunCommandAsync(_message, prefix))
-                {
-                    break;
-                }
+                await c.CheckAsync(_message);
             }
         }
 
