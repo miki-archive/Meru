@@ -19,9 +19,7 @@ namespace IA
     public class Bot
     {
         public AddonManager Addons { private set; get; }
-
         public DiscordShardedClient Client { private set; get; }
-
         public EventSystem Events { private set; get; }
 
         public string Name
@@ -175,10 +173,7 @@ namespace IA
                 LogLevel = LogSeverity.Info
             });
 
-            Events = new EventSystem(x =>
-            {
-                x.Name = clientInformation.Name;
-            });
+            Events = new EventSystem(this);
 
             Events.RegisterPrefixInstance(">").RegisterAsDefault();
             // fallback prefix
@@ -197,9 +192,6 @@ namespace IA
             Application.ThreadException +=
                new ThreadExceptionEventHandler(Application_ThreadException);       
 
-            Client.JoinedGuild += Client_JoinedGuild;
-            Client.LeftGuild += Client_LeftGuild;
-
             foreach (DiscordSocketClient c in Client.Shards)
             {
                 c.Ready += async () =>
@@ -211,11 +203,6 @@ namespace IA
                 c.Connected += async () =>
                 {
                     Log.Message($"{c.ShardId}| Connected!");
-                };
-
-                c.MessageReceived += async (e) =>
-                {
-                    Task.Run(() => Client_MessageReceived(e));
                 };
 
                 c.Disconnected += async (e) =>
@@ -232,21 +219,6 @@ namespace IA
             Log.Error(e.Exception.Message + "\n\n" + e.Exception.StackTrace);
         }
 
-        // Events
-        private async Task Client_JoinedGuild(IGuild arg)
-        {
-            RuntimeGuild g = new RuntimeGuild(arg);
-
-            Task.Run(() => Events.OnGuildJoin(g));
-        }
-
-        private async Task Client_LeftGuild(IGuild arg)
-        {
-            RuntimeGuild g = new RuntimeGuild(arg);
-
-            Task.Run(() => Events.OnGuildLeave(g));
-        }
-
         private async Task Client_Log(LogMessage arg)
         {
             Console.ForegroundColor = ConsoleColor.White;
@@ -254,32 +226,6 @@ namespace IA
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(arg.Exception);
             await Task.CompletedTask;
-        }
-
-        private async Task Client_MessageReceived(SocketMessage arg)
-        {
-            try
-            {
-                RuntimeMessage r = new RuntimeMessage(arg, Client.GetShardFor((((arg as IUserMessage).Channel) as IGuildChannel).Guild));
-
-                if (r.Content.Contains(r.Bot.Id.ToString()))
-                {
-                    await Events.OnMention(r);
-                }
-
-                if (r.Guild != null)
-                {
-                    await Events.OnMessageRecieved(r);
-                }
-                else
-                {
-                    await Events.OnPrivateMessage(r);
-                }
-            }
-            catch (Exception e)
-            {
-                Log.ErrorAt("messagerecieved", e.ToString());
-            }
         }
     }
 }

@@ -9,22 +9,28 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    class CommandHandlerBuilder
+    public class CommandHandlerBuilder
     {
-        CommandHandler commandHandler;
+        CommandHandler commandHandler = null;
 
+        public CommandHandlerBuilder()
+        {
+            commandHandler = new CommandHandler(Bot.instance.Events);
+        }
         public CommandHandlerBuilder(EventSystem eventSystem)
         {
-            commandHandler.eventSystem = eventSystem;
+            commandHandler = new CommandHandler(eventSystem);
         }
 
         public CommandHandlerBuilder AddCommand(ICommandEvent cmd)
         {
-            foreach(string a in cmd.Aliases)
-            {
-                commandHandler.aliases.Add(a, cmd.Name.ToLower());
-            }
-            commandHandler.Commands.Add(cmd.Name.ToLower(), cmd);
+            commandHandler.AddCommand(cmd);
+            return this;
+        }
+
+        public CommandHandlerBuilder AddModule(IModule module)
+        {
+            commandHandler.AddModule(module);
             return this;
         }
 
@@ -57,12 +63,12 @@ namespace IA.Events
         }
     }
 
-    public class CommandHandler
+    public class CommandHandler : ICommandHandler
     {
-        public bool IsPrivate = false;
-        public bool ShouldBeDisposed = false;
+        public bool IsPrivate { get; set; } = false;
+        public bool ShouldBeDisposed { get; set; } = false;
 
-        public ulong Owner = 0;
+        public ulong Owner { get; set; } = 0;
 
         public DateTime TimeCreated = DateTime.Now;
         internal DateTime timeDisposed;
@@ -73,12 +79,17 @@ namespace IA.Events
 
         internal Dictionary<string, string> aliases = new Dictionary<string, string>();
 
-        public List<IModule> Modules = new List<IModule>();
+        public Dictionary<string, IModule> Modules = new Dictionary<string, IModule>();
         public Dictionary<string, ICommandEvent> Commands = new Dictionary<string, ICommandEvent>();
 
         public CommandHandler(EventSystem eventSystem)
         {
             this.eventSystem = eventSystem;
+        }
+
+        public bool ShouldDispose()
+        {
+            return (DateTime.Now > timeDisposed);
         }
 
         public async Task CheckAsync(IDiscordMessage msg)
@@ -107,6 +118,24 @@ namespace IA.Events
             }
         }
 
+        public void AddCommand(ICommandEvent cmd)
+        {
+            foreach (string a in cmd.Aliases)
+            {
+                aliases.Add(a, cmd.Name.ToLower());
+            }
+            Commands.Add(cmd.Name.ToLower(), cmd);
+        }
+
+        public void AddModule(IModule module)
+        {
+            foreach (ICommandEvent c in module.Events)
+            {
+                AddCommand(c);
+            }
+            Modules.Add(module.Name.ToLower(), module);
+        }
+
         public async Task<bool> TryRunCommandAsync(IDiscordMessage msg, PrefixInstance prefix)
         {
             string identifier = await prefix.GetForGuildAsync(msg.Guild.Id);
@@ -132,7 +161,7 @@ namespace IA.Events
                 {
                     if (await eventInstance.IsEnabled(msg.Channel.Id) || prefix.ForceCommandExecution && GetUserAccessibility(msg) >= EventAccessibility.DEVELOPERONLY)
                     {
-                        Task.Run(() => eventInstance.Check(msg, identifier));
+                        Task.Run(() => eventInstance.Check(msg, this, identifier));
                         return true;
                     }
                 }
@@ -159,6 +188,26 @@ namespace IA.Events
                 return Commands[value];
             }
             return null;
+        }
+
+        public void RequestDispose()
+        {
+            if (Owner != 0)
+            {
+                eventSystem.DisposePrivateCommandHandler(Owner);
+                return;
+            }
+            else
+            {
+                if(eventSystem.CommandHandler == this)
+                {
+                    Log.Warning("you just asked to dispose the standard command handler??");
+                }
+                else
+                {
+                    eventSystem.DisposeCommandHandler(this);
+                }
+            }
         }
     }
 }

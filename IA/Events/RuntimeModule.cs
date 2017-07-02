@@ -75,8 +75,6 @@ namespace IA.Events
             Bot b = (Bot)bot;
             Name = Name.ToLower();
 
-            b.Events.Modules.Add(Name, this);
-
             if (MessageRecieved != null)
             {
                 b.Client.MessageReceived += Module_MessageReceived;
@@ -109,18 +107,15 @@ namespace IA.Events
 
             EventSystem = b.Events;
 
+            b.Events.CommandHandler.Modules.Add(Name, this);
+
             foreach (ICommandEvent e in Events)
             {
                 RuntimeCommandEvent ev = new RuntimeCommandEvent(e);
                 ev.eventSystem = b.Events;
                 ev.Module = this;
 
-                foreach(string alias in e.Aliases)
-                {
-                    ev.eventSystem.aliases.Add(alias.ToLower(), ev.Name.ToLower());
-                }
-
-                EventSystem.events.CommandEvents.Add(ev.Name, ev);
+                EventSystem.CommandHandler.AddCommand(ev);
             }
 
             isInstalled = true;
@@ -145,15 +140,7 @@ namespace IA.Events
 
             b.Events.Modules.Remove(Name);
 
-            foreach (ICommandEvent e in Events)
-            {
-                ICommandEvent ev = new RuntimeCommandEvent(e);
-                EventSystem.events.CommandEvents.Remove(ev.Name);
-                foreach (string x in e.Aliases)
-                {
-                    EventSystem.aliases.Add(x.ToLower(), Name.ToLower());
-                }
-            }
+            b.Events.CommandHandler.AddModule(this);
 
             if (MessageRecieved != null)
             {

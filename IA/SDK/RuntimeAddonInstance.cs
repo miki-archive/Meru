@@ -42,7 +42,7 @@ namespace IA.SDK
 
         public ICommandEvent GetCommandEvent(string args)
         {
-            return Bot.instance.Events.GetCommandEvent(args);
+            return Bot.instance.Events.CommandHandler.GetCommandEvent(args);
         }
 
         public void CreateModule(Action<IModule> module)
@@ -53,7 +53,7 @@ namespace IA.SDK
 
         public EventAccessibility GetUserAccessibility(IDiscordMessage message)
         {
-            return Bot.instance.Events.GetUserAccessibility(message);
+            return Bot.instance.Events.CommandHandler.GetUserAccessibility(message);
         }
 
         public async Task<string> GetIdentifierAsync(ulong serverid)

@@ -1,4 +1,6 @@
-﻿using IA.Models;
+﻿using Discord;
+using Discord.WebSocket;
+using IA.Models;
 using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
@@ -16,22 +18,20 @@ namespace IA.Events
         public delegate Task ExceptionDelegate(Exception ex, ICommandEvent command, IDiscordMessage message);
 
         public List<ulong> Developers = new List<ulong>();
-        public Dictionary<string, IModule> Modules { get; internal set; } = new Dictionary<string, IModule>();
-        public Dictionary<ulong, GameEvent> GameEvents { get; internal set; } = new Dictionary<ulong, GameEvent>();
 
-        private Dictionary<string, PrefixInstance> prefixCache = new Dictionary<string, PrefixInstance>();
-        private Dictionary<ulong, string> identifierCache = new Dictionary<ulong, string>();
-
-        public CommandHandler Commands;
+        public CommandHandler CommandHandler;
         List<CommandHandler> commandHandlers = new List<CommandHandler>();
         Dictionary<ulong, CommandHandler> privateCommandHandlers = new Dictionary<ulong, CommandHandler>();
+
+        public Dictionary<string, IModule> Modules => CommandHandler.Modules;
+        public Dictionary<string, ICommandEvent> Commands => CommandHandler.Commands;
 
         private List<ulong> ignore = new List<ulong>();
 
         /// <summary>
         /// Variable to check if eventSystem has been defined already.
         /// </summary>
-        public BotInformation bot;
+        public Bot bot = null;
 
         internal EventContainer events { private set; get; }
 
@@ -41,17 +41,21 @@ namespace IA.Events
         /// Constructor for EventSystem.
         /// </summary>
         /// <param name="botInfo">Optional information for the event system about the bot.</param>
-        public EventSystem(Action<BotInformation> botInfo)
+        public EventSystem(Bot bot)
         {
-            if (bot != null)
+            if (this.bot != null)
             {
                 Log.Warning("EventSystem already defined, terminating...");
                 return;
             }
 
-            bot = new BotInformation(botInfo);
+            this.bot = bot;
             events = new EventContainer();
-            Commands = new CommandHandler(this);
+            CommandHandler = new CommandHandler(this);
+
+            bot.Client.MessageReceived += InternalMessageReceived;
+            bot.Client.JoinedGuild += InternalJoinedGuild;
+            bot.Client.LeftGuild += InternalLeftGuild;
         }
 
         public void AddCommandDoneEvent(Action<CommandDoneEvent> info)
@@ -63,7 +67,7 @@ namespace IA.Events
             {
                 foreach (string s in newEvent.Aliases)
                 {
-                    Commands.aliases.Add(s, newEvent.Name.ToLower());
+                    CommandHandler.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
             events.CommandDoneEvents.Add(newEvent.Name.ToLower(), newEvent);
@@ -87,7 +91,7 @@ namespace IA.Events
             {
                 foreach (string s in newEvent.Aliases)
                 {
-                    Commands.aliases.Add(s, newEvent.Name.ToLower());
+                    CommandHandler.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
             events.JoinServerEvents.Add(newEvent.Name.ToLower(), newEvent);
@@ -102,7 +106,7 @@ namespace IA.Events
             {
                 foreach (string s in newEvent.Aliases)
                 {
-                    Commands.aliases.Add(s, newEvent.Name.ToLower());
+                    CommandHandler.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
             events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
@@ -131,7 +135,7 @@ namespace IA.Events
                 e.Module = newModule;
             }
             newModule.EventSystem = this;
-            Modules.Add(newModule.Name, newModule);
+            CommandHandler.AddModule(newModule);
             return newModule;
         }
 
@@ -156,9 +160,9 @@ namespace IA.Events
 
         public IModule GetModuleByName(string name)
         {
-            if (Modules.ContainsKey(name.ToLower()))
+            if (CommandHandler.Modules.ContainsKey(name.ToLower()))
             {
-                return Modules[name.ToLower()];
+                return CommandHandler.Modules[name.ToLower()];
             }
             Log.Warning($"Could not find Module with name '{name}'");
             return null;
@@ -170,7 +174,7 @@ namespace IA.Events
 
             moduleEvents.Add("MISC", new List<string>());
 
-            EventAccessibility userEventAccessibility = Commands.GetUserAccessibility(e);
+            EventAccessibility userEventAccessibility = CommandHandler.GetUserAccessibility(e);
 
             foreach (ICommandEvent ev in events.CommandEvents.Values)
             {
@@ -183,7 +187,7 @@ namespace IA.Events
                             moduleEvents.Add(ev.Module.Name.ToUpper(), new List<string>());
                         }
 
-                        if (Commands.GetUserAccessibility(e) >= ev.Accessibility)
+                        if (CommandHandler.GetUserAccessibility(e) >= ev.Accessibility)
                         {
                             moduleEvents[ev.Module.Name.ToUpper()].Add(ev.Name);
                         }
@@ -208,6 +212,15 @@ namespace IA.Events
             }
 
             return moduleEvents;
+        }
+
+        internal void DisposeCommandHandler(CommandHandler commandHandler)
+        {
+            commandHandlers.Remove(commandHandler);
+        }
+        internal void DisposePrivateCommandHandler(ulong owner)
+        {
+            privateCommandHandlers.Remove(owner);
         }
 
         public async Task<string> ListCommands(IDiscordMessage e)
@@ -248,7 +261,7 @@ namespace IA.Events
         public PrefixInstance RegisterPrefixInstance(string prefix, bool canBeChanged = true, bool forceExecuteCommands = false)
         {
             PrefixInstance newPrefix = new PrefixInstance(prefix.ToLower(), canBeChanged, forceExecuteCommands);
-            prefixCache.Add(prefix, newPrefix);
+            CommandHandler.Prefixes.Add(prefix, newPrefix);
             return newPrefix;
         }
 
@@ -256,16 +269,16 @@ namespace IA.Events
         {
             string prefix = defaultPrefix.ToLower();
 
-            if(prefixCache.ContainsKey(prefix))
+            if(CommandHandler.Prefixes.ContainsKey(prefix))
             {
-                return prefixCache[prefix];
+                return CommandHandler.Prefixes[prefix];
             }
             return null;
         }
 
         public async Task<string> GetPrefixValueAsync(string defaultPrefix, ulong guildId)
         {
-            PrefixInstance instance = prefixCache
+            PrefixInstance instance = CommandHandler.Prefixes
                 .First(prefix => prefix.Value.IsDefault)
                 .Value;
 
@@ -278,8 +291,7 @@ namespace IA.Events
         }
 
         #region events
-
-        public async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
+        internal async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
         {
             foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
             {
@@ -293,7 +305,8 @@ namespace IA.Events
                 }
             }
         }
-        public async Task OnGuildLeave(IDiscordGuild e)
+
+        private async Task OnGuildLeave(IDiscordGuild e)
         {
             foreach (GuildEvent ev in events.LeaveServerEvents.Values)
             {
@@ -303,7 +316,7 @@ namespace IA.Events
                 }
             }
         }
-        public async Task OnGuildJoin(IDiscordGuild e)
+        private async Task OnGuildJoin(IDiscordGuild e)
         {
             foreach (GuildEvent ev in events.JoinServerEvents.Values)
             {
@@ -313,30 +326,89 @@ namespace IA.Events
                 }
             }
         }
-        public async Task OnPrivateMessage(IDiscordMessage arg)
+        private async Task OnPrivateMessage(IDiscordMessage arg)
         {
             await Task.CompletedTask;
         }
-        public async Task OnMention(IDiscordMessage e)
+        private async Task OnMention(IDiscordMessage e)
         {
             foreach (RuntimeCommandEvent ev in events.MentionEvents.Values)
             {
-                await ev.Check(e);
+                await ev.Check(e, null);
             }
         }
-        public async Task OnMessageRecieved(IDiscordMessage _message)
+        private async Task OnMessageRecieved(IDiscordMessage _message)
         {
             if (_message.Author.IsBot)
             {
                 return;
             }
 
+            await CommandHandler.CheckAsync(_message);
+
             foreach (CommandHandler c in commandHandlers)
             {
+                if(c.ShouldBeDisposed && c.ShouldDispose())
+                {
+                    commandHandlers.Remove(c);
+                }
+
                 await c.CheckAsync(_message);
+            }
+
+            if(privateCommandHandlers.ContainsKey(_message.Author.Id))
+            {
+                if (privateCommandHandlers[_message.Author.Id].ShouldBeDisposed && privateCommandHandlers[_message.Author.Id].ShouldDispose())
+                {
+                    privateCommandHandlers.Remove(_message.Author.Id);
+                }
+                else
+                {
+                    await privateCommandHandlers[_message.Author.Id].CheckAsync(_message);
+                }
             }
         }
 
+        public void AddPrivateCommandHandler(ulong id, CommandHandler cHandler)
+        {
+            privateCommandHandlers.Add(id, cHandler);
+        }
+
+        private async Task InternalMessageReceived(SocketMessage message)
+        {
+            try
+            {
+                RuntimeMessage r = new RuntimeMessage(message, bot.Client.GetShardFor((((message as IUserMessage).Channel) as IGuildChannel).Guild));
+
+                if (r.Content.Contains(r.Bot.Id.ToString()))
+                {
+                    await OnMention(r);
+                }
+
+                if (r.Guild != null)
+                {
+                    await OnMessageRecieved(r);
+                }
+                else
+                {
+                    await OnPrivateMessage(r);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.ErrorAt("messagerecieved", e.ToString());
+            }
+        }
+        private async Task InternalJoinedGuild(IGuild arg)
+        {
+            RuntimeGuild g = new RuntimeGuild(arg);
+            await OnGuildJoin(g);
+        }
+        private async Task InternalLeftGuild(IGuild arg)
+        {
+            RuntimeGuild g = new RuntimeGuild(arg);
+            await OnGuildLeave(g);
+        }
         #endregion
     }
 }

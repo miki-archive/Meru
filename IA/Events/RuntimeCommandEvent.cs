@@ -17,7 +17,7 @@ namespace IA.Events
         public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
 
         public CheckCommandDelegate CheckCommand { get; set; } = (e, args, aliases) => true;
-        public ProcessCommandDelegate ProcessCommand { get; set; } = async (e, args) => { };
+        public ProcessCommandDelegate ProcessCommand { get; set; } = async (context) => { };
 
         public RuntimeCommandEvent() { }
         public RuntimeCommandEvent(string name) { Name = name; }
@@ -31,7 +31,7 @@ namespace IA.Events
         }
         public RuntimeCommandEvent(Action<RuntimeCommandEvent> info) { info.Invoke(this);  }
 
-        public async Task Check(IDiscordMessage e, string identifier = "")
+        public async Task Check(IDiscordMessage e, ICommandHandler c, string identifier = "")
         {
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
@@ -102,7 +102,12 @@ namespace IA.Events
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
 
-                if (await TryProcessCommand(targetCommand, e, args))
+                EventContext context = new EventContext();
+                context.commandHandler = c;
+                context.arguments = args;
+                context.message = e;
+
+                if (await TryProcessCommand(targetCommand, context))
                 {
                     await eventSystem.OnCommandDone(e, this);
                     TimesUsed++;
@@ -136,11 +141,11 @@ namespace IA.Events
             }
         }
 
-        private async Task<bool> TryProcessCommand(ProcessCommandDelegate cmd, IDiscordMessage e, string args)
+        private async Task<bool> TryProcessCommand(ProcessCommandDelegate cmd, EventContext context)
         {
             try
             {
-                await cmd(e, args);
+                await cmd(context);
                 return true;
             }
             catch(Exception ex)

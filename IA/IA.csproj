@@ -72,11 +72,11 @@
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
     <Compile Include="Events\CommandDoneEvent.cs" />
+    <Compile Include="Events\CommandHandler.cs" />
     <Compile Include="Events\PrefixInstance.cs" />
     <Compile Include="Events\RuntimeCommandEvent.cs" />
     <Compile Include="Events\ContinuousEvent.cs" />
     <Compile Include="Events\Event.cs" />
-    <Compile Include="Events\GameEvent.cs" />
     <Compile Include="Events\RuntimeModule.cs" />
     <Compile Include="Events\UserEvent.cs" />
     <Compile Include="Bot.cs" />
