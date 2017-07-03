@@ -21,7 +21,7 @@ namespace IA.Events
 
         public CommandHandler CommandHandler;
         List<CommandHandler> commandHandlers = new List<CommandHandler>();
-        Dictionary<ulong, CommandHandler> privateCommandHandlers = new Dictionary<ulong, CommandHandler>();
+        Dictionary<Tuple<ulong, ulong>, CommandHandler> privateCommandHandlers = new Dictionary<Tuple<ulong, ulong>, CommandHandler>();
 
         public Dictionary<string, IModule> Modules => CommandHandler.Modules;
         public Dictionary<string, ICommandEvent> Commands => CommandHandler.Commands;
@@ -218,9 +218,15 @@ namespace IA.Events
         {
             commandHandlers.Remove(commandHandler);
         }
-        internal void DisposePrivateCommandHandler(ulong owner)
+
+        internal void DisposePrivateCommandHandler(Tuple<ulong, ulong> key)
         {
-            privateCommandHandlers.Remove(owner);
+            privateCommandHandlers.Remove(key);
+
+        }
+        internal void DisposePrivateCommandHandler(IDiscordMessage msg)
+        {
+            DisposePrivateCommandHandler(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id));
         }
 
         public async Task<string> ListCommands(IDiscordMessage e)
@@ -356,22 +362,30 @@ namespace IA.Events
                 await c.CheckAsync(_message);
             }
 
-            if(privateCommandHandlers.ContainsKey(_message.Author.Id))
+            Tuple<ulong, ulong> privateKey = new Tuple<ulong, ulong>(_message.Author.Id, _message.Channel.Id);
+
+            if(privateCommandHandlers.ContainsKey(privateKey))
             {
-                if (privateCommandHandlers[_message.Author.Id].ShouldBeDisposed && privateCommandHandlers[_message.Author.Id].ShouldDispose())
-                {
-                    privateCommandHandlers.Remove(_message.Author.Id);
-                }
-                else
-                {
-                    await privateCommandHandlers[_message.Author.Id].CheckAsync(_message);
-                }
+                    if (privateCommandHandlers[privateKey].ShouldBeDisposed && privateCommandHandlers[privateKey].ShouldDispose())
+                    {
+                        privateCommandHandlers.Remove(privateKey);
+                    }
+                    else
+                    {
+                        await privateCommandHandlers[privateKey].CheckAsync(_message);
+                    }
             }
         }
 
-        public void AddPrivateCommandHandler(ulong id, CommandHandler cHandler)
+        private void AddPrivateCommandHandler(Tuple<ulong, ulong> key, CommandHandler value)
         {
-            privateCommandHandlers.Add(id, cHandler);
+            if (privateCommandHandlers.ContainsKey(key)) return;
+
+            privateCommandHandlers.Add(key, value);
+        }
+        public void AddPrivateCommandHandler(IDiscordMessage msg, CommandHandler cHandler)
+        {
+            AddPrivateCommandHandler(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id), cHandler);
         }
 
         private async Task InternalMessageReceived(SocketMessage message)

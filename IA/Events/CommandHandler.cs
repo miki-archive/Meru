@@ -34,10 +34,11 @@ namespace IA.Events
             return this;
         }
 
-        public CommandHandlerBuilder SetOwner(ulong owner)
+        public CommandHandlerBuilder SetOwner(IDiscordMessage owner)
         {
             commandHandler.IsPrivate = true;
-            commandHandler.Owner = owner;
+            commandHandler.Owner = owner.Author.Id;
+            commandHandler.ChannelId = owner.Channel.Id;
             return this;
         }
 
@@ -69,6 +70,7 @@ namespace IA.Events
         public bool ShouldBeDisposed { get; set; } = false;
 
         public ulong Owner { get; set; } = 0;
+        public ulong ChannelId = 0;
 
         public DateTime TimeCreated = DateTime.Now;
         internal DateTime timeDisposed;
@@ -191,10 +193,10 @@ namespace IA.Events
         }
 
         public void RequestDispose()
-        {
+        {   
             if (Owner != 0)
             {
-                eventSystem.DisposePrivateCommandHandler(Owner);
+                eventSystem.DisposePrivateCommandHandler(new Tuple<ulong, ulong>(Owner, ChannelId));
                 return;
             }
             else
