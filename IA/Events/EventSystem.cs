@@ -176,7 +176,7 @@ namespace IA.Events
 
             EventAccessibility userEventAccessibility = CommandHandler.GetUserAccessibility(e);
 
-            foreach (ICommandEvent ev in events.CommandEvents.Values)
+            foreach (ICommandEvent ev in CommandHandler.Commands.Values)
             {
                 if (await ev.IsEnabled(e.Channel.Id) && userEventAccessibility >= ev.Accessibility)
                 {
@@ -392,9 +392,20 @@ namespace IA.Events
         {
             try
             {
-                RuntimeMessage r = new RuntimeMessage(message, bot.Client.GetShardFor((((message as IUserMessage).Channel) as IGuildChannel).Guild));
+                IGuild g = (((message as IUserMessage)?.Channel) as IGuildChannel)?.Guild;
+                DiscordSocketClient client;
+                if (g != null)
+                {
+                    client = bot.Client.GetShardFor(g);
+                }
+                else
+                {
+                    client = bot.Client.GetShard(0);
+                }
 
-                if (r.Content.Contains(r.Bot.Id.ToString()))
+                RuntimeMessage r = new RuntimeMessage(message, client);
+
+                if (r.MentionedUserIds.Contains(Bot.instance.Client.CurrentUser.Id))
                 {
                     await OnMention(r);
                 }
