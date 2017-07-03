@@ -394,29 +394,24 @@ namespace IA.Events
             {
                 IGuild g = (((message as IUserMessage)?.Channel) as IGuildChannel)?.Guild;
                 DiscordSocketClient client;
+                RuntimeMessage r;
+
                 if (g != null)
                 {
                     client = bot.Client.GetShardFor(g);
-                }
-                else
-                {
-                    client = bot.Client.GetShard(0);
-                }
-
-                RuntimeMessage r = new RuntimeMessage(message, client);
-
-                if (r.MentionedUserIds.Contains(Bot.instance.Client.CurrentUser.Id))
-                {
-                    await OnMention(r);
-                }
-
-                if (r.Guild != null)
-                {
+                    r = new RuntimeMessage(message, client);
                     await OnMessageRecieved(r);
                 }
                 else
                 {
+                    client = bot.Client.GetShard(0);
+                    r = new RuntimeMessage(message, client);
                     await OnPrivateMessage(r);
+                }
+          
+                if (r.MentionedUserIds.Contains(Bot.instance.Client.CurrentUser.Id))
+                {
+                    await OnMention(r);
                 }
             }
             catch (Exception e)
