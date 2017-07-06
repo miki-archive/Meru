@@ -268,7 +268,7 @@ namespace IA.Events
 
             using (var context = IAContext.CreateNoCache())
             {
-                ModuleState state = await context.ModuleStates.FindAsync(Name, serverId.ToDbLong());
+                ModuleState state = await context.ModuleStates.FindAsync(SqlName, serverId.ToDbLong());
                 if (state == null)
                 {
                     state = context.ModuleStates.Add(new ModuleState() { ChannelId = serverId.ToDbLong(), ModuleName = SqlName, State = Enabled });
