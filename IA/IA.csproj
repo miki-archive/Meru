@@ -82,6 +82,7 @@
     <Compile Include="Bot.cs" />
     <Compile Include="Extension Methods\Mathm.cs" />
     <Compile Include="Extension\LongExtensions.cs" />
+    <Compile Include="Extension\StringExtension.cs" />
     <Compile Include="Extension\UlongExtensions.cs" />
     <Compile Include="Internal\IpcSocket.cs" />
     <Compile Include="Instances\Manager.cs" />
