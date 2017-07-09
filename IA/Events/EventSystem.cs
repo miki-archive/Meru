@@ -115,7 +115,7 @@ namespace IA.Events
         public int CommandsUsed()
         {
             int output = 0;
-            foreach (Event e in events.CommandEvents.Values)
+            foreach (ICommandEvent e in CommandHandler.Commands.Values)
             {
                 output += e.TimesUsed;
             }
@@ -123,7 +123,7 @@ namespace IA.Events
         }
         public int CommandsUsed(string eventName)
         {
-            return events.GetEvent(eventName).TimesUsed;
+            return CommandHandler.GetCommandEvent(eventName).TimesUsed;
         }
 
         public RuntimeModule CreateModule(Action<IModule> info)
