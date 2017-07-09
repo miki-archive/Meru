@@ -239,11 +239,19 @@ namespace IA.SDK
         {
             return new RuntimeMessage(await (Bot.instance.Client.GetChannel(channelId) as IMessageChannel).SendMessageAsync("", false, embed));
         }
+        public async Task<IDiscordMessage> SendToChannel(IDiscordMessageChannel channel)
+        {
+            return await SendToChannel(channel.Id);
+        }
 
         public async Task<IDiscordMessage> SendToUser(ulong userId)
         {
             RestDMChannel channel = await (Bot.instance.Client.GetUser(userId).CreateDMChannelAsync());
             return new RuntimeMessage(await channel.SendMessageAsync("", false, embed));
+        }
+        public async Task<IDiscordMessage> SendToUser(IDiscordUser user)
+        {
+            return await SendToUser(user.Id);
         }
 
         public IDiscordEmbed SetAuthor(string name, string imageurl, string url)
@@ -256,6 +264,10 @@ namespace IA.SDK
         {
             Color = color;
             return this;
+        }
+        public IDiscordEmbed SetColor(float r, float g, float b)
+        {
+            return SetColor(new Color(r, g, b));
         }
 
         public IDiscordEmbed SetDescription(string description)
