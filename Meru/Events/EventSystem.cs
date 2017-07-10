@@ -115,74 +115,6 @@ namespace IA.Events
             events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
-        public void RegisterAttributeCommands()
-        {
-            Assembly assembly = Assembly.GetEntryAssembly();
-
-            var modules = assembly.GetTypes()
-                                  .Where(m => m.GetCustomAttributes<ModuleAttribute>().Count() > 0)
-                                  .ToArray();
-
-            foreach (var m in modules)
-            {
-
-                RuntimeModule newModule = new RuntimeModule();
-                object instance = null;
-                try
-                {
-                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName), newModule);
-                }
-                catch
-                {
-                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName));
-                }
-
-                newModule.EventSystem = this;
-                newModule = m.GetCustomAttribute<ModuleAttribute>().module;
-
-                var methods = m.GetMethods()
-                               .Where(t => t.GetCustomAttributes<CommandAttribute>().Count() > 0)
-                               .ToArray();
-
-                var initMethod = m.GetMethods().Where(t => t.GetCustomAttributes<ModuleInitAttribute>().Count() > 0).ToArray();
-
-                foreach (var x in initMethod)
-                {
- 
-                }
-
-                foreach (var x in methods)
-                {
-                    RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
-                    CommandAttribute commandAttribute = x.GetCustomAttribute<CommandAttribute>();
-
-                    newEvent = commandAttribute.command;
-                    newEvent.ProcessCommand = async (context) => x.Invoke(instance, new object[] { context });
-                    newEvent.Module = newModule;
-
-                    ICommandEvent foundCommand = newModule.Events.Find(c => c.Name == newEvent.Name);
-
-                    if (foundCommand != null)
-                    {
-                        if(commandAttribute.on != "")
-                        {
-                            foundCommand.On(commandAttribute.On, newEvent.ProcessCommand);
-                        }
-                        else
-                        {
-                            foundCommand.Default(newEvent.ProcessCommand);
-                        }
-                    }
-                    else
-                    {
-                        newModule.AddCommand(newEvent);
-                    }
-                }
-
-                newModule.InstallAsync(bot).GetAwaiter().GetResult();
-            }
-        }
-
         public int CommandsUsed()
         {
             int output = 0;
@@ -192,28 +124,24 @@ namespace IA.Events
             }
             return output;
         }
-
-        internal static void RegisterBot(Bot bot)
-        {
-            _instance = new EventSystem(bot);
-        }
-
         public int CommandsUsed(string eventName)
         {
             return CommandHandler.GetCommandEvent(eventName).TimesUsed;
         }
 
-        public RuntimeModule CreateModule(Action<IModule> info)
+        internal void DisposeCommandHandler(CommandHandler commandHandler)
         {
-            RuntimeModule newModule = new RuntimeModule(info);
-            foreach (Event e in newModule.Events)
-            {
-                e.eventSystem = this;
-                e.Module = newModule;
-            }
-            newModule.EventSystem = this;
-            CommandHandler.AddModule(newModule);
-            return newModule;
+            commandHandlers.Remove(commandHandler);
+        }
+
+        internal void DisposePrivateCommandHandler(Tuple<ulong, ulong> key)
+        {
+            privateCommandHandlers.Remove(key);
+
+        }
+        internal void DisposePrivateCommandHandler(IDiscordMessage msg)
+        {
+            DisposePrivateCommandHandler(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id));
         }
 
         public IEvent GetEvent(string id)
@@ -221,31 +149,7 @@ namespace IA.Events
             return events.GetEvent(id);
         }
 
-        public async Task<string> GetIdentifier(ulong guildId, PrefixInstance prefix)
-        {
-            using (var context = new IAContext())
-            {
-                Identifier i = await context.Identifiers.FindAsync(guildId);
-                if (i == null)
-                {
-                    i = context.Identifiers.Add(new Identifier() { GuildId = guildId.ToDbLong(), Value = prefix.DefaultValue });
-                    await context.SaveChangesAsync();
-                }
-                return i.Value;
-            }
-        }
-
-        public IModule GetModuleByName(string name)
-        {
-            if (CommandHandler.Modules.ContainsKey(name.ToLower()))
-            {
-                return CommandHandler.Modules[name.ToLower()];
-            }
-            Log.Warning($"Could not find Module with name '{name}'");
-            return null;
-        }
-
-        public async Task<SortedDictionary<string, List<string>>> GetEventNames(IDiscordMessage e)
+        public async Task<SortedDictionary<string, List<string>>> GetEventNamesAsync(IDiscordMessage e)
         {
             SortedDictionary<string, List<string>> moduleEvents = new SortedDictionary<string, List<string>>();
 
@@ -291,24 +195,44 @@ namespace IA.Events
             return moduleEvents;
         }
 
-        internal void DisposeCommandHandler(CommandHandler commandHandler)
+        public async Task<string> GetIdentifierAsync(ulong guildId, PrefixInstance prefix)
         {
-            commandHandlers.Remove(commandHandler);
+            using (var context = new IAContext())
+            {
+                Identifier i = await context.Identifiers.FindAsync(guildId);
+                if (i == null)
+                {
+                    i = context.Identifiers.Add(new Identifier() { GuildId = guildId.ToDbLong(), Value = prefix.DefaultValue });
+                    await context.SaveChangesAsync();
+                }
+                return i.Value;
+            }
         }
 
-        internal void DisposePrivateCommandHandler(Tuple<ulong, ulong> key)
+        public PrefixInstance GetPrefixInstance(string defaultPrefix)
         {
-            privateCommandHandlers.Remove(key);
+            string prefix = defaultPrefix.ToLower();
 
-        }
-        internal void DisposePrivateCommandHandler(IDiscordMessage msg)
-        {
-            DisposePrivateCommandHandler(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id));
+            if (CommandHandler.Prefixes.ContainsKey(prefix))
+            {
+                return CommandHandler.Prefixes[prefix];
+            }
+            return null;
         }
 
-        public async Task<string> ListCommands(IDiscordMessage e)
+        public IModule GetModuleByName(string name)
         {
-            SortedDictionary<string, List<string>> moduleEvents = await GetEventNames(e);
+            if (CommandHandler.Modules.ContainsKey(name.ToLower()))
+            {
+                return CommandHandler.Modules[name.ToLower()];
+            }
+            Log.Warning($"Could not find Module with name '{name}'");
+            return null;
+        }
+
+        public async Task<string> ListCommandsAsync(IDiscordMessage e)
+        {
+            SortedDictionary<string, List<string>> moduleEvents = await GetEventNamesAsync(e);
 
             string output = "";
             foreach (KeyValuePair<string, List<string>> items in moduleEvents)
@@ -323,9 +247,9 @@ namespace IA.Events
             }
             return output;
         }
-        public async Task<IDiscordEmbed> ListCommandsInEmbed(IDiscordMessage e)
+        public async Task<IDiscordEmbed> ListCommandsInEmbedAsync(IDiscordMessage e)
         {
-            SortedDictionary<string, List<string>> moduleEvents = await GetEventNames(e);
+            SortedDictionary<string, List<string>> moduleEvents = await GetEventNamesAsync(e);
 
             IDiscordEmbed embed = new RuntimeEmbed(new Discord.EmbedBuilder());
 
@@ -341,22 +265,84 @@ namespace IA.Events
             return embed;
         }
 
+        public void RegisterAttributeCommands()
+        {
+            Assembly assembly = Assembly.GetEntryAssembly();
+
+            var modules = assembly.GetTypes()
+                                  .Where(m => m.GetCustomAttributes<ModuleAttribute>().Count() > 0)
+                                  .ToArray();
+
+            foreach (var m in modules)
+            {
+
+                RuntimeModule newModule = new RuntimeModule();
+                object instance = null;
+                try
+                {
+                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName), newModule);
+                }
+                catch
+                {
+                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName));
+                }
+
+                newModule.EventSystem = this;
+                newModule = m.GetCustomAttribute<ModuleAttribute>().module;
+
+                var methods = m.GetMethods()
+                               .Where(t => t.GetCustomAttributes<CommandAttribute>().Count() > 0)
+                               .ToArray();
+
+                var initMethod = m.GetMethods().Where(t => t.GetCustomAttributes<ModuleInitAttribute>().Count() > 0).ToArray();
+
+                foreach (var x in initMethod)
+                {
+
+                }
+
+                foreach (var x in methods)
+                {
+                    RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
+                    CommandAttribute commandAttribute = x.GetCustomAttribute<CommandAttribute>();
+
+                    newEvent = commandAttribute.command;
+                    newEvent.ProcessCommand = async (context) => x.Invoke(instance, new object[] { context });
+                    newEvent.Module = newModule;
+
+                    ICommandEvent foundCommand = newModule.Events.Find(c => c.Name == newEvent.Name);
+
+                    if (foundCommand != null)
+                    {
+                        if (commandAttribute.on != "")
+                        {
+                            foundCommand.On(commandAttribute.On, newEvent.ProcessCommand);
+                        }
+                        else
+                        {
+                            foundCommand.Default(newEvent.ProcessCommand);
+                        }
+                    }
+                    else
+                    {
+                        newModule.AddCommand(newEvent);
+                    }
+                }
+
+                newModule.InstallAsync(bot).GetAwaiter().GetResult();
+            }
+        }
+
+        internal static void RegisterBot(Bot bot)
+        {
+            _instance = new EventSystem(bot);
+        }
+
         public PrefixInstance RegisterPrefixInstance(string prefix, bool canBeChanged = true, bool forceExecuteCommands = false)
         {
             PrefixInstance newPrefix = new PrefixInstance(prefix.ToLower(), canBeChanged, forceExecuteCommands);
             CommandHandler.Prefixes.Add(prefix, newPrefix);
             return newPrefix;
-        }
-
-        public PrefixInstance GetPrefixInstance(string defaultPrefix)
-        {
-            string prefix = defaultPrefix.ToLower();
-
-            if(CommandHandler.Prefixes.ContainsKey(prefix))
-            {
-                return CommandHandler.Prefixes[prefix];
-            }
-            return null;
         }
 
         #region events

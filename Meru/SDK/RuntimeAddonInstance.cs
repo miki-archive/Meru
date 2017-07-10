@@ -33,11 +33,11 @@ namespace IA.SDK
 
         public async Task<string> ListCommands(IDiscordMessage e)
         {
-            return await Bot.instance.Events.ListCommands(e);
+            return await Bot.instance.Events.ListCommandsAsync(e);
         }
         public async Task<IDiscordEmbed> ListCommandsInEmbed(IDiscordMessage e)
         {
-            return await Bot.instance.Events.ListCommandsInEmbed(e);
+            return await Bot.instance.Events.ListCommandsInEmbedAsync(e);
         }
 
         public ICommandEvent GetCommandEvent(string args)
@@ -58,7 +58,7 @@ namespace IA.SDK
 
         public async Task<string> GetIdentifierAsync(ulong serverid)
         {
-            return await Bot.instance.Events.GetIdentifier(serverid, PrefixInstance.Default);
+            return await Bot.instance.Events.GetIdentifierAsync(serverid, PrefixInstance.Default);
         }
 
         public List<IModule> GetModules()
