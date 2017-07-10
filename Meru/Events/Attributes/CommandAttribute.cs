@@ -40,10 +40,5 @@ namespace IA.Events.Attributes
         public CommandAttribute()
         {
         }
-        public CommandAttribute(string name, params string[] aliases)
-        {
-            Name = name;
-            Aliases = aliases;
-        }
     }
 }
