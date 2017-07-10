@@ -74,6 +74,7 @@
     <Compile Include="Bot.cs" />
     <Compile Include="Events\Attributes\CommandAttribute.cs" />
     <Compile Include="Events\Attributes\ModuleAttribute.cs" />
+    <Compile Include="Events\Attributes\ModuleInitAttribute.cs" />
     <Compile Include="Events\CommandDoneEvent.cs" />
     <Compile Include="Events\CommandHandler.cs" />
     <Compile Include="Events\ContinuousEvent.cs" />

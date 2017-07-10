@@ -135,6 +135,13 @@ namespace IA.Events
                                .Where(t => t.GetCustomAttributes<CommandAttribute>().Count() > 0)
                                .ToArray();
 
+                var initMethod = m.GetMethods().Where(t => t.GetCustomAttributes<ModuleInitAttribute>().Count() > 0).ToArray();
+
+                foreach (var x in initMethod)
+                {
+                    x.Invoke(instance, new object[] { newModule });
+                }
+
                 foreach (var x in methods)
                 {
                     RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
@@ -346,20 +353,6 @@ namespace IA.Events
                 return CommandHandler.Prefixes[prefix];
             }
             return null;
-        }
-
-        public async Task<string> GetPrefixValueAsync(string defaultPrefix, ulong guildId)
-        {
-            PrefixInstance instance = CommandHandler.Prefixes
-                .First(prefix => prefix.Value.IsDefault)
-                .Value;
-
-            if(instance == null)
-            {
-                return "no";
-            }
-
-            return await instance.GetForGuildAsync(guildId);
         }
 
         #region events
