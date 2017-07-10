@@ -20,7 +20,7 @@ namespace IA
     {
         public AddonManager Addons { private set; get; }
         public DiscordShardedClient Client { private set; get; }
-        public EventSystem Events { private set; get; }
+        public EventSystem Events { internal set; get; }
 
         public string Name
         {
@@ -173,7 +173,7 @@ namespace IA
                 LogLevel = LogSeverity.Info
             });
 
-            Events = new EventSystem(this);
+            EventSystem.RegisterBot(this);
 
             Events.RegisterPrefixInstance(">").RegisterAsDefault();
             // fallback prefix

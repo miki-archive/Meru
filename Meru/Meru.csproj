@@ -71,15 +71,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
+    <Compile Include="Bot.cs" />
+    <Compile Include="Events\Attributes\CommandAttribute.cs" />
+    <Compile Include="Events\Attributes\ModuleAttribute.cs" />
     <Compile Include="Events\CommandDoneEvent.cs" />
     <Compile Include="Events\CommandHandler.cs" />
-    <Compile Include="Events\PrefixInstance.cs" />
-    <Compile Include="Events\RuntimeCommandEvent.cs" />
     <Compile Include="Events\ContinuousEvent.cs" />
     <Compile Include="Events\Event.cs" />
+    <Compile Include="Events\EventContainer.cs" />
+    <Compile Include="Events\EventSystem.cs" />
+    <Compile Include="Events\InformationObjects\BotInformation.cs" />
+    <Compile Include="Events\PrefixInstance.cs" />
+    <Compile Include="Events\RuntimeCommandEvent.cs" />
     <Compile Include="Events\RuntimeModule.cs" />
     <Compile Include="Events\UserEvent.cs" />
-    <Compile Include="Bot.cs" />
     <Compile Include="Extension Methods\Mathm.cs" />
     <Compile Include="Extension\LongExtensions.cs" />
     <Compile Include="Extension\StringExtension.cs" />
@@ -88,9 +93,6 @@
     <Compile Include="Instances\Manager.cs" />
     <Compile Include="Instances\Shard.cs" />
     <Compile Include="ClientInformation.cs" />
-    <Compile Include="Events\EventContainer.cs" />
-    <Compile Include="Events\EventSystem.cs" />
-    <Compile Include="Events\InformationObjects\BotInformation.cs" />
     <Compile Include="Extension Methods\Channel.cs" />
     <Compile Include="FileHandling\FileReader.cs" />
     <Compile Include="FileHandling\FileWriter.cs" />
@@ -304,7 +306,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\IA.SDK\IA.SDK\IA.SDK.csproj">
+    <ProjectReference Include="..\Meru.SDK\Meru.SDK.csproj">
       <Project>{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}</Project>
       <Name>IA.SDK</Name>
     </ProjectReference>

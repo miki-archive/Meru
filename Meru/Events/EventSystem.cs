@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using IA.Events.Attributes;
 using IA.Models;
 using IA.Models.Context;
 using IA.SDK;
@@ -8,13 +9,18 @@ using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Objects;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace IA.Events
 {
     public class EventSystem
     {
+        public static EventSystem Instance => _instance;
+        private static EventSystem _instance = null;
+
         public delegate Task ExceptionDelegate(Exception ex, ICommandEvent command, IDiscordMessage message);
 
         public List<ulong> Developers = new List<ulong>();
@@ -28,19 +34,12 @@ namespace IA.Events
 
         private List<ulong> ignore = new List<ulong>();
 
-        /// <summary>
-        /// Variable to check if eventSystem has been defined already.
-        /// </summary>
         public Bot bot = null;
 
         internal EventContainer events { private set; get; }
 
         public ExceptionDelegate OnCommandError = async (ex, command, msg) => { };
 
-        /// <summary>
-        /// Constructor for EventSystem.
-        /// </summary>
-        /// <param name="botInfo">Optional information for the event system about the bot.</param>
         public EventSystem(Bot bot)
         {
             if (this.bot != null)
@@ -50,8 +49,12 @@ namespace IA.Events
             }
 
             this.bot = bot;
+            bot.Events = this;
+
             events = new EventContainer();
             CommandHandler = new CommandHandler(this);
+
+            RegisterAttributeCommands();
 
             bot.Client.MessageReceived += InternalMessageReceived;
             bot.Client.JoinedGuild += InternalJoinedGuild;
@@ -112,6 +115,63 @@ namespace IA.Events
             events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
+        public void RegisterAttributeCommands()
+        {
+            Assembly assembly = Assembly.GetEntryAssembly();
+
+            var modules = assembly.GetTypes()
+                                  .Where(m => m.GetCustomAttributes<ModuleAttribute>().Count() > 0)
+                                  .ToArray();
+
+            foreach (var m in modules)
+            {
+                var instance = GetInstance<object>(m.AssemblyQualifiedName);
+
+                RuntimeModule newModule = new RuntimeModule();
+                newModule.EventSystem = this;
+                newModule = m.GetCustomAttribute<ModuleAttribute>().module;
+
+                var methods = m.GetMethods()
+                               .Where(t => t.GetCustomAttributes<CommandAttribute>().Count() > 0)
+                               .ToArray();
+
+                foreach (var x in methods)
+                {
+                    RuntimeCommandEvent newEvent = new RuntimeCommandEvent();
+                    CommandAttribute commandAttribute = x.GetCustomAttribute<CommandAttribute>();
+
+                    newEvent = commandAttribute.command;
+                    newEvent.ProcessCommand = async (context) => x.Invoke(instance, new object[] { context });
+                    newEvent.Module = newModule;
+
+                    ICommandEvent foundCommand = newModule.Events.Find(c => c.Name == newEvent.Name);
+
+                    if (foundCommand != null)
+                    {
+                        if(commandAttribute.on != "")
+                        {
+                            foundCommand.On(commandAttribute.On, newEvent.ProcessCommand);
+                        }
+                        else
+                        {
+                            foundCommand.Default(newEvent.ProcessCommand);
+                        }
+                    }
+                    else
+                    {
+                        newModule.AddCommand(newEvent);
+                    }
+                }
+
+                newModule.InstallAsync(bot).GetAwaiter().GetResult();
+            }
+        }
+
+        private T GetInstance<T>(string type)
+        {
+            return (T)Activator.CreateInstance(Type.GetType(type));
+        }
+
         public int CommandsUsed()
         {
             int output = 0;
@@ -121,6 +181,12 @@ namespace IA.Events
             }
             return output;
         }
+
+        internal static void RegisterBot(Bot bot)
+        {
+            _instance = new EventSystem(bot);
+        }
+
         public int CommandsUsed(string eventName)
         {
             return CommandHandler.GetCommandEvent(eventName).TimesUsed;
@@ -364,16 +430,16 @@ namespace IA.Events
 
             Tuple<ulong, ulong> privateKey = new Tuple<ulong, ulong>(_message.Author.Id, _message.Channel.Id);
 
-            if(privateCommandHandlers.ContainsKey(privateKey))
+            if (privateCommandHandlers.ContainsKey(privateKey))
             {
-                    if (privateCommandHandlers[privateKey].ShouldBeDisposed && privateCommandHandlers[privateKey].ShouldDispose())
-                    {
-                        privateCommandHandlers.Remove(privateKey);
-                    }
-                    else
-                    {
-                        await privateCommandHandlers[privateKey].CheckAsync(_message);
-                    }
+                if (privateCommandHandlers[privateKey].ShouldBeDisposed && privateCommandHandlers[privateKey].ShouldDispose())
+                {
+                    privateCommandHandlers.Remove(privateKey);
+                }
+                else
+                {
+                    await privateCommandHandlers[privateKey].CheckAsync(_message);
+                }
             }
         }
 
