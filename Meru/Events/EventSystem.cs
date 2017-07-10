@@ -125,9 +125,18 @@ namespace IA.Events
 
             foreach (var m in modules)
             {
-                var instance = GetInstance<object>(m.AssemblyQualifiedName);
 
                 RuntimeModule newModule = new RuntimeModule();
+                object instance = null;
+                try
+                {
+                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName), newModule);
+                }
+                catch
+                {
+                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName));
+                }
+
                 newModule.EventSystem = this;
                 newModule = m.GetCustomAttribute<ModuleAttribute>().module;
 
@@ -139,7 +148,7 @@ namespace IA.Events
 
                 foreach (var x in initMethod)
                 {
-                    x.Invoke(instance, new object[] { newModule });
+ 
                 }
 
                 foreach (var x in methods)
@@ -172,11 +181,6 @@ namespace IA.Events
 
                 newModule.InstallAsync(bot).GetAwaiter().GetResult();
             }
-        }
-
-        private T GetInstance<T>(string type)
-        {
-            return (T)Activator.CreateInstance(Type.GetType(type));
         }
 
         public int CommandsUsed()
