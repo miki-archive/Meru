@@ -13,12 +13,6 @@ namespace IA.Events.Attributes
         internal RuntimeCommandEvent command = new RuntimeCommandEvent();
         internal string on = "";
 
-        public string Name
-        {
-            get => command.Name;
-            set => command.Name = value.ToLower();
-        }
-
         public EventAccessibility Accessibility
         {
             get => command.Accessibility;
@@ -29,6 +23,12 @@ namespace IA.Events.Attributes
         {
             get => command.Aliases;
             set => command.Aliases = value;
+        }
+
+        public string Name
+        {
+            get => command.Name;
+            set => command.Name = value.ToLower();
         }
 
         public string On
