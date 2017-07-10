@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B8FFA60F-2C45-449F-AD4D-CF1C5A3075D4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IA.SDK</RootNamespace>
+    <AssemblyName>IA.SDK</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddonInstance.cs" />
+    <Compile Include="ArgumentField.cs" />
+    <Compile Include="BaseAddon.cs" />
+    <Compile Include="Color.cs" />
+    <Compile Include="DiscordReactionMetadata.cs" />
+    <Compile Include="Discord\DiscordEmbed.cs" />
+    <Compile Include="Events\CommandEvent.cs" />
+    <Compile Include="Database\SqlQueryResponse.cs" />
+    <Compile Include="Discord\DiscordAudioClient.cs" />
+    <Compile Include="Discord\DiscordChannel.cs" />
+    <Compile Include="Discord\DiscordChannelPermission.cs" />
+    <Compile Include="Discord\DiscordGuild.cs" />
+    <Compile Include="Discord\DiscordUser.cs" />
+    <Compile Include="Discord\DiscordRole.cs" />
+    <Compile Include="Events\EventContext.cs" />
+    <Compile Include="Events\ICommandEvent.cs" />
+    <Compile Include="Events\ICommandHandler.cs" />
+    <Compile Include="Events\IEvent.cs" />
+    <Compile Include="Exceptions\AddonRunException.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="IAddonInstance.cs" />
+    <Compile Include="ICacheable.cs" />
+    <Compile Include="Interfaces\IDiscordClient.cs" />
+    <Compile Include="Interfaces\IDiscordAudioChannel.cs" />
+    <Compile Include="Interfaces\IDiscordEmoji.cs" />
+    <Compile Include="Interfaces\IDiscordMessageChannel.cs" />
+    <Compile Include="Interfaces\IDiscordReaction.cs" />
+    <Compile Include="Interfaces\IModule.cs" />
+    <Compile Include="Interfaces\IAudio.cs" />
+    <Compile Include="Interfaces\IDiscordAudioClient.cs" />
+    <Compile Include="Interfaces\IDiscordEmbed.cs" />
+    <Compile Include="Interfaces\IDiscordEntity.cs" />
+    <Compile Include="Interfaces\IDiscordGuild.cs" />
+    <Compile Include="Interfaces\IDiscordRole.cs" />
+    <Compile Include="Interfaces\IEmbedAuthor.cs" />
+    <Compile Include="Interfaces\IEmbedField.cs" />
+    <Compile Include="Interfaces\IEmbedFooter.cs" />
+    <Compile Include="Interfaces\IMentionable.cs" />
+    <Compile Include="Interfaces\IDiscordChannel.cs" />
+    <Compile Include="Interfaces\IDiscordUser.cs" />
+    <Compile Include="Interfaces\IDiscordMessage.cs" />
+    <Compile Include="Events\Event.cs" />
+    <Compile Include="Events\EventInformation.cs" />
+    <Compile Include="Discord\DiscordGuildPermission.cs" />
+    <Compile Include="Interfaces\IProxy.cs" />
+    <Compile Include="Interfaces\IQuery.cs" />
+    <Compile Include="Interfaces\ISong.cs" />
+    <Compile Include="Builders\MessageBuilder.cs" />
+    <Compile Include="ModuleInstance.cs" />
+    <Compile Include="ModuleData.cs" />
+    <Compile Include="Option.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
