@@ -15,7 +15,7 @@ namespace IA.SDK
             }
         }
 
-        public virtual uint ChannelCount
+        public virtual int ChannelCount
         {
             get
             {
@@ -47,7 +47,7 @@ namespace IA.SDK
             }
         }
 
-        public virtual uint UserCount
+        public virtual int UserCount
         {
             get
             {
@@ -63,7 +63,7 @@ namespace IA.SDK
             }
         }
 
-        public uint VoiceChannelCount => throw new NotImplementedException();
+        public int VoiceChannelCount => throw new NotImplementedException();
 
         public virtual Task<IDiscordUser> GetUserAsync(ulong user_id)
         {

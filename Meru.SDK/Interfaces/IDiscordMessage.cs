@@ -6,6 +6,8 @@ namespace IA.SDK.Interfaces
 {
     public interface IDiscordMessage : IDiscordEntity
     {
+        IReadOnlyCollection<IDiscordAttachment> Attachments { get; }
+
         IDiscordUser Author { get; }
         IDiscordUser Bot { get; }
 

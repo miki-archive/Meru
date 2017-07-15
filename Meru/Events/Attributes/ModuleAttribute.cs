@@ -16,6 +16,12 @@ namespace IA.Events.Attributes
             set => module.Name = value;
         }
 
+        public bool Nsfw
+        {
+            get => module.Nsfw;
+            set => module.Nsfw = value;
+        }
+
         public ModuleAttribute()
         {
 

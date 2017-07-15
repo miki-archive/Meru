@@ -275,9 +275,9 @@ namespace IA.Events
 
             foreach (var m in modules)
             {
-
                 RuntimeModule newModule = new RuntimeModule();
                 object instance = null;
+
                 try
                 {
                     instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName), newModule);
@@ -288,18 +288,13 @@ namespace IA.Events
                 }
 
                 newModule.EventSystem = this;
-                newModule = m.GetCustomAttribute<ModuleAttribute>().module;
+                ModuleAttribute mAttrib = m.GetCustomAttribute<ModuleAttribute>();
+                newModule.Name = mAttrib.module.Name;
+                newModule.Nsfw = mAttrib.module.Nsfw;
 
                 var methods = m.GetMethods()
                                .Where(t => t.GetCustomAttributes<CommandAttribute>().Count() > 0)
                                .ToArray();
-
-                var initMethod = m.GetMethods().Where(t => t.GetCustomAttributes<ModuleInitAttribute>().Count() > 0).ToArray();
-
-                foreach (var x in initMethod)
-                {
-
-                }
 
                 foreach (var x in methods)
                 {

@@ -80,6 +80,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="IAddonInstance.cs" />
     <Compile Include="ICacheable.cs" />
+    <Compile Include="Interfaces\IDiscordAttachment.cs" />
     <Compile Include="Interfaces\IDiscordClient.cs" />
     <Compile Include="Interfaces\IDiscordAudioChannel.cs" />
     <Compile Include="Interfaces\IDiscordEmoji.cs" />

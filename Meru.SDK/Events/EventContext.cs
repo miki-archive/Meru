@@ -10,6 +10,8 @@ namespace IA.SDK.Events
     public class EventContext
     {
         public string arguments;
+
+       // public IBot bot;
         public ICommandHandler commandHandler;
         public IDiscordMessage message;
 

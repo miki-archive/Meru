@@ -297,5 +297,10 @@ namespace IA.Events
                 return state.State;
             }
         }
+
+        internal RuntimeModule Add(RuntimeModule module)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

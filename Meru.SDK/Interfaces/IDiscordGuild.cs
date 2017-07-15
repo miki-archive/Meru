@@ -9,9 +9,9 @@ namespace IA.SDK.Interfaces
         string AvatarUrl { get; }
         string Name { get; }
 
-        uint ChannelCount { get; }
-        uint VoiceChannelCount { get; }
-        uint UserCount { get; }
+        int ChannelCount { get; }
+        int VoiceChannelCount { get; }
+        int UserCount { get; }
 
         IDiscordUser Owner { get; }
 

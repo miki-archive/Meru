@@ -37,6 +37,12 @@ namespace IA.Events.Attributes
             set => on = value.ToLower();
         }
 
+        public bool CanBeDisabled
+        {
+            get => command.CanBeDisabled;
+            set => command.CanBeDisabled = value;
+        }
+
         public CommandAttribute()
         {
         }
