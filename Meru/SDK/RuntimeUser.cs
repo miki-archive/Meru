@@ -163,6 +163,8 @@ namespace IA.SDK
             {
                 GuildPermission newP = (GuildPermission)Enum.Parse(typeof(DiscordGuildPermission), p.ToString());
 
+                IGuildChannel c = ((channel as IProxy<IChannel>).ToNativeObject() as IGuildChannel);
+
                 if (!(user as IGuildUser).GuildPermissions.Has(newP))
                 {
                     return false;

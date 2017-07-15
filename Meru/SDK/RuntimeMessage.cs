@@ -64,6 +64,19 @@ namespace IA.SDK
             }
         }
 
+        public IReadOnlyCollection<IDiscordAttachment> Attachments
+        {
+            get
+            {
+                List<IDiscordAttachment> output = new List<IDiscordAttachment>();
+                foreach(IAttachment a in messageData.Attachments)
+                {
+                    output.Add(new RuntimeAttachment(a));
+                }
+                return output;
+            }
+        }
+
         public IReadOnlyCollection<ulong> MentionedUserIds
         {
             get

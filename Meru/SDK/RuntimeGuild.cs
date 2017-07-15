@@ -17,11 +17,11 @@ namespace IA.SDK
 
         public string Name => guild.Name;
 
-        public uint ChannelCount => (uint) guild.GetChannelsAsync().GetAwaiter().GetResult().Count;
+        public int ChannelCount => guild.GetChannelsAsync().GetAwaiter().GetResult().Count;
 
-        public uint VoiceChannelCount => (uint)guild.GetVoiceChannelsAsync().GetAwaiter().GetResult().Count;
+        public int VoiceChannelCount => guild.GetVoiceChannelsAsync().GetAwaiter().GetResult().Count;
 
-        public uint UserCount => (uint)guild.GetUsersAsync().GetAwaiter().GetResult().Count;
+        public int UserCount => guild.GetUsersAsync().GetAwaiter().GetResult().Count;
 
         public IDiscordUser Owner => new RuntimeUser(guild.GetOwnerAsync().GetAwaiter().GetResult());
 
