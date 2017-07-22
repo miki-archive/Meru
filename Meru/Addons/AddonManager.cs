@@ -38,9 +38,8 @@ namespace IA.Addons
 
                     Assembly addon = Assembly.Load(File.ReadAllBytes(s));
 
-                    IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
 
-                    if (currentAddon != null)
+                    if (addon.CreateInstance(newS + ".Addon") is IAddon currentAddon)
                     {
                         IAddonInstance aInstance = new RuntimeAddonInstance();
                         aInstance = await currentAddon.Create(aInstance);
@@ -69,9 +68,7 @@ namespace IA.Addons
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
 
-            IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
-
-            if (currentAddon != null)
+            if (addon.CreateInstance(newS + ".Addon") is IAddon currentAddon)
             {
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
                 aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance), bot);
@@ -104,9 +101,8 @@ namespace IA.Addons
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
 
-            IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
 
-            if (currentAddon != null)
+            if (addon.CreateInstance(newS + ".Addon") is IAddon currentAddon)
             {
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
                 aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance), bot);
@@ -135,9 +131,8 @@ namespace IA.Addons
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
 
-            IAddon currentAddon = addon.CreateInstance(newS + ".Addon") as IAddon;
 
-            if (currentAddon != null)
+            if (addon.CreateInstance(newS + ".Addon") is IAddon currentAddon)
             {
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
                 aInstance = new RuntimeAddonInstance(await currentAddon.Create(aInstance), bot);
