@@ -31,7 +31,6 @@ namespace IA.Events
         public CommandHandlerBuilder AddModule(IModule module)
         {
             commandHandler.AddModule(module);
-            string x = "";
             return this;
         }
 
