@@ -203,11 +203,13 @@ namespace IA
                 c.Connected += async () =>
                 {
                     Log.Message($"{c.ShardId}| Connected!");
+                    await Task.Delay(0);
                 };
 
                 c.Disconnected += async (e) =>
                 {
                     Log.ErrorAt(c.ShardId + "| Disconnected", e.Message);
+                    await Task.Delay(0);
                 };
             }
 
