@@ -16,7 +16,6 @@ namespace IA.SDK.Interfaces
 
         IDiscordEmbed AddField(string title, string value);
         IDiscordEmbed AddField(IEmbedField field);
-        IDiscordEmbed AddField(Action<IEmbedField> field);
 
         IDiscordEmbed AddInlineField(string title, string value);
 
@@ -43,5 +42,7 @@ namespace IA.SDK.Interfaces
 
         Task<IDiscordMessage> SendToUser(ulong userId);
         Task<IDiscordMessage> SendToUser(IDiscordUser user);
+
+        Task ModifyMessage(IDiscordMessage message);
     }
 }

@@ -149,6 +149,11 @@ namespace IA.SDK
             throw new NotImplementedException();
         }
 
+        public Task ModifyMessage(IDiscordMessage message)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<IDiscordMessage> SendToChannel(ulong channelId)
         {
             throw new NotImplementedException();
