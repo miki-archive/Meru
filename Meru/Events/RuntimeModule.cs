@@ -111,10 +111,11 @@ namespace IA.Events
 
             foreach (ICommandEvent e in Events)
             {
-                RuntimeCommandEvent ev = new RuntimeCommandEvent(e);
-                ev.eventSystem = b.Events;
-                ev.Module = this;
-
+                RuntimeCommandEvent ev = new RuntimeCommandEvent(e)
+                {
+                    eventSystem = b.Events,
+                    Module = this
+                };
                 EventSystem.CommandHandler.AddCommand(ev);
             }
 
@@ -188,7 +189,7 @@ namespace IA.Events
                 }
                 catch (Exception e)
                 {
-
+                    Log.ErrorAt(Name, e.Message);
                 }
             }
         }

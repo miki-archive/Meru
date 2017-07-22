@@ -10,6 +10,12 @@ namespace IA.Events.Attributes
     {
         internal RuntimeModule module = new RuntimeModule();
 
+        public bool CanBeDisabled
+        {
+            get => module.CanBeDisabled;
+            set => module.CanBeDisabled = value;
+        }
+
         public string Name
         {
             get => module.Name;

@@ -136,13 +136,13 @@ namespace IA.SDK
 
         public async Task SendFile(string path)
         {
-            IDMChannel c = await user.CreateDMChannelAsync();
+            IDMChannel c = await user.GetOrCreateDMChannelAsync();
             await c.SendFileAsync(path);
         }
 
         public async Task<IDiscordMessage> SendMessage(string message)
         {
-            IDMChannel c = await user.CreateDMChannelAsync();
+            IDMChannel c = await user.GetOrCreateDMChannelAsync();
 
             RuntimeMessage m = new RuntimeMessage(await c.SendMessageAsync(message));
             Log.Message("Sent message to " + user.Username);
@@ -151,7 +151,7 @@ namespace IA.SDK
 
         public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
-            IDMChannel c = await user.CreateDMChannelAsync();
+            IDMChannel c = await user.GetOrCreateDMChannelAsync();
             IMessage m = await c.SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>).ToNativeObject());
             Log.Message("Sent message to " + user.Username);
             return new RuntimeMessage(m);

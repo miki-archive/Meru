@@ -1,9 +1,12 @@
 ﻿using Discord;
 using Discord.Rest;
+using IA.SDK.Builders;
 using IA.SDK.Extensions;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace IA.SDK
@@ -11,8 +14,6 @@ namespace IA.SDK
     public class RuntimeEmbed : IDiscordEmbed, IProxy<EmbedBuilder>, IQuery<RuntimeEmbed>
     {
         public EmbedBuilder embed;
-
-        public List<IEmbedField> fields = new List<IEmbedField>();
 
         public RuntimeEmbed()
         {
@@ -23,10 +24,24 @@ namespace IA.SDK
             embed = e;
         }
 
+        public List<IEmbedField> Fields
+        {
+            get
+            {
+                List<IEmbedField> f = new List<IEmbedField>();
+                foreach(EmbedFieldBuilder field in embed.Fields)
+                {
+                    f.Add(new RuntimeEmbedField(field));
+                }
+                return f;
+            }
+        }
+
         public IEmbedAuthor Author
         {
             get
             {
+                if (embed.Author == null) return null;
                 return new RuntimeEmbedAuthor(embed.Author);
             }
             set
@@ -67,6 +82,7 @@ namespace IA.SDK
         {
             get
             {
+                if (embed.Footer == null) return null;
                 return new RuntimeEmbedFooter(embed.Footer);
             }
 
@@ -147,7 +163,6 @@ namespace IA.SDK
 
             return this;
         }
-
         public IDiscordEmbed AddField(string title, string value)
         {
             embed.AddField(title, value);
@@ -177,7 +192,6 @@ namespace IA.SDK
             embed.Footer = new EmbedFooterBuilder();
             return Footer;
         }
-
         public IDiscordEmbed CreateFooter(string text, string iconUrl)
         {
             embed.Footer = new EmbedFooterBuilder().WithText(text).WithIconUrl(iconUrl);
@@ -237,7 +251,28 @@ namespace IA.SDK
 
         public async Task<IDiscordMessage> SendToChannel(ulong channelId)
         {
-            return new RuntimeMessage(await (Bot.instance.Client.GetChannel(channelId) as IMessageChannel).SendMessageAsync("", false, embed));
+            IMessageChannel m = (Bot.instance.Client.GetChannel(channelId) as IMessageChannel);
+            if (m as IGuildChannel != null)
+            {
+                if (!(await (m as IGuildChannel).Guild.GetCurrentUserAsync()).GuildPermissions.EmbedLinks)
+                {
+                    if(string.IsNullOrWhiteSpace(ImageUrl))
+                    {
+                        return new RuntimeMessage(await m.SendMessageAsync(ToMessageBuilder().Build(), false));
+                    }
+
+
+                    using (WebClient wc = new WebClient())
+                    {
+                        byte[] image = wc.DownloadData(ImageUrl);
+                        using (MemoryStream ms = new MemoryStream(image))
+                        {
+                            return new RuntimeMessage(await m.SendFileAsync(ms, ImageUrl, ToMessageBuilder().Build()));
+                    }
+                    }
+                }
+            }
+            return new RuntimeMessage(await m.SendMessageAsync("", false, embed));
         }
         public async Task<IDiscordMessage> SendToChannel(IDiscordMessageChannel channel)
         {
@@ -246,12 +281,26 @@ namespace IA.SDK
 
         public async Task<IDiscordMessage> SendToUser(ulong userId)
         {
-            RestDMChannel channel = await (Bot.instance.Client.GetUser(userId).CreateDMChannelAsync());
+            IDMChannel channel = await (Bot.instance.Client.GetUser(userId)).GetOrCreateDMChannelAsync();
             return new RuntimeMessage(await channel.SendMessageAsync("", false, embed));
         }
         public async Task<IDiscordMessage> SendToUser(IDiscordUser user)
         {
             return await SendToUser(user.Id);
+        }
+
+        public async Task ModifyMessage(IDiscordMessage message)
+        {
+            IMessageChannel m = ((message.Channel as IProxy<IChannel>).ToNativeObject() as IMessageChannel);
+            if (m != null)
+            {
+                if (!(await (m as IGuildChannel).Guild.GetCurrentUserAsync()).GuildPermissions.EmbedLinks)
+                {
+                    await message.ModifyAsync(ToMessageBuilder().Build());
+                    return;
+                }
+            }
+            await message.ModifyAsync(this);
         }
 
         public IDiscordEmbed SetAuthor(string name, string imageurl, string url)
@@ -306,6 +355,32 @@ namespace IA.SDK
             return this;
         }
 
+        public MessageBuilder ToMessageBuilder()
+        {
+            MessageBuilder b = new MessageBuilder();
+
+            if(Author != null)
+            {
+                b.AppendText(Author.Name, MessageFormatting.BOLD);
+            }
+
+            b.AppendText(Title, MessageFormatting.BOLD)
+             .AppendText(Description);
+
+            foreach(IEmbedField f in Fields)
+            {
+                b.AppendText(f.Name, MessageFormatting.UNDERLINED)
+                 .AppendText(f.Value)
+                 .NewLine();
+            }
+
+            if (Footer != null)
+            {
+                b.AppendText(Footer.Text, MessageFormatting.ITALIC);
+            }
+
+            return b;
+        }
         public EmbedBuilder ToNativeObject()
         {
             return embed;

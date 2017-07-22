@@ -24,6 +24,7 @@ namespace IA.Events
         public delegate Task ExceptionDelegate(Exception ex, ICommandEvent command, IDiscordMessage message);
 
         public List<ulong> Developers = new List<ulong>();
+        Dictionary<ulong, OnRegisteredMessage> registeredUsers = new Dictionary<ulong, OnRegisteredMessage>();
 
         public CommandHandler CommandHandler;
         List<CommandHandler> commandHandlers = new List<CommandHandler>();
@@ -36,9 +37,9 @@ namespace IA.Events
 
         public Bot bot = null;
 
-        internal EventContainer events { private set; get; }
+        internal EventContainer Events { private set; get; }
 
-        public ExceptionDelegate OnCommandError = async (ex, command, msg) => { };
+        public ExceptionDelegate OnCommandError = async (ex, command, msg) => await Task.Delay(0);
 
         public EventSystem(Bot bot)
         {
@@ -51,7 +52,7 @@ namespace IA.Events
             this.bot = bot;
             bot.Events = this;
 
-            events = new EventContainer();
+            Events = new EventContainer();
             CommandHandler = new CommandHandler(this);
 
             RegisterAttributeCommands();
@@ -73,7 +74,7 @@ namespace IA.Events
                     CommandHandler.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.CommandDoneEvents.Add(newEvent.Name.ToLower(), newEvent);
+            Events.CommandDoneEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
         public void AddContinuousEvent(Action<ContinuousEvent> info)
@@ -81,7 +82,7 @@ namespace IA.Events
             ContinuousEvent newEvent = new ContinuousEvent();
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
-            events.ContinuousEvents.Add(newEvent.Name.ToLower(), newEvent);
+            Events.ContinuousEvents.Add(newEvent.Name.ToLower(), newEvent);
 
         }
 
@@ -97,7 +98,7 @@ namespace IA.Events
                     CommandHandler.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.JoinServerEvents.Add(newEvent.Name.ToLower(), newEvent);
+            Events.JoinServerEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
         public void AddLeaveEvent(Action<GuildEvent> info)
@@ -112,7 +113,7 @@ namespace IA.Events
                     CommandHandler.aliases.Add(s, newEvent.Name.ToLower());
                 }
             }
-            events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
+            Events.LeaveServerEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
         public int CommandsUsed()
@@ -146,15 +147,15 @@ namespace IA.Events
 
         public IEvent GetEvent(string id)
         {
-            return events.GetEvent(id);
+            return Events.GetEvent(id);
         }
 
         public async Task<SortedDictionary<string, List<string>>> GetEventNamesAsync(IDiscordMessage e)
         {
-            SortedDictionary<string, List<string>> moduleEvents = new SortedDictionary<string, List<string>>();
-
-            moduleEvents.Add("MISC", new List<string>());
-
+            SortedDictionary<string, List<string>> moduleEvents = new SortedDictionary<string, List<string>>
+            {
+                { "MISC", new List<string>() }
+            };
             EventAccessibility userEventAccessibility = CommandHandler.GetUserAccessibility(e);
 
             foreach (ICommandEvent ev in CommandHandler.Commands.Values)
@@ -255,12 +256,7 @@ namespace IA.Events
 
             foreach (KeyValuePair<string, List<string>> items in moduleEvents)
             {
-                embed.AddField(f =>
-                {
-                    f.Name = items.Key;
-                    f.Value = "```" + string.Join(", ", items.Value) + "```";
-                    f.IsInline = true;
-                });
+                embed.AddInlineField(items.Key, "```" + string.Join(", ", items.Value) + "```");
             }
             return embed;
         }
@@ -288,9 +284,11 @@ namespace IA.Events
                 }
 
                 newModule.EventSystem = this;
+                
                 ModuleAttribute mAttrib = m.GetCustomAttribute<ModuleAttribute>();
                 newModule.Name = mAttrib.module.Name;
                 newModule.Nsfw = mAttrib.module.Nsfw;
+                newModule.CanBeDisabled = mAttrib.module.CanBeDisabled;
 
                 var methods = m.GetMethods()
                                .Where(t => t.GetCustomAttributes<CommandAttribute>().Count() > 0)
@@ -302,7 +300,7 @@ namespace IA.Events
                     CommandAttribute commandAttribute = x.GetCustomAttribute<CommandAttribute>();
 
                     newEvent = commandAttribute.command;
-                    newEvent.ProcessCommand = async (context) => x.Invoke(instance, new object[] { context });
+                    newEvent.ProcessCommand = async (context) => await (Task)x.Invoke(instance, new object[] { context });
                     newEvent.Module = newModule;
 
                     ICommandEvent foundCommand = newModule.Events.Find(c => c.Name == newEvent.Name);
@@ -328,6 +326,19 @@ namespace IA.Events
             }
         }
 
+        public void RegisterUser(ulong user, OnRegisteredMessage m)
+        {
+            registeredUsers.Add(user, m);
+        }
+
+        public void UnregisterUser(ulong user)
+        {
+            if (registeredUsers.ContainsKey(user))
+            {
+                registeredUsers.Remove(user);
+            }
+        }
+
         internal static void RegisterBot(Bot bot)
         {
             _instance = new EventSystem(bot);
@@ -343,7 +354,7 @@ namespace IA.Events
         #region events
         internal async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
         {
-            foreach (CommandDoneEvent ev in events.CommandDoneEvents.Values)
+            foreach (CommandDoneEvent ev in Events.CommandDoneEvents.Values)
             {
                 try
                 {
@@ -358,7 +369,7 @@ namespace IA.Events
 
         private async Task OnGuildLeave(IDiscordGuild e)
         {
-            foreach (GuildEvent ev in events.LeaveServerEvents.Values)
+            foreach (GuildEvent ev in Events.LeaveServerEvents.Values)
             {
                 if (await ev.IsEnabled(e.Id))
                 {
@@ -368,7 +379,7 @@ namespace IA.Events
         }
         private async Task OnGuildJoin(IDiscordGuild e)
         {
-            foreach (GuildEvent ev in events.JoinServerEvents.Values)
+            foreach (GuildEvent ev in Events.JoinServerEvents.Values)
             {
                 if (await ev.IsEnabled(e.Id))
                 {
@@ -382,7 +393,7 @@ namespace IA.Events
         }
         private async Task OnMention(IDiscordMessage e)
         {
-            foreach (RuntimeCommandEvent ev in events.MentionEvents.Values)
+            foreach (RuntimeCommandEvent ev in Events.MentionEvents.Values)
             {
                 await ev.Check(e, null);
             }
@@ -392,6 +403,11 @@ namespace IA.Events
             if (_message.Author.IsBot)
             {
                 return;
+            }
+
+            if(registeredUsers.ContainsKey(_message.Author.Id))
+            {
+                registeredUsers[_message.Author.Id].Invoke(_message);
             }
 
             await CommandHandler.CheckAsync(_message);
@@ -475,4 +491,6 @@ namespace IA.Events
         }
         #endregion
     }
+
+    public delegate void OnRegisteredMessage(IDiscordMessage m);
 }

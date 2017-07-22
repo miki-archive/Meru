@@ -19,6 +19,10 @@ namespace IA.SDK
             field.Value = f.Value;
             field.IsInline = f.IsInline;
         }
+        public RuntimeEmbedField(EmbedFieldBuilder f)
+        {
+            field = f;
+        }
 
         public RuntimeEmbedField(string Name, string Value, bool Isinline = false)
         {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -19,6 +20,8 @@ namespace IA.SDK.Interfaces
         Task SendOption(IDiscordEmbed embed, IDiscordUser user, params Option[] reactionEmoji);
 
         Task<IDiscordMessage> SendMessage(string message);
+
+        [Obsolete("Use 'IDiscordEmbed.SendToChannel' instead")]
         Task<IDiscordMessage> SendMessage(IDiscordEmbed embed);
 
         Task SendTypingAsync();
