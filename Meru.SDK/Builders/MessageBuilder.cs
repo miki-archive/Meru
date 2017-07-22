@@ -10,13 +10,17 @@ namespace IA.SDK.Builders
     {
         string message = "";
 
-        public MessageBuilder AppendText(string text, MessageFormatting formatting = MessageFormatting.PLAIN, bool endWithSpace = true)
+        public MessageBuilder AppendText(string text, MessageFormatting formatting = MessageFormatting.PLAIN, bool newLine = true, bool endWithSpace = false)
         {
+            if (string.IsNullOrWhiteSpace(text)) return this;
+
             text = ApplyFormatting(text, formatting);
 
             if (endWithSpace) text += " ";
 
             message += text;
+            if (newLine) NewLine();
+
             return this;
         }
         public MessageBuilder NewLine()
