@@ -65,6 +65,8 @@ namespace IA.SDK
 
         public int VoiceChannelCount => throw new NotImplementedException();
 
+        public IDiscordUser CurrentUser => throw new NotImplementedException();
+
         public virtual Task<IDiscordUser> GetUserAsync(ulong user_id)
         {
             throw new NotImplementedException();

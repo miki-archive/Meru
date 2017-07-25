@@ -14,6 +14,7 @@ namespace IA.SDK.Interfaces
         int UserCount { get; }
 
         IDiscordUser Owner { get; }
+        IDiscordUser CurrentUser { get; }
 
         List<IDiscordRole> Roles { get; }
 
