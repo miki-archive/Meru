@@ -12,7 +12,7 @@ namespace IA.Events
     public class RuntimeCommandEvent : Event, ICommandEvent
     {
         public Dictionary<string, ProcessCommandDelegate> CommandPool { get; set; } = new Dictionary<string, ProcessCommandDelegate>();
-        public int Cooldown { get; set; }
+        public int Cooldown { get; set; } = 5;
 
         public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
 
@@ -69,7 +69,6 @@ namespace IA.Events
 
             if (IsOnCooldown(e.Author.Id))
             {
-                await e.Channel.SendMessage($"Sorry, this command is still on cooldown for {-GetCooldown(e.Author.Id)} seconds!");
                 Log.WarningAt(Name, " is on cooldown");
                 return;
             }
