@@ -40,6 +40,8 @@ namespace IA.SDK
             }
         }
 
+        public IDiscordUser CurrentUser => new RuntimeUser(guild.GetCurrentUserAsync().GetAwaiter().GetResult());
+
         public RuntimeGuild(IGuild g)
         {
             guild = g;
