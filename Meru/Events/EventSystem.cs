@@ -135,6 +135,8 @@ namespace IA.Events
             commandHandlers.Remove(commandHandler);
         }
 
+        public bool PrivateCommandHandlerExist(ulong userId, ulong channelId) => privateCommandHandlers.ContainsKey(new Tuple<ulong, ulong>(userId, channelId));
+
         internal void DisposePrivateCommandHandler(Tuple<ulong, ulong> key)
         {
             privateCommandHandlers.Remove(key);
