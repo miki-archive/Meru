@@ -131,33 +131,27 @@ namespace IA.SDK
 
         public IReadOnlyCollection<ulong> MentionedChannelIds => messageData.MentionedChannelIds;
 
-        public RuntimeMessage(IMessage msg)
+        public RuntimeMessage( IMessage _message, DiscordSocketClient _client = null )
         {
-            messageData = msg;
 
-            if (msg.Author != null) user = new RuntimeUser(msg.Author);
-            if(msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
-            IGuild g = (messageData.Author as IGuildUser)?.Guild;
-            
-            if (g != null)
-            {
-                guild = new RuntimeGuild(g);
-            }
-        }
+			messageData = _message;
 
-        public RuntimeMessage(IMessage msg, DiscordSocketClient c)
-        {
-            messageData = msg;
+			if( _client != null )
+				client = new RuntimeClient( _client );
+			if( _message.Author != null )
+				user = new RuntimeUser( _message.Author );
+			if( _message.Channel != null )
+				channel = new RuntimeMessageChannel( _message.Channel );
 
-            if (msg.Author != null) user = new RuntimeUser(msg.Author);
-            if (msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
-            IGuild g = (messageData.Author as IGuildUser)?.Guild;
-            if (g != null)
-            {
-                guild = new RuntimeGuild(g);
-            }
-            client = new RuntimeClient(c);
-        }
+			IGuild _guild = ( _message.Author as IGuildUser )?.Guild;
+			if( _guild != null )
+			{
+
+				guild = new RuntimeGuild( _guild );
+
+			}
+
+		}
 
         public async Task AddReaction(string emoji)
         {
@@ -174,10 +168,13 @@ namespace IA.SDK
 
         public async Task DeleteAsync()
         {
-            if (Guild.CurrentUser.HasPermissions(Channel, DiscordGuildPermission.ManageMessages))
+            if (Guild != null && Guild.CurrentUser.HasPermissions(Channel, DiscordGuildPermission.ManageMessages))
             {
                 await messageData.DeleteAsync();
-            }
+            } else // Bypass the permission check if the message is not part of a guild (server).
+			{
+				await messageData.DeleteAsync();
+			}
         }
 
         public async Task ModifyAsync(string message)
