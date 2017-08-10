@@ -1,15 +1,12 @@
-﻿using Discord;
-using Discord.WebSocket;
-using IA.Events.Attributes;
+﻿using IA.Events.Attributes;
 using IA.Models;
 using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.Entity.Core.Objects;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -24,11 +21,13 @@ namespace IA.Events
         public delegate Task ExceptionDelegate(Exception ex, ICommandEvent command, IDiscordMessage message);
 
         public List<ulong> Developers = new List<ulong>();
-        Dictionary<ulong, OnRegisteredMessage> registeredUsers = new Dictionary<ulong, OnRegisteredMessage>();
+        private Dictionary<ulong, OnRegisteredMessage> registeredUsers = new Dictionary<ulong, OnRegisteredMessage>();
 
         public CommandHandler CommandHandler;
-        List<CommandHandler> commandHandlers = new List<CommandHandler>();
-        Dictionary<Tuple<ulong, ulong>, CommandHandler> privateCommandHandlers = new Dictionary<Tuple<ulong, ulong>, CommandHandler>();
+        private List<CommandHandler> commandHandlers = new List<CommandHandler>();
+
+        private ConcurrentDictionary<Tuple<ulong, ulong>, CommandHandler> privateCommandHandlers = new ConcurrentDictionary<Tuple<ulong, ulong>, CommandHandler>();
+        private object privateCommandHandlerLock = new object();
 
         public Dictionary<string, IModule> Modules => CommandHandler.Modules;
         public Dictionary<string, ICommandEvent> Commands => CommandHandler.Commands;
@@ -57,9 +56,9 @@ namespace IA.Events
 
             RegisterAttributeCommands();
 
-            bot.Client.MessageReceived += InternalMessageReceived;
-            bot.Client.JoinedGuild += InternalJoinedGuild;
-            bot.Client.LeftGuild += InternalLeftGuild;
+            bot.MessageReceived += InternalMessageReceived;
+            bot.GuildJoin += InternalJoinedGuild;
+            bot.GuildLeave += InternalLeftGuild;
         }
 
         public void AddCommandDoneEvent(Action<CommandDoneEvent> info)
@@ -83,7 +82,6 @@ namespace IA.Events
             info.Invoke(newEvent);
             newEvent.eventSystem = this;
             Events.ContinuousEvents.Add(newEvent.Name.ToLower(), newEvent);
-
         }
 
         public void AddJoinEvent(Action<GuildEvent> info)
@@ -125,6 +123,7 @@ namespace IA.Events
             }
             return output;
         }
+
         public int CommandsUsed(string eventName)
         {
             return CommandHandler.GetCommandEvent(eventName).TimesUsed;
@@ -135,16 +134,25 @@ namespace IA.Events
             commandHandlers.Remove(commandHandler);
         }
 
-        public bool PrivateCommandHandlerExist(ulong userId, ulong channelId) => privateCommandHandlers.ContainsKey(new Tuple<ulong, ulong>(userId, channelId));
-
-        internal void DisposePrivateCommandHandler(Tuple<ulong, ulong> key)
+        public bool PrivateCommandHandlerExist(ulong userId, ulong channelId)
         {
-            privateCommandHandlers.Remove(key);
-
+            lock (privateCommandHandlerLock)
+            {
+                return privateCommandHandlers.ContainsKey(new Tuple<ulong, ulong>(userId, channelId));
+            }
         }
-        internal void DisposePrivateCommandHandler(IDiscordMessage msg)
+        internal async Task DisposePrivateCommandHandlerAsync(Tuple<ulong, ulong> key)
         {
-            DisposePrivateCommandHandler(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id));
+            if(!privateCommandHandlers.TryRemove(key, out CommandHandler v))
+            {
+                await Task.Delay(1000);
+                await DisposePrivateCommandHandlerAsync(key);
+            }
+        }
+
+        internal async Task DisposePrivateCommandHandlerAsync(IDiscordMessage msg)
+        {
+            await DisposePrivateCommandHandlerAsync(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id));
         }
 
         public IEvent GetEvent(string id)
@@ -209,7 +217,7 @@ namespace IA.Events
                     await context.SaveChangesAsync();
                 }
                 return i.Value;
-            }
+            }       
         }
 
         public PrefixInstance GetPrefixInstance(string defaultPrefix)
@@ -250,6 +258,7 @@ namespace IA.Events
             }
             return output;
         }
+
         public async Task<IDiscordEmbed> ListCommandsInEmbedAsync(IDiscordMessage e)
         {
             SortedDictionary<string, List<string>> moduleEvents = await GetEventNamesAsync(e);
@@ -286,9 +295,9 @@ namespace IA.Events
                 }
 
                 newModule.EventSystem = this;
-                
+
                 ModuleAttribute mAttrib = m.GetCustomAttribute<ModuleAttribute>();
-                newModule.Name = mAttrib.module.Name;
+                newModule.Name = mAttrib.module.Name.ToLower();
                 newModule.Nsfw = mAttrib.module.Nsfw;
                 newModule.CanBeDisabled = mAttrib.module.CanBeDisabled;
 
@@ -328,19 +337,6 @@ namespace IA.Events
             }
         }
 
-        public void RegisterUser(ulong user, OnRegisteredMessage m)
-        {
-            registeredUsers.Add(user, m);
-        }
-
-        public void UnregisterUser(ulong user)
-        {
-            if (registeredUsers.ContainsKey(user))
-            {
-                registeredUsers.Remove(user);
-            }
-        }
-
         internal static void RegisterBot(Bot bot)
         {
             _instance = new EventSystem(bot);
@@ -354,6 +350,7 @@ namespace IA.Events
         }
 
         #region events
+
         internal async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
         {
             foreach (CommandDoneEvent ev in Events.CommandDoneEvents.Values)
@@ -379,6 +376,7 @@ namespace IA.Events
                 }
             }
         }
+
         private async Task OnGuildJoin(IDiscordGuild e)
         {
             foreach (GuildEvent ev in Events.JoinServerEvents.Values)
@@ -389,10 +387,12 @@ namespace IA.Events
                 }
             }
         }
+
         private async Task OnPrivateMessage(IDiscordMessage arg)
         {
             await Task.CompletedTask;
         }
+
         private async Task OnMention(IDiscordMessage e)
         {
             foreach (RuntimeCommandEvent ev in Events.MentionEvents.Values)
@@ -400,6 +400,7 @@ namespace IA.Events
                 await ev.Check(e, null);
             }
         }
+
         private async Task OnMessageRecieved(IDiscordMessage _message)
         {
             if (_message.Author.IsBot)
@@ -407,7 +408,7 @@ namespace IA.Events
                 return;
             }
 
-            if(registeredUsers.ContainsKey(_message.Author.Id))
+            if (registeredUsers.ContainsKey(_message.Author.Id))
             {
                 registeredUsers[_message.Author.Id].Invoke(_message);
             }
@@ -416,9 +417,12 @@ namespace IA.Events
 
             foreach (CommandHandler c in commandHandlers)
             {
-                if(c.ShouldBeDisposed && c.ShouldDispose())
+                if (c.ShouldBeDisposed && c.ShouldDispose())
                 {
-                    commandHandlers.Remove(c);
+                    lock (privateCommandHandlerLock)
+                    {
+                        commandHandlers.Remove(c);
+                    }
                 }
 
                 await c.CheckAsync(_message);
@@ -430,7 +434,7 @@ namespace IA.Events
             {
                 if (privateCommandHandlers[privateKey].ShouldBeDisposed && privateCommandHandlers[privateKey].ShouldDispose())
                 {
-                    privateCommandHandlers.Remove(privateKey);
+                    await DisposePrivateCommandHandlerAsync(_message);
                 }
                 else
                 {
@@ -441,39 +445,31 @@ namespace IA.Events
 
         private void AddPrivateCommandHandler(Tuple<ulong, ulong> key, CommandHandler value)
         {
-            if (privateCommandHandlers.ContainsKey(key)) return;
-
-            privateCommandHandlers.Add(key, value);
+            privateCommandHandlers.AddOrUpdate(key, value,
+                (k, existingVal) =>
+                {
+                    if (value != existingVal)
+                    {
+                        return existingVal;
+                    }
+                    return value;
+                });
         }
+
         public void AddPrivateCommandHandler(IDiscordMessage msg, CommandHandler cHandler)
         {
             AddPrivateCommandHandler(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id), cHandler);
         }
 
-        private async Task InternalMessageReceived(SocketMessage message)
+        private async Task InternalMessageReceived(IDiscordMessage message)
         {
             try
             {
-                IGuild g = (((message as IUserMessage)?.Channel) as IGuildChannel)?.Guild;
-                DiscordSocketClient client;
-                RuntimeMessage r;
+                await OnMessageRecieved(message);
 
-                if (g != null)
+                if (message.MentionedUserIds.Contains(Bot.instance.Client.CurrentUser.Id))
                 {
-                    client = bot.Client.GetShardFor(g);
-                    r = new RuntimeMessage(message, client);
-                    await OnMessageRecieved(r);
-                }
-                else
-                {
-                    client = bot.Client.GetShard(0);
-                    r = new RuntimeMessage(message, client);
-                    await OnPrivateMessage(r);
-                }
-          
-                if (r.MentionedUserIds.Contains(Bot.instance.Client.CurrentUser.Id))
-                {
-                    await OnMention(r);
+                    await OnMention(message);
                 }
             }
             catch (Exception e)
@@ -481,17 +477,18 @@ namespace IA.Events
                 Log.ErrorAt("messagerecieved", e.ToString());
             }
         }
-        private async Task InternalJoinedGuild(IGuild arg)
+
+        private async Task InternalJoinedGuild(IDiscordGuild g)
         {
-            RuntimeGuild g = new RuntimeGuild(arg);
             await OnGuildJoin(g);
         }
-        private async Task InternalLeftGuild(IGuild arg)
+
+        private async Task InternalLeftGuild(IDiscordGuild g)
         {
-            RuntimeGuild g = new RuntimeGuild(arg);
             await OnGuildLeave(g);
         }
-        #endregion
+
+        #endregion events
     }
 
     public delegate void OnRegisteredMessage(IDiscordMessage m);

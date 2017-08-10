@@ -1,4 +1,5 @@
 ﻿using IA.SDK.Events;
+using IA.SDK.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -20,12 +21,14 @@ namespace IA.SDK
         GuildEventDelegate LeftGuild { get; set; }
 
         List<ICommandEvent> Events { get; set; }
+        List<IService> Services { get; set; }
 
         Task<bool> IsEnabled(ulong id);
 
         Task SetEnabled(ulong id, bool value);
 
         Task InstallAsync(object bot);
+
         Task UninstallAsync(object bot);
     }
 }

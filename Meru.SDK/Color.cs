@@ -21,7 +21,7 @@ namespace IA.SDK
 
         public static Color GetColor(IAColor color)
         {
-            switch(color)
+            switch (color)
             {
                 case IAColor.BLACK: return new Color(0.1f, 0.2f, 0.1f);
                 case IAColor.WHITE: return new Color(0.9f, 0.9f, 0.9f);
@@ -32,8 +32,7 @@ namespace IA.SDK
                 default:
                 case IAColor.ORANGE: return new Color(0.8f, 0.8f, 0.2f);
                 case IAColor.PURPLE: return new Color(1.0f, 0.6f, 0.8f);
-            
-}
+            }
         }
 
         public static Color Lerp(Color colorA, Color ColorB, float time)

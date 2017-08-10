@@ -85,6 +85,7 @@ namespace IA.SDK
         {
             return new RuntimeMessage(await (channel as IMessageChannel).SendFileAsync(path));
         }
+
         public async Task<IDiscordMessage> SendFileAsync(MemoryStream stream, string extension)
         {
             return new RuntimeMessage(await (channel as IMessageChannel)?.SendFileAsync(stream, extension));
@@ -122,7 +123,7 @@ namespace IA.SDK
             Bot.instance.Client.ReactionAdded += socketReaction;
 
             int timeTaken = 0;
-            while(output == -1 || timeTaken > 10000)
+            while (output == -1 || timeTaken > 10000)
             {
                 await Task.Delay(100);
                 timeTaken += 100;
@@ -134,6 +135,7 @@ namespace IA.SDK
                 await reactionEmoji[output].output();
             }
         }
+
         public async Task SendOption(IDiscordEmbed message, IDiscordUser user, params Option[] reactionEmoji)
         {
             IDiscordMessage e = await SendMessage(message);
@@ -191,6 +193,7 @@ namespace IA.SDK
             }
             return null;
         }
+
         public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
             try
@@ -201,7 +204,7 @@ namespace IA.SDK
                     .SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>)
                     .ToNativeObject()));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.ErrorAt("SendMessage", ex.Message);
             }

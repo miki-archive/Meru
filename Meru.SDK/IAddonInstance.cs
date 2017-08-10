@@ -19,14 +19,19 @@ namespace IA.SDK
         ICommandEvent GetCommandEvent(string commandName);
 
         ulong GetBotId(IDiscordGuild guild);
+
         string GetBotVersion();
 
         int GetGuildCount();
 
         Task<string> GetIdentifierAsync(ulong serverid);
+
         List<IModule> GetModules();
+
         EventAccessibility GetUserAccessibility(IDiscordMessage message);
+
         Task<string> ListCommands(IDiscordMessage e);
+
         Task<IDiscordEmbed> ListCommandsInEmbed(IDiscordMessage e);
 
         Task SetIdentifierAsync(IDiscordGuild guild, string defaultPrefix, string newPrefix);

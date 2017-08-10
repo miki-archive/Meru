@@ -1,7 +1,5 @@
-﻿using System;
-using Discord;
+﻿using Discord;
 using IA.SDK.Interfaces;
-using IA.SDK.Extensions;
 
 namespace IA.SDK
 {
@@ -54,6 +52,7 @@ namespace IA.SDK
         }
 
         #region IQuery<this>
+
         public RuntimeEmbedAuthor Query(string query)
         {
             string[] cutEmbed = query.Split('}');
@@ -74,11 +73,13 @@ namespace IA.SDK
                             Name = y[1];
                         }
                         break;
+
                     case "icon":
                         {
                             IconUrl = y[1].Trim(' ');
                         }
                         break;
+
                     case "url":
                         {
                             Url = y[1].Trim(' ');
@@ -89,7 +90,8 @@ namespace IA.SDK
 
             return this;
         }
-        #endregion
+
+        #endregion IQuery<this>
 
         #region IProxy<EmbedAuthorBuilder>
 
@@ -97,6 +99,7 @@ namespace IA.SDK
         {
             return author;
         }
-        #endregion
+
+        #endregion IProxy<EmbedAuthorBuilder>
     }
 }

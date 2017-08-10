@@ -1,24 +1,24 @@
-﻿using System;
+﻿using Discord;
+using IA.Events;
+using IA.SDK.Events;
+using IA.SDK.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using IA.SDK.Interfaces;
-using IA.SDK.Events;
-using IA.Events;
-using Discord;
 
 namespace IA.SDK
 {
-    class RuntimeAddonInstance : IAddonInstance
+    internal class RuntimeAddonInstance : IAddonInstance
     {
         public string Name { get; set; } = "";
         public List<IModule> Modules { get; set; } = new List<IModule>();
-        Bot bot = null;
+        private Bot bot = null;
 
         public RuntimeAddonInstance()
         {
         }
+
         public RuntimeAddonInstance(IAddonInstance i, Bot bot)
         {
             Name = i.Name;
@@ -35,6 +35,7 @@ namespace IA.SDK
         {
             return await Bot.instance.Events.ListCommandsAsync(e);
         }
+
         public async Task<IDiscordEmbed> ListCommandsInEmbed(IDiscordMessage e)
         {
             return await Bot.instance.Events.ListCommandsInEmbedAsync(e);

@@ -3,7 +3,6 @@ using IA.SDK.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
 
 namespace IA.SDK
 {

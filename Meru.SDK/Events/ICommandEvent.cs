@@ -1,14 +1,12 @@
 ﻿using IA.SDK.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK.Events
 {
     public interface ICommandEvent : IEvent
     {
+        string[] Aliases { get; set; }
         Dictionary<string, ProcessCommandDelegate> CommandPool { get; set; }
         int Cooldown { get; set; }
 
@@ -20,11 +18,17 @@ namespace IA.SDK.Events
         Task Check(IDiscordMessage e, ICommandHandler c, string identifier = "");
 
         new ICommandEvent SetName(string name);
+
         new ICommandEvent SetAccessibility(EventAccessibility accessibility);
-        new ICommandEvent SetAliases(params string[] aliases);
+
+        ICommandEvent SetAliases(params string[] aliases);
+
         ICommandEvent SetCooldown(int seconds);
+
         ICommandEvent SetPermissions(params DiscordGuildPermission[] permissions);
+
         ICommandEvent On(string args, ProcessCommandDelegate command);
+
         ICommandEvent Default(ProcessCommandDelegate command);
     }
 }

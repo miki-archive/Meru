@@ -1,14 +1,9 @@
 ﻿using Discord;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IA.SDK.Interfaces;
 
 namespace IA.SDK
 {
-    class RuntimeAttachment : IDiscordAttachment
+    internal class RuntimeAttachment : IDiscordAttachment
     {
         private IAttachment attachment;
 

@@ -114,6 +114,7 @@ namespace IA.SDK
         {
             throw new NotImplementedException();
         }
+
         public IDiscordEmbed AddField(Action<IEmbedField> field)
         {
             throw new NotImplementedException();
@@ -124,7 +125,7 @@ namespace IA.SDK
             throw new NotImplementedException();
         }
 
-        public IDiscordEmbed AddInlineField(string title, string value)
+        public IDiscordEmbed AddInlineField(object title, object value)
         {
             throw new NotImplementedException();
         }

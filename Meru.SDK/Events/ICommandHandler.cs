@@ -1,8 +1,4 @@
 ﻿using IA.SDK.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK.Events
@@ -17,11 +13,19 @@ namespace IA.SDK.Events
         bool ShouldDispose();
 
         void AddCommand(ICommandEvent cmd);
+
         void AddModule(IModule module);
 
         EventAccessibility GetUserAccessibility(IDiscordMessage message);
+
         ICommandEvent GetCommandEvent(string id);
 
-        void RequestDispose();
+        IEvent GetEvent(string id);
+
+        IModule GetModule(string id);
+
+        Task RequestDisposeAsync();
+
+        string[] GetAllEventNames();
     }
 }

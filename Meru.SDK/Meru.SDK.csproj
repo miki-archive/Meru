@@ -105,6 +105,7 @@
     <Compile Include="Discord\DiscordGuildPermission.cs" />
     <Compile Include="Interfaces\IProxy.cs" />
     <Compile Include="Interfaces\IQuery.cs" />
+    <Compile Include="Interfaces\IService.cs" />
     <Compile Include="Interfaces\ISong.cs" />
     <Compile Include="Builders\MessageBuilder.cs" />
     <Compile Include="ModuleInstance.cs" />

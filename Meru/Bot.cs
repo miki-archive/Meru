@@ -4,19 +4,14 @@ using Discord.WebSocket;
 using IA.Addons;
 using IA.Events;
 using IA.FileHandling;
-using IA.SDK;
-using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace IA
 {
-    public class Bot
+    public partial class Bot
     {
         public AddonManager Addons { private set; get; }
         public DiscordShardedClient Client { private set; get; }
@@ -59,11 +54,13 @@ namespace IA
             }
             InitializeBot().GetAwaiter().GetResult();
         }
+
         public Bot(ClientInformation info)
         {
             clientInformation = info;
             InitializeBot().GetAwaiter().GetResult();
         }
+
         public Bot(Action<ClientInformation> info)
         {
             clientInformation = new ClientInformation();
@@ -75,10 +72,12 @@ namespace IA
         {
             Events.Developers.Add(id);
         }
+
         public void AddDeveloper(IDiscordUser user)
         {
             Events.Developers.Add(user.Id);
         }
+
         public void AddDeveloper(IUser user)
         {
             Events.Developers.Add(user.Id);
@@ -88,7 +87,7 @@ namespace IA
         {
             await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
 
-            foreach(DiscordSocketClient client in Client.Shards)
+            foreach (DiscordSocketClient client in Client.Shards)
             {
                 await client.StartAsync();
                 // 10 seconds wait
@@ -173,9 +172,12 @@ namespace IA
                 LogLevel = LogSeverity.Info
             });
 
+            LoadEvents();
+
             EventSystem.RegisterBot(this);
 
             Events.RegisterPrefixInstance(">").RegisterAsDefault();
+
             // fallback prefix
             Events.RegisterPrefixInstance("miki.", false);
             // debug prefix
@@ -188,9 +190,6 @@ namespace IA
             {
                 await clientInformation.EventLoaderMethod(this);
             }
-
-            Application.ThreadException +=
-               new ThreadExceptionEventHandler(Application_ThreadException);       
 
             foreach (DiscordSocketClient c in Client.Shards)
             {
@@ -214,11 +213,6 @@ namespace IA
             }
 
             Client.Log += Client_Log;
-        }
-
-        private void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
-        {
-            Log.Error(e.Exception.Message + "\n\n" + e.Exception.StackTrace);
         }
 
         private async Task Client_Log(LogMessage arg)

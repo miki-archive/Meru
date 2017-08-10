@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Entity;
 
 namespace IA.Models.Context
 {
-    class IAContext : DbContext
+    internal class IAContext : DbContext
     {
         public DbSet<Identifier> Identifiers { get; set; }
         public DbSet<CommandState> CommandStates { get; set; }
         public DbSet<ModuleState> ModuleStates { get; set; }
 
-        public IAContext() : base()
+        public IAContext() : base("PostgreSql")
         {
-        
         }
 
         internal static IAContext CreateNoCache()

@@ -8,9 +8,9 @@ namespace Rest
 {
     public class RestClient
     {
-        HttpClient client;
+        private HttpClient client;
 
-        string baseUrl;
+        private string baseUrl;
 
         public RestClient(string base_url)
         {

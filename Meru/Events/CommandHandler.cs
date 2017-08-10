@@ -4,19 +4,19 @@ using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Events
 {
     public class CommandHandlerBuilder
     {
-        CommandHandler commandHandler = null;
+        private CommandHandler commandHandler = null;
 
         public CommandHandlerBuilder()
         {
             commandHandler = new CommandHandler(Bot.instance.Events);
         }
+
         public CommandHandlerBuilder(EventSystem eventSystem)
         {
             commandHandler = new CommandHandler(eventSystem);
@@ -183,25 +183,39 @@ namespace IA.Events
             if (e.Author.HasPermissions(e.Channel, DiscordGuildPermission.ManageRoles)) return EventAccessibility.ADMINONLY;
             return EventAccessibility.PUBLIC;
         }
+
         public ICommandEvent GetCommandEvent(string value)
         {
-            if(Commands.ContainsKey(value))
+            if (Commands.ContainsKey(value))
             {
                 return Commands[value];
             }
             return null;
         }
 
-        public void RequestDispose()
-        {   
+        public IEvent GetEvent(string value)
+        {
+            foreach (IModule m in Modules.Values)
+            {
+                IService s = m.Services.Where(x => x.Name.ToLower() == value.ToLower()).FirstOrDefault();
+                if (s != null)
+                {
+                    return s;
+                }
+            }
+            return GetCommandEvent(value);
+        }
+
+        public async Task RequestDisposeAsync()
+        {
             if (Owner != 0)
             {
-                eventSystem.DisposePrivateCommandHandler(new Tuple<ulong, ulong>(Owner, ChannelId));
+                await eventSystem.DisposePrivateCommandHandlerAsync(new Tuple<ulong, ulong>(Owner, ChannelId));
                 return;
             }
             else
             {
-                if(eventSystem.CommandHandler == this)
+                if (eventSystem.CommandHandler == this)
                 {
                     Log.Warning("you just asked to dispose the standard command handler??");
                 }
@@ -210,6 +224,36 @@ namespace IA.Events
                     eventSystem.DisposeCommandHandler(this);
                 }
             }
+        }
+
+        public IModule GetModule(string id)
+        {
+            if (Modules.ContainsKey(id.ToLower()))
+            {
+                return Modules[id.ToLower()];
+            }
+            return null;
+        }
+
+        public string[] GetAllEventNames()
+        {
+            List<string> allEvents = new List<string>();
+
+            foreach (IModule m in Modules.Values)
+            {
+                foreach (ICommandEvent c in m.Events)
+                {
+                    allEvents.Add(c.Name);
+                    allEvents.AddRange(c.Aliases);
+                }
+
+                foreach (IService s in m.Services)
+                {
+                    allEvents.Add(s.Name);
+                }
+            }
+
+            return allEvents.ToArray();
         }
     }
 }

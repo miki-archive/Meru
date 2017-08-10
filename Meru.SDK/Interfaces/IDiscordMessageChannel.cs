@@ -14,9 +14,11 @@ namespace IA.SDK.Interfaces
         Task<List<IDiscordMessage>> GetMessagesAsync(int amount = 100);
 
         Task<IDiscordMessage> SendFileAsync(string path);
+
         Task<IDiscordMessage> SendFileAsync(MemoryStream stream, string extension);
 
         Task SendOption(string message, IDiscordUser user, params Option[] reactionEmoji);
+
         Task SendOption(IDiscordEmbed embed, IDiscordUser user, params Option[] reactionEmoji);
 
         Task<IDiscordMessage> SendMessage(string message);

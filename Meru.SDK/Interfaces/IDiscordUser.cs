@@ -14,8 +14,10 @@ namespace IA.SDK.Interfaces
 
         IDiscordAudioChannel VoiceChannel { get; }
 
+        int Hierarchy { get; }
+
         IDiscordGuild Guild { get; }
-        
+
         DateTimeOffset CreatedAt { get; }
         DateTimeOffset? JoinedAt { get; }
 
@@ -30,9 +32,9 @@ namespace IA.SDK.Interfaces
 
         Task AddRolesAsync(List<IDiscordRole> roles);
 
-        Task Ban(IDiscordGuild guild);
+        Task Ban(IDiscordGuild guild, int pruneDays = 0, string reason = "");
 
-        Task Kick();
+        Task Kick(string reason = "");
 
         string GetAvatarUrl(DiscordAvatarType type = DiscordAvatarType.PNG, ushort size = 128);
 

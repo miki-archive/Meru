@@ -1,9 +1,5 @@
 ﻿using IA.SDK.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IA.SDK.Extensions
 {
@@ -32,6 +28,7 @@ namespace IA.SDK.Extensions
             return content;
         }
     }
+
     public static class ExtensionString
     {
         public static string Peel(this string embed, char startChar = '{', char endChar = '}')
@@ -67,6 +64,7 @@ namespace IA.SDK.Extensions
             }
             return string.Join(" ", cutEmbed);
         }
+
         public static string[] Slice(this string embed, char startChar = '{', char endChar = '}')
         {
             int shouldCut = 0;
@@ -94,7 +92,7 @@ namespace IA.SDK.Extensions
                     shouldCut--;
                     if (shouldCut == 0)
                     {
-                        string tempStr = embed.Substring(lastCutPosition != 0? lastCutPosition + 1:lastCutPosition);
+                        string tempStr = embed.Substring(lastCutPosition != 0 ? lastCutPosition + 1 : lastCutPosition);
                         if (i < embed.Length - 1)
                         {
                             tempStr = tempStr.Remove((i - lastCutPosition) + 1);
@@ -109,9 +107,9 @@ namespace IA.SDK.Extensions
 
         public static int GetNextChar(this string s, int startIndex, char targetChar)
         {
-            for(int i = startIndex; i < s.Length; i++)
+            for (int i = startIndex; i < s.Length; i++)
             {
-                if(s[i] == targetChar)
+                if (s[i] == targetChar)
                 {
                     return i - startIndex;
                 }
@@ -124,7 +122,7 @@ namespace IA.SDK.Extensions
             string[] tempArg = args.Split(' ');
             ArgumentField f = new ArgumentField();
 
-            foreach(string x in tempArg)
+            foreach (string x in tempArg)
             {
                 f.arguments.Add(x);
             }

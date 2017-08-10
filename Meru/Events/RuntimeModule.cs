@@ -1,14 +1,10 @@
-﻿using Discord;
-using Discord.WebSocket;
-using IA.Models;
+﻿using IA.Models;
 using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
-using MySql.Data.MySqlClient;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +27,7 @@ namespace IA.Events
         public GuildEventDelegate LeftGuild { get; set; } = null;
 
         public List<ICommandEvent> Events { get; set; } = new List<ICommandEvent>();
+        public List<IService> Services { get; set; } = new List<IService>();
 
         private Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
 
@@ -46,25 +43,24 @@ namespace IA.Events
 
         private bool isInstalled = false;
 
-        internal RuntimeModule() { }
+        internal RuntimeModule()
+        {
+        }
+
         public RuntimeModule(string name, bool enabled = true)
         {
             Name = name;
             Enabled = enabled;
         }
+
         public RuntimeModule(IModule info)
         {
             Name = info.Name;
             Enabled = info.Enabled;
             CanBeDisabled = info.CanBeDisabled;
-            MessageRecieved = info.MessageRecieved;
-            UserUpdated = info.UserUpdated;
-            UserJoinGuild = info.UserJoinGuild;
-            UserLeaveGuild = info.UserLeaveGuild;
-            JoinedGuild = info.JoinedGuild;
-            LeftGuild = info.LeftGuild;
             Events = info.Events;
         }
+
         public RuntimeModule(Action<IModule> info)
         {
             info.Invoke(this);
@@ -77,32 +73,32 @@ namespace IA.Events
 
             if (MessageRecieved != null)
             {
-                b.Client.MessageReceived += Module_MessageReceived;
+                b.MessageReceived += Module_MessageReceived;
             }
 
             if (UserUpdated != null)
             {
-                b.Client.UserUpdated += Module_UserUpdated;
+                b.UserUpdated += Module_UserUpdated;
             }
 
             if (UserJoinGuild != null)
             {
-                b.Client.UserJoined += Module_UserJoined;
+                b.UserJoin += Module_UserJoined;
             }
 
             if (UserLeaveGuild != null)
             {
-                b.Client.UserLeft += Module_UserLeft;
+                b.UserLeft += Module_UserLeft;
             }
 
             if (JoinedGuild != null)
             {
-                b.Client.JoinedGuild += Module_JoinedGuild;
+                b.GuildJoin += Module_JoinedGuild;
             }
 
             if (LeftGuild != null)
             {
-                b.Client.LeftGuild += Module_LeftGuild;
+                b.GuildLeave += Module_LeftGuild;
             }
 
             EventSystem = b.Events;
@@ -145,47 +141,45 @@ namespace IA.Events
 
             if (MessageRecieved != null)
             {
-                b.Client.MessageReceived -= Module_MessageReceived;
+                b.MessageReceived -= Module_MessageReceived;
             }
 
             if (UserUpdated != null)
             {
-                b.Client.UserUpdated -= Module_UserUpdated;
+                b.UserUpdated -= Module_UserUpdated;
             }
 
             if (UserJoinGuild != null)
             {
-                b.Client.UserJoined -= Module_UserJoined;
+                b.UserJoin -= Module_UserJoined;
             }
 
             if (UserLeaveGuild != null)
             {
-                b.Client.UserLeft -= Module_UserLeft;
+                b.UserLeft -= Module_UserLeft;
             }
 
             if (JoinedGuild != null)
             {
-                b.Client.JoinedGuild -= Module_JoinedGuild;
+                b.GuildJoin -= Module_JoinedGuild;
             }
 
             if (LeftGuild != null)
             {
-                b.Client.LeftGuild -= Module_LeftGuild;
+                b.GuildLeave -= Module_LeftGuild;
             }
 
             isInstalled = false;
             await Task.CompletedTask;
         }
 
-        private async Task Module_JoinedGuild(SocketGuild arg)
+        private async Task Module_JoinedGuild(IDiscordGuild arg)
         {
-            RuntimeGuild r = new RuntimeGuild(arg);
-
-            if (await IsEnabled(r.Id))
+            if (await IsEnabled(arg.Id))
             {
                 try
                 {
-                    await JoinedGuild(r);
+                    await JoinedGuild(arg);
                 }
                 catch (Exception e)
                 {
@@ -200,54 +194,48 @@ namespace IA.Events
             return this;
         }
 
-        private async Task Module_LeftGuild(SocketGuild arg)
+        private async Task Module_LeftGuild(IDiscordGuild arg)
         {
-            RuntimeGuild r = new RuntimeGuild(arg);
-
-            if (await IsEnabled(r.Id))
+            if (await IsEnabled(arg.Id))
             {
-                await LeftGuild(r);
+                await LeftGuild(arg);
             }
         }
 
-        private async Task Module_UserJoined(SocketGuildUser arg)
+        private async Task Module_UserJoined(IDiscordUser arg)
         {
-            RuntimeUser r = new RuntimeUser(arg);
-
-            if (await IsEnabled(r.Guild.Id))
+            if (await IsEnabled(arg.Guild.Id))
             {
-                await UserJoinGuild(r.Guild, r);
+                await UserJoinGuild(arg.Guild, arg);
             }
         }
 
-        private async Task Module_UserLeft(SocketGuildUser arg)
+        private async Task Module_UserLeft(IDiscordUser arg)
         {
-            RuntimeUser r = new RuntimeUser(arg);
-
-            if (await IsEnabled(r.Guild.Id))
+            if (await IsEnabled(arg.Guild.Id))
             {
-                await UserLeaveGuild(r.Guild, r);
+                await UserLeaveGuild(arg.Guild, arg);
             }
         }
 
-        private async Task Module_UserUpdated(SocketUser arg1, SocketUser arg2)
+        private async Task Module_UserUpdated(IDiscordUser arg1, IDiscordUser arg2)
         {
-            RuntimeUser usr1 = new RuntimeUser(arg1);
-            RuntimeUser usr2 = new RuntimeUser(arg2);
-            if (await IsEnabled(usr1.Guild.Id))
+            if (arg1.Guild != null)
             {
-                await UserUpdated(usr1, usr2);
+                if (await IsEnabled(arg1.Guild.Id))
+                {
+                    await UserUpdated(arg1, arg2);
+                }
             }
         }
 
-        private async Task Module_MessageReceived(IMessage message)
+        private async Task Module_MessageReceived(IDiscordMessage message)
         {
-            RuntimeMessage msg = new RuntimeMessage(message);
-            if (await IsEnabled(msg.Guild.Id))
+            if (await IsEnabled(message.Guild.Id))
             {
                 try
                 {
-                    Task.Run(() => MessageRecieved(msg));
+                    Task.Run(() => MessageRecieved(message));
                 }
                 catch (Exception ex)
                 {

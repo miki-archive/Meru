@@ -1,9 +1,9 @@
 ﻿using IA.SDK.Events;
+using IA.SDK.Exceptions;
+using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
-using IA.SDK.Interfaces;
 using System.Threading.Tasks;
-using IA.SDK.Exceptions;
 
 namespace IA.SDK
 {
@@ -17,10 +17,12 @@ namespace IA.SDK
         {
             return true;
         };
+
         public ProcessCommandDelegate ProcessCommand { get; set; } = async (context) =>
         {
             await context.message.Channel.SendMessage("This command hasn't been set up correctly!");
         };
+
         public Dictionary<string, ProcessCommandDelegate> CommandPool { get; set; } = new Dictionary<string, ProcessCommandDelegate>();
 
         public CommandEvent()

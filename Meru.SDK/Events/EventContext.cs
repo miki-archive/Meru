@@ -1,9 +1,4 @@
 ﻿using IA.SDK.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IA.SDK.Events
 {
@@ -11,8 +6,9 @@ namespace IA.SDK.Events
     {
         public string arguments;
 
-       // public IBot bot;
+        // public IBot bot;
         public ICommandHandler commandHandler;
+
         public IDiscordMessage message;
 
         public IDiscordUser Author => message.Author;

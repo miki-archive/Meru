@@ -1,4 +1,4 @@
-﻿ using IA.SDK.Exceptions;
+﻿using IA.SDK.Exceptions;
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -26,6 +26,7 @@ namespace IA.SDK.Events
         public Event()
         {
         }
+
         public Event(Action<Event> info)
         {
             info.Invoke(this);
@@ -40,6 +41,7 @@ namespace IA.SDK.Events
         {
             throw new AddonRunException();
         }
+
         public Task SetEnabledAll(IDiscordGuild guild, bool value)
         {
             throw new AddonRunException();
@@ -75,6 +77,7 @@ namespace IA.SDK.Events
         public EventMetadata()
         {
         }
+
         public EventMetadata(string description, string error, params string[] usage)
         {
             this.description = description;

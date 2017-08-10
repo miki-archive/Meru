@@ -1,18 +1,16 @@
 namespace IA.Migrations
 {
-    using System;
     using System.Data.Entity.Migrations;
-    
-    public partial class plswerk : DbMigration
+
+    public partial class ReworkMeruDb : DbMigration
     {
         public override void Up()
         {
             DropPrimaryKey("dbo.Identifiers");
-            DropColumn("dbo.Identifiers", "guild_id");
-            Sql("truncate table Identifiers");
-            AddColumn("dbo.Identifiers", "GuildId", c => c.Long(nullable: false, identity: false));
-            AddColumn("dbo.Identifiers", "IdentifierId", c => c.String(nullable: false, maxLength: 128, defaultValue: ">"));
+            AddColumn("dbo.Identifiers", "GuildId", c => c.Long(nullable: false));
+            AddColumn("dbo.Identifiers", "IdentifierId", c => c.String(nullable: false, maxLength: 128));
             AddPrimaryKey("dbo.Identifiers", new[] { "GuildId", "IdentifierId" });
+            DropColumn("dbo.Identifiers", "guild_id");
         }
 
         public override void Down()

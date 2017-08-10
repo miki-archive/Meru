@@ -2,15 +2,13 @@
 using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK
 {
-    class RuntimeAudioChannel : IDiscordAudioChannel
+    internal class RuntimeAudioChannel : IDiscordAudioChannel
     {
-        IVoiceChannel audio;
+        private IVoiceChannel audio;
 
         public RuntimeAudioChannel(IVoiceChannel a)
         {

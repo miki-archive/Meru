@@ -1,9 +1,5 @@
 ﻿using IA.Models;
 using IA.Models.Context;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -65,14 +61,14 @@ namespace IA.Events
 
         public async Task<string> GetForGuildAsync(ulong id)
         {
-            if(Changable)
+            if (Changable)
             {
                 long guildId = id.ToDbLong();
 
                 using (var context = new IAContext())
                 {
                     Identifier identifier = await context.Identifiers.FindAsync(guildId, DefaultValue);
-                    if(identifier == null)
+                    if (identifier == null)
                     {
                         context.Identifiers.Add(new Identifier() { GuildId = guildId, DefaultValue = DefaultValue, Value = DefaultValue });
                         await context.SaveChangesAsync();

@@ -38,7 +38,6 @@ namespace IA.Addons
 
                     Assembly addon = Assembly.Load(File.ReadAllBytes(s));
 
-
                     if (addon.CreateInstance(newS + ".Addon") is IAddon currentAddon)
                     {
                         IAddonInstance aInstance = new RuntimeAddonInstance();
@@ -101,7 +100,6 @@ namespace IA.Addons
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
 
-
             if (addon.CreateInstance(newS + ".Addon") is IAddon currentAddon)
             {
                 RuntimeAddonInstance aInstance = new RuntimeAddonInstance();
@@ -130,7 +128,6 @@ namespace IA.Addons
 
             string newS = s.Split('/')[s.Split('/').Length - 1];
             newS = newS.Remove(newS.Length - 4);
-
 
             if (addon.CreateInstance(newS + ".Addon") is IAddon currentAddon)
             {

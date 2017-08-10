@@ -4,7 +4,6 @@ using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -15,21 +14,34 @@ namespace IA.Events
         public int Cooldown { get; set; } = 5;
 
         public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
+        public string[] Aliases { get; set; } = new string[] { };
 
         public CheckCommandDelegate CheckCommand { get; set; } = (e, args, aliases) => true;
         public ProcessCommandDelegate ProcessCommand { get; set; } = async (context) => await Task.Delay(0);
 
-        public RuntimeCommandEvent() { }
-        public RuntimeCommandEvent(string name) { Name = name; }
+        public RuntimeCommandEvent()
+        {
+        }
+
+        public RuntimeCommandEvent(string name)
+        {
+            Name = name;
+        }
+
         public RuntimeCommandEvent(ICommandEvent commandEvent) : base(commandEvent)
         {
             CheckCommand = commandEvent?.CheckCommand;
+            Aliases = commandEvent.Aliases;
             Cooldown = commandEvent.Cooldown;
             GuildPermissions = commandEvent?.GuildPermissions;
             ProcessCommand = commandEvent?.ProcessCommand;
             CommandPool = commandEvent?.CommandPool;
         }
-        public RuntimeCommandEvent(Action<RuntimeCommandEvent> info) { info.Invoke(this);  }
+
+        public RuntimeCommandEvent(Action<RuntimeCommandEvent> info)
+        {
+            info.Invoke(this);
+        }
 
         public async Task Check(IDiscordMessage e, ICommandHandler c, string identifier = "")
         {
@@ -44,9 +56,9 @@ namespace IA.Events
                 arguments = args.Split(' ');
             }
 
-            if(Module != null)
+            if (Module != null)
             {
-                if(Module.Nsfw && !e.Channel.Nsfw)
+                if (Module.Nsfw && !e.Channel.Nsfw)
                 {
                     return;
                 }
@@ -89,9 +101,9 @@ namespace IA.Events
             {
                 ProcessCommandDelegate targetCommand = ProcessCommand;
 
-                if(arguments.Length > 0)
+                if (arguments.Length > 0)
                 {
-                    if(CommandPool.ContainsKey(arguments[0]))
+                    if (CommandPool.ContainsKey(arguments[0]))
                     {
                         targetCommand = CommandPool[arguments[0]];
                         args = args.Substring((arguments[0].Length == args.Length) ? arguments[0].Length : arguments[0].Length + 1);
@@ -147,7 +159,7 @@ namespace IA.Events
                 await cmd(context);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.ErrorAt(Name, ex.Message + "\n" + ex.StackTrace);
             }

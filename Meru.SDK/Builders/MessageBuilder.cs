@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace IA.SDK.Builders
+﻿namespace IA.SDK.Builders
 {
     public class MessageBuilder
     {
-        string message = "";
+        private string message = "";
 
         public MessageBuilder AppendText(string text, MessageFormatting formatting = MessageFormatting.PLAIN, bool newLine = true, bool endWithSpace = false)
         {
@@ -23,6 +17,7 @@ namespace IA.SDK.Builders
 
             return this;
         }
+
         public MessageBuilder NewLine()
         {
             message += "\n";
@@ -33,6 +28,7 @@ namespace IA.SDK.Builders
         {
             return message;
         }
+
         public string BuildWithBlockCode(string language = "markdown")
         {
             return "```" + language + "\n" + message + "\n```";
@@ -40,7 +36,7 @@ namespace IA.SDK.Builders
 
         private string ApplyFormatting(string text, MessageFormatting formatting)
         {
-            switch(formatting)
+            switch (formatting)
             {
                 case MessageFormatting.BOLD:
                     return "**" + text + "**";

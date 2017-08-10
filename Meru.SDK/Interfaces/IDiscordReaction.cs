@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace IA.SDK.Interfaces
+﻿namespace IA.SDK.Interfaces
 {
-    interface IDiscordReaction
+    internal interface IDiscordReaction
     {
         DiscordEmoji Emoji { get; }
     }

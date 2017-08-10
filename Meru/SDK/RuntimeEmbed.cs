@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.Rest;
 using IA.SDK.Builders;
 using IA.SDK.Extensions;
 using IA.SDK.Interfaces;
@@ -19,6 +18,7 @@ namespace IA.SDK
         {
             embed = new EmbedBuilder();
         }
+
         public RuntimeEmbed(EmbedBuilder e)
         {
             embed = e;
@@ -29,7 +29,7 @@ namespace IA.SDK
             get
             {
                 List<IEmbedField> f = new List<IEmbedField>();
-                foreach(EmbedFieldBuilder field in embed.Fields)
+                foreach (EmbedFieldBuilder field in embed.Fields)
                 {
                     f.Add(new RuntimeEmbedField(field));
                 }
@@ -152,6 +152,7 @@ namespace IA.SDK
 
             return this;
         }
+
         public IDiscordEmbed AddField(IEmbedField field)
         {
             embed.AddField(x =>
@@ -163,15 +164,16 @@ namespace IA.SDK
 
             return this;
         }
+
         public IDiscordEmbed AddField(string title, string value)
         {
             embed.AddField(title, value);
             return this;
         }
 
-        public IDiscordEmbed AddInlineField(string title, string value)
+        public IDiscordEmbed AddInlineField(object title, object value)
         {
-            embed.AddInlineField(title, value);
+            embed.AddInlineField(title.ToString(), value);
             return this;
         }
 
@@ -192,6 +194,7 @@ namespace IA.SDK
             embed.Footer = new EmbedFooterBuilder();
             return Footer;
         }
+
         public IDiscordEmbed CreateFooter(string text, string iconUrl)
         {
             embed.Footer = new EmbedFooterBuilder().WithText(text).WithIconUrl(iconUrl);
@@ -211,38 +214,52 @@ namespace IA.SDK
                             Title = x.Peel();
                         }
                         break;
+
                     case "description":
                     case "desc":
                         {
                             Description = x.Peel();
-                        } break;
+                        }
+                        break;
+
                     case "url":
                         {
                             Url = x.Peel();
-                        } break;
+                        }
+                        break;
+
                     case "imageurl":
                         {
                             ImageUrl = x.Peel();
-                        } break;
+                        }
+                        break;
+
                     case "color":
                     case "c":
                         {
                             string[] colorSplit = x.Peel().Split(',');
                             Color = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
-                        } break;
+                        }
+                        break;
+
                     case "author":
                         {
                             Author = (Author as IQuery<RuntimeEmbedAuthor>).Query(x.Peel());
-                        } break;
+                        }
+                        break;
+
                     case "footer":
                         {
                             Footer = (Footer as IQuery<RuntimeEmbedFooter>).Query(x.Peel());
-                        } break;
+                        }
+                        break;
+
                     case "field":
                         {
                             RuntimeEmbedField em = new RuntimeEmbedField();
                             AddField((em as IQuery<RuntimeEmbedField>).Query(x.Peel()));
-                        } break;
+                        }
+                        break;
                 }
             }
 
@@ -256,11 +273,10 @@ namespace IA.SDK
             {
                 if (!(await (m as IGuildChannel).Guild.GetCurrentUserAsync()).GuildPermissions.EmbedLinks)
                 {
-                    if(string.IsNullOrWhiteSpace(ImageUrl))
+                    if (string.IsNullOrWhiteSpace(ImageUrl))
                     {
                         return new RuntimeMessage(await m.SendMessageAsync(ToMessageBuilder().Build(), false));
                     }
-
 
                     using (WebClient wc = new WebClient())
                     {
@@ -268,12 +284,13 @@ namespace IA.SDK
                         using (MemoryStream ms = new MemoryStream(image))
                         {
                             return new RuntimeMessage(await m.SendFileAsync(ms, ImageUrl, ToMessageBuilder().Build()));
-                    }
+                        }
                     }
                 }
             }
             return new RuntimeMessage(await m.SendMessageAsync("", false, embed));
         }
+
         public async Task<IDiscordMessage> SendToChannel(IDiscordMessageChannel channel)
         {
             return await SendToChannel(channel.Id);
@@ -284,6 +301,7 @@ namespace IA.SDK
             IDMChannel channel = await (Bot.instance.Client.GetUser(userId)).GetOrCreateDMChannelAsync();
             return new RuntimeMessage(await channel.SendMessageAsync("", false, embed));
         }
+
         public async Task<IDiscordMessage> SendToUser(IDiscordUser user)
         {
             return await SendToUser(user.Id);
@@ -314,6 +332,7 @@ namespace IA.SDK
             Color = color;
             return this;
         }
+
         public IDiscordEmbed SetColor(float r, float g, float b)
         {
             return SetColor(new Color(r, g, b));
@@ -359,7 +378,7 @@ namespace IA.SDK
         {
             MessageBuilder b = new MessageBuilder();
 
-            if(Author != null)
+            if (Author != null)
             {
                 b.AppendText(Author.Name, MessageFormatting.BOLD);
             }
@@ -367,7 +386,7 @@ namespace IA.SDK
             b.AppendText(Title, MessageFormatting.BOLD)
              .AppendText(Description);
 
-            foreach(IEmbedField f in Fields)
+            foreach (IEmbedField f in Fields)
             {
                 b.AppendText(f.Name, MessageFormatting.UNDERLINED)
                  .AppendText(f.Value)
@@ -381,6 +400,7 @@ namespace IA.SDK
 
             return b;
         }
+
         public EmbedBuilder ToNativeObject()
         {
             return embed;

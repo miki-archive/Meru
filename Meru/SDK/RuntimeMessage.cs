@@ -69,7 +69,7 @@ namespace IA.SDK
             get
             {
                 List<IDiscordAttachment> output = new List<IDiscordAttachment>();
-                foreach(IAttachment a in messageData.Attachments)
+                foreach (IAttachment a in messageData.Attachments)
                 {
                     output.Add(new RuntimeAttachment(a));
                 }
@@ -114,7 +114,7 @@ namespace IA.SDK
             {
                 IReadOnlyDictionary<IEmote, ReactionMetadata> x = (messageData as IUserMessage).Reactions;
                 Dictionary<DiscordEmoji, DiscordReactionMetadata> emojis = new Dictionary<DiscordEmoji, DiscordReactionMetadata>();
-                foreach(Emoji y in x.Keys)
+                foreach (Emoji y in x.Keys)
                 {
                     DiscordEmoji newEmoji = new DiscordEmoji();
                     newEmoji.Name = y.Name;
@@ -136,9 +136,9 @@ namespace IA.SDK
             messageData = msg;
 
             if (msg.Author != null) user = new RuntimeUser(msg.Author);
-            if(msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
+            if (msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
             IGuild g = (messageData.Author as IGuildUser)?.Guild;
-            
+
             if (g != null)
             {
                 guild = new RuntimeGuild(g);
@@ -187,6 +187,7 @@ namespace IA.SDK
                 x.Content = message;
             });
         }
+
         public async Task ModifyAsync(IDiscordEmbed embed)
         {
             await (messageData as IUserMessage)?.ModifyAsync(x =>

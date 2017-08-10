@@ -4,14 +4,16 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public class GuildEvent : Event
+    public class GuildEvent : RuntimeCommandEvent
     {
         public ProcessServerCommand processCommand = async (e) =>
         {
             await (await e.GetDefaultChannel()).SendMessage("This server event has not been set up correctly.");
         };
 
-        public GuildEvent() { }
+        public GuildEvent()
+        {
+        }
 
         public async Task CheckAsync(IDiscordGuild e)
         {

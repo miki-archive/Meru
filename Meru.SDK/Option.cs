@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IA.SDK
@@ -10,7 +7,7 @@ namespace IA.SDK
     {
         public string emoji;
 
-        public Func<Task> output; 
+        public Func<Task> output;
 
         public Option(string emoji, Func<Task> output)
         {

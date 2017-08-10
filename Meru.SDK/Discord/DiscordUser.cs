@@ -103,6 +103,8 @@ namespace IA.SDK
             }
         }
 
+        public int Hierarchy => throw new NotImplementedException();
+
         public virtual Task AddRoleAsync(IDiscordRole role)
         {
             throw new NotImplementedException();
@@ -113,7 +115,7 @@ namespace IA.SDK
             throw new NotImplementedException();
         }
 
-        public virtual Task Ban(IDiscordGuild guild)
+        public virtual Task Ban(IDiscordGuild guild, int amount = 0, string reason = "")
         {
             throw new NotImplementedException();
         }
@@ -128,7 +130,7 @@ namespace IA.SDK
             throw new NotImplementedException();
         }
 
-        public virtual Task Kick()
+        public virtual Task Kick(string x = "")
         {
             throw new NotImplementedException();
         }

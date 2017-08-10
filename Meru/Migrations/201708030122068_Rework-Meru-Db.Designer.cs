@@ -7,13 +7,13 @@ namespace IA.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.3-40302")]
-    public sealed partial class plswerk : IMigrationMetadata
+    public sealed partial class ReworkMeruDb : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(plswerk));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(ReworkMeruDb));
         
         string IMigrationMetadata.Id
         {
-            get { return "201706031712080_pls-werk"; }
+            get { return "201708030122068_Rework-Meru-Db"; }
         }
         
         string IMigrationMetadata.Source

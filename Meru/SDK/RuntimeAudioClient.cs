@@ -68,7 +68,7 @@ namespace IA.SDK
                 RedirectStandardOutput = true,
             };
             Process p = Process.Start(ffmpeg);
-            
+
             var output = p.StandardOutput.BaseStream;
 
             var discord = client.CreateOpusStream(1920);
@@ -77,7 +77,6 @@ namespace IA.SDK
 
             await discord.FlushAsync();
         }
-
 
         public async Task Skip()
         {

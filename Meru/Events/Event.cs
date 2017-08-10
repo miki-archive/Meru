@@ -3,7 +3,6 @@ using IA.Models.Context;
 using IA.SDK;
 using IA.SDK.Events;
 using IA.SDK.Interfaces;
-using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,7 +12,6 @@ namespace IA.Events
     public class Event : IEvent
     {
         public string Name { get; set; } = "$command-not-named";
-        public string[] Aliases { get; set; } = new string[] { };
 
         public EventAccessibility Accessibility { get; set; } = EventAccessibility.PUBLIC;
         public EventMetadata Metadata { get; set; } = new EventMetadata();
@@ -21,7 +19,7 @@ namespace IA.Events
         public bool OverridableByDefaultPrefix { get; set; } = false;
         public bool CanBeDisabled { get; set; } = true;
         public bool DefaultEnabled { get; set; } = true;
-  
+
         public IModule Module { get; set; }
 
         public int TimesUsed { get; set; } = 0;
@@ -31,11 +29,13 @@ namespace IA.Events
         public Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
         protected Dictionary<ulong, DateTime> lastTimeUsed = new Dictionary<ulong, DateTime>();
 
-        public Event() { }
+        public Event()
+        {
+        }
+
         public Event(IEvent eventObject)
         {
             Name = eventObject.Name;
-            Aliases = eventObject.Aliases;
             Accessibility = eventObject.Accessibility;
             OverridableByDefaultPrefix = eventObject.OverridableByDefaultPrefix;
             CanBeDisabled = eventObject.CanBeDisabled;
@@ -43,6 +43,7 @@ namespace IA.Events
             Module = eventObject.Module;
             TimesUsed = eventObject.TimesUsed;
         }
+
         public Event(Action<Event> info)
         {
             info.Invoke(this);
@@ -70,10 +71,11 @@ namespace IA.Events
                 await context.SaveChangesAsync();
             }
         }
+
         public async Task SetEnabledAll(IDiscordGuild guildId, bool enabled)
         {
             List<IDiscordMessageChannel> channels = await guildId.GetChannels();
-            foreach(IDiscordMessageChannel c in channels)
+            foreach (IDiscordMessageChannel c in channels)
             {
                 await SetEnabled(c.Id, enabled);
             }
@@ -91,7 +93,7 @@ namespace IA.Events
                 return enabled[id];
             }
 
-            using (var context = IAContext.CreateNoCache())
+            using (var context = new IAContext())
             {
                 CommandState state = await context.CommandStates.FindAsync(Name, id.ToDbLong());
                 if (state == null)
@@ -105,12 +107,6 @@ namespace IA.Events
         public IEvent SetName(string name)
         {
             Name = name;
-            return this;
-        }
-
-        public IEvent SetAliases(params string[] aliases)
-        {
-            Aliases = aliases;
             return this;
         }
 

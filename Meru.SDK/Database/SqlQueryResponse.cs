@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IA
 {
@@ -30,22 +27,27 @@ namespace IA
 
             return DateTime.Parse(GetString(id));
         }
+
         public int GetInt(string id)
         {
             return int.Parse(GetString(id));
         }
+
         public long GetLong(string id)
         {
             return long.Parse(GetString(id));
         }
+
         public float GetFloat(string v)
         {
             return float.Parse(GetString(v));
         }
+
         public uint GetUint(string id)
         {
             return uint.Parse(GetString(id));
         }
+
         public ulong GetUlong(string id)
         {
             return ulong.Parse(GetString(id));
@@ -55,6 +57,7 @@ namespace IA
         {
             return Values.ContainsKey(id);
         }
+
         public bool IsValid(string id)
         {
             return !string.IsNullOrWhiteSpace(GetString(id));

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IA.Events.Attributes
 {
@@ -30,8 +26,8 @@ namespace IA.Events.Attributes
 
         public ModuleAttribute()
         {
-
         }
+
         public ModuleAttribute(string Name)
         {
             module.Name = Name;
