@@ -11,7 +11,7 @@ namespace IA.Events
     public class RuntimeCommandEvent : Event, ICommandEvent
     {
         public Dictionary<string, ProcessCommandDelegate> CommandPool { get; set; } = new Dictionary<string, ProcessCommandDelegate>();
-        public int Cooldown { get; set; } = 5;
+        public int Cooldown { get; set; } = 3;
 
         public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
         public string[] Aliases { get; set; } = new string[] { };
@@ -128,26 +128,20 @@ namespace IA.Events
             }
         }
 
-        private float GetCooldown(ulong id)
-        {
-            float currentCooldown = (float)(DateTime.Now.AddSeconds(-Cooldown) - lastTimeUsed[id]).TotalSeconds;
-            return currentCooldown;
-        }
-
         private bool IsOnCooldown(ulong id)
         {
             if (lastTimeUsed.ContainsKey(id))
             {
-                if (DateTime.Now.AddSeconds(-Cooldown) >= lastTimeUsed[id])
+                if (lastTimeUsed[id].CanBeUsed())
                 {
-                    lastTimeUsed[id] = DateTime.Now;
+                    lastTimeUsed[id].Tick();
                     return false;
                 }
                 return true;
             }
             else
             {
-                lastTimeUsed.Add(id, DateTime.Now);
+                lastTimeUsed.Add(id, new EventCooldownObject(Cooldown));
                 return false;
             }
         }

@@ -99,7 +99,6 @@ namespace IA.SDK
 
         public int ShardId => client.ShardId;
 
-        // TODO: Implement
         public IDiscordAudioChannel VoiceChannel
         {
             get
@@ -137,7 +136,7 @@ namespace IA.SDK
 
             if (msg.Author != null) user = new RuntimeUser(msg.Author);
             if (msg.Channel != null) channel = new RuntimeMessageChannel(msg.Channel);
-            IGuild g = (messageData.Author as IGuildUser)?.Guild;
+            IGuild g = (messageData.Channel as IGuildChannel)?.Guild;
 
             if (g != null)
             {
@@ -162,14 +161,6 @@ namespace IA.SDK
         public async Task AddReaction(string emoji)
         {
             await (messageData as IUserMessage).AddReactionAsync(new Emoji(emoji));
-        }
-
-        // ---------------------------- important :( why don't I ever do what future me would do?!?!!?
-        // GET THIS SHIT OUTTA HERE.
-        // One day..
-        public IDiscordEmbed CreateEmbed()
-        {
-            return new RuntimeEmbed(new EmbedBuilder());
         }
 
         public async Task DeleteAsync()

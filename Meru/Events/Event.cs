@@ -27,12 +27,11 @@ namespace IA.Events
         internal EventSystem eventSystem;
 
         public Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
-        protected Dictionary<ulong, DateTime> lastTimeUsed = new Dictionary<ulong, DateTime>();
+        protected Dictionary<ulong, EventCooldownObject> lastTimeUsed = new Dictionary<ulong, EventCooldownObject>();
 
         public Event()
         {
         }
-
         public Event(IEvent eventObject)
         {
             Name = eventObject.Name;
@@ -43,7 +42,6 @@ namespace IA.Events
             Module = eventObject.Module;
             TimesUsed = eventObject.TimesUsed;
         }
-
         public Event(Action<Event> info)
         {
             info.Invoke(this);
@@ -114,6 +112,37 @@ namespace IA.Events
         {
             Accessibility = accessibility;
             return this;
+        }
+    }
+
+    public class EventCooldownObject
+    {
+        DateTime lastTimeUsed;
+        DateTime prevLastTimeUsed;
+
+        DateTime canBeUsedWhen;
+
+        int coolDown = 1;
+
+        public EventCooldownObject(int Cooldown)
+        {
+            lastTimeUsed = DateTime.Now;
+            coolDown = Cooldown;
+        }
+
+        public void Tick()
+        {
+            prevLastTimeUsed = lastTimeUsed;
+            lastTimeUsed = DateTime.Now;
+
+            double s = Math.Max(0, coolDown - (lastTimeUsed - prevLastTimeUsed).TotalSeconds);
+
+            canBeUsedWhen = DateTime.Now.AddSeconds(s);
+        }
+
+        public bool CanBeUsed()
+        {
+            return canBeUsedWhen <= DateTime.Now;
         }
     }
 }
