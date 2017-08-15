@@ -27,7 +27,7 @@ namespace IA
             {
                 await MeruUtils.TryAsync(async () =>
                 {
-                    Task.Run(() => UserJoin.Invoke(new RuntimeUser(u)));
+                    Task.Run(() => UserJoin?.Invoke(new RuntimeUser(u)));
                 });
             };
             
@@ -35,18 +35,15 @@ namespace IA
             {
                 await MeruUtils.TryAsync(async () =>
                 {
-                    Task.Run(() => UserLeft.Invoke(new RuntimeUser(u)));
+                    Task.Run(() => UserLeft?.Invoke(new RuntimeUser(u)));
                 });
             };
 
             Client.UserUpdated += async (u, unew) =>
             {
-                await MeruUtils.TryAsync(async () =>
-                {
                     RuntimeUser userOld = new RuntimeUser(u);
                     RuntimeUser userNew = new RuntimeUser(unew);
-                    Task.Run(() => UserUpdated.Invoke(userOld, userNew));
-                });    
+                    Task.Run(() => UserUpdated?.Invoke(userOld, userNew));
             };
 
             Client.MessageReceived += async (m) =>
@@ -56,7 +53,7 @@ namespace IA
                     await MeruUtils.TryAsync(async () =>
                     {
                         RuntimeMessage newMessage = new RuntimeMessage(m);
-                        await MessageReceived(newMessage);
+                        await MessageReceived?.Invoke(newMessage);
                     });
                 });
             };

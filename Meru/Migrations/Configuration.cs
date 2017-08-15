@@ -1,8 +1,13 @@
 namespace IA.Migrations
 {
     using EFCache;
+    using EFCache.Redis;
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Configuration;
     using System.Data.Entity;
     using System.Data.Entity.Core.Common;
+    using System.Data.Entity.Core.Metadata.Edm;
     using System.Data.Entity.Migrations;
 
     internal sealed class Configuration : DbMigrationsConfiguration<IA.Models.Context.IAContext>
@@ -28,20 +33,31 @@ namespace IA.Migrations
             //
         }
     }
-    internal sealed class CacheConfiguration : DbConfiguration
+    public class CacheConfiguration : DbConfiguration
     {
         public CacheConfiguration()
         {
-            var transactionHandler = new CacheTransactionHandler(new InMemoryCache());
-
+            var redisConnection = ConfigurationManager.ConnectionStrings["Redis"].ToString();
+            var cache = new RedisCache(redisConnection);
+            var transactionHandler = new CacheTransactionHandler(cache);
             AddInterceptor(transactionHandler);
 
-            var cachingPolicy = new CachingPolicy();
+            Loaded += (sender, args) =>
+            {
+                args.ReplaceService<CachingProviderServices>(
+                    (s, _) => new CachingProviderServices(s, transactionHandler, new RedisCachingPolicy())
+                    );
+            };
 
-            Loaded +=
-              (sender, args) => args.ReplaceService<DbProviderServices>(
-                (s, _) => new CachingProviderServices(s, transactionHandler,
-                  cachingPolicy));
+        }
+    }
+
+    public class RedisCachingPolicy : CachingPolicy
+    {
+        protected override void GetExpirationTimeout(ReadOnlyCollection<EntitySetBase> affectedEntitySets, out TimeSpan slidingExpiration, out DateTimeOffset absoluteExpiration)
+        {
+            slidingExpiration = TimeSpan.FromMinutes(5);
+            absoluteExpiration = DateTimeOffset.Now.AddMinutes(30);
         }
     }
 }
