@@ -49,16 +49,7 @@ namespace IA.Events
 
         public async Task SetEnabled(ulong channelId, bool enabled)
         {
-            if (this.enabled.ContainsKey(channelId))
-            {
-                this.enabled[channelId] = enabled;
-            }
-            else
-            {
-                this.enabled.Add(channelId, enabled);
-            }
-
-            using (var context = IAContext.CreateNoCache())
+            using (var context = new IAContext())
             {
                 CommandState state = await context.CommandStates.FindAsync(Name, channelId.ToDbLong());
                 if (state == null)
@@ -81,25 +72,30 @@ namespace IA.Events
 
         public async Task<bool> IsEnabled(ulong id)
         {
+            bool isEnabled = false;
+
             if (Module != null)
             {
                 if (!await Module.IsEnabled(id)) return false;
             }
 
-            if (enabled.ContainsKey(id))
-            {
-                return enabled[id];
-            }
+            CommandState state = null;
 
             using (var context = new IAContext())
             {
-                CommandState state = await context.CommandStates.FindAsync(Name, id.ToDbLong());
-                if (state == null)
-                {
-                    return DefaultEnabled;
-                }
-                return state.State;
+                state = await context.CommandStates.FindAsync(Name, id.ToDbLong());
             }
+
+            if (state == null)
+            {
+                isEnabled = DefaultEnabled;
+            }
+            else
+            {
+                isEnabled = state.State;
+            }
+
+            return isEnabled;
         }
 
         public IEvent SetName(string name)

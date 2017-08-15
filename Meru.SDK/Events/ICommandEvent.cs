@@ -12,7 +12,6 @@ namespace IA.SDK.Events
 
         List<DiscordGuildPermission> GuildPermissions { get; set; }
 
-        CheckCommandDelegate CheckCommand { get; set; }
         ProcessCommandDelegate ProcessCommand { get; set; }
 
         Task Check(IDiscordMessage e, ICommandHandler c, string identifier = "");

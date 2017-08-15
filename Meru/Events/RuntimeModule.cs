@@ -177,14 +177,10 @@ namespace IA.Events
         {
             if (await IsEnabled(arg.Id))
             {
-                try
+                await MeruUtils.TryAsync(async () => 
                 {
                     await JoinedGuild(arg);
-                }
-                catch (Exception e)
-                {
-                    Log.ErrorAt(Name, e.Message);
-                }
+                });
             }
         }
 
@@ -198,7 +194,10 @@ namespace IA.Events
         {
             if (await IsEnabled(arg.Id))
             {
-                await LeftGuild(arg);
+                await MeruUtils.TryAsync(async () =>
+                {
+                    await LeftGuild(arg);
+                });
             }
         }
 
@@ -206,7 +205,10 @@ namespace IA.Events
         {
             if (await IsEnabled(arg.Guild.Id))
             {
-                await UserJoinGuild(arg.Guild, arg);
+                await MeruUtils.TryAsync(async () =>
+                {
+                    await UserJoinGuild(arg.Guild, arg);
+                });
             }
         }
 
@@ -214,7 +216,10 @@ namespace IA.Events
         {
             if (await IsEnabled(arg.Guild.Id))
             {
-                await UserLeaveGuild(arg.Guild, arg);
+                await MeruUtils.TryAsync(async () =>
+                {
+                    await UserLeaveGuild(arg.Guild, arg);
+                });
             }
         }
 
@@ -224,7 +229,10 @@ namespace IA.Events
             {
                 if (await IsEnabled(arg1.Guild.Id))
                 {
-                    await UserUpdated(arg1, arg2);
+                    await MeruUtils.TryAsync(async () =>
+                    {
+                        await UserUpdated(arg1, arg2);
+                    });
                 }
             }
         }
@@ -233,29 +241,16 @@ namespace IA.Events
         {
             if (await IsEnabled(message.Guild.Id))
             {
-                try
+                await MeruUtils.TryAsync(async () =>
                 {
                     Task.Run(() => MessageRecieved(message));
-                }
-                catch (Exception ex)
-                {
-                    Log.ErrorAt("module@message", ex.Message);
-                }
+                });
             }
         }
 
         public async Task SetEnabled(ulong serverId, bool enabled)
         {
-            if (this.enabled.ContainsKey(serverId))
-            {
-                this.enabled[serverId] = enabled;
-            }
-            else
-            {
-                this.enabled.Add(serverId, enabled);
-            }
-
-            using (var context = IAContext.CreateNoCache())
+            using (var context = new IAContext())
             {
                 ModuleState state = await context.ModuleStates.FindAsync(SqlName, serverId.ToDbLong());
                 if (state == null)
@@ -269,22 +264,20 @@ namespace IA.Events
 
         public async Task<bool> IsEnabled(ulong id)
         {
-            if (enabled.ContainsKey(id))
-            {
-                return enabled[id];
-            }
+            ModuleState state = null;
 
-            using (var context = IAContext.CreateNoCache())
+            using (var context = new IAContext())
             {
                 long guildId = id.ToDbLong();
-                ModuleState state = await context.ModuleStates.FindAsync(SqlName, guildId);
-                if (state == null)
-                {
-                    return Enabled;
-                }
-                enabled.Add(id, state.State);
-                return state.State;
+                state = await context.ModuleStates.FindAsync(SqlName, guildId);
             }
+
+            if (state == null)
+            {
+                return Enabled;
+            }
+
+            return state.State;
         }
 
         internal RuntimeModule Add(RuntimeModule module)

@@ -181,34 +181,35 @@ namespace IA.SDK
 
         public async Task<IDiscordMessage> SendMessage(string message)
         {
-            try
+            RuntimeMessage m = null;
+            MeruUtils.TryAsync(async () =>
             {
-                RuntimeMessage m = new RuntimeMessage(await (channel as IMessageChannel).SendMessage(message));
+                m = new RuntimeMessage(await (channel as IMessageChannel).SendMessage(message));
                 Log.Message("Sent message to channel " + channel.Name);
-                return m;
-            }
-            catch
+            },
+            async (ex) =>
             {
                 Log.ErrorAt("SendMessage", "failed to send");
-            }
-            return null;
+            });
+            return m;
         }
 
         public async Task<IDiscordMessage> SendMessage(IDiscordEmbed embed)
         {
-            try
+            RuntimeMessage m = null;
+            await MeruUtils.TryAsync(async () =>
             {
                 Log.Message("Sent embed to channel " + channel.Name);
-                return new RuntimeMessage(
+                m = new RuntimeMessage(
                     await (channel as IMessageChannel)
                     .SendMessageAsync("", false, (embed as IProxy<EmbedBuilder>)
                     .ToNativeObject()));
-            }
-            catch (Exception ex)
+            },
+            async (ex) =>
             {
                 Log.ErrorAt("SendMessage", ex.Message);
-            }
-            return null;
+            });
+            return m;
         }
 
         public IChannel ToNativeObject()

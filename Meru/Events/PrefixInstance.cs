@@ -70,7 +70,7 @@ namespace IA.Events
                     Identifier identifier = await context.Identifiers.FindAsync(guildId, DefaultValue);
                     if (identifier == null)
                     {
-                        context.Identifiers.Add(new Identifier() { GuildId = guildId, DefaultValue = DefaultValue, Value = DefaultValue });
+                        identifier = context.Identifiers.Add(new Identifier() { GuildId = guildId, DefaultValue = DefaultValue, Value = DefaultValue });
                         await context.SaveChangesAsync();
                     }
                     return identifier.Value;

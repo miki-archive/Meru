@@ -13,7 +13,7 @@ namespace IA
 
         public event Func<IDiscordMessage, Task> MessageReceived;
 
-        public event Func<IDiscordMessage, IDiscordMessageChannel, Task> MessageDeleted;
+        //public event Func<IDiscordMessage, IDiscordMessageChannel, Task> MessageDeleted;
 
         public event Func<IDiscordUser, Task> UserJoin;
 
@@ -23,13 +23,43 @@ namespace IA
 
         public void LoadEvents()
         {
-            Client.UserJoined += async (u) => await UserJoin.Invoke(new RuntimeUser(u));
-            Client.UserLeft += async (u) => await UserLeft.Invoke(new RuntimeUser(u));
-            Client.UserUpdated += async (u, unew) => await UserUpdated.Invoke(new RuntimeUser(u), new RuntimeUser(unew));
+            Client.UserJoined += async (u) =>
+            {
+                await MeruUtils.TryAsync(async () =>
+                {
+                    Task.Run(() => UserJoin.Invoke(new RuntimeUser(u)));
+                });
+            };
+            
+            Client.UserLeft += async (u) =>
+            {
+                await MeruUtils.TryAsync(async () =>
+                {
+                    Task.Run(() => UserLeft.Invoke(new RuntimeUser(u)));
+                });
+            };
 
-            // TODO: write a ICachable wrapper
-            //Client.MessageDeleted += async (m, c) => await MessageDeleted.Invoke(new RuntimeMessage(m));
-            Client.MessageReceived += async (m) => await MessageReceived.Invoke(new RuntimeMessage(m));
+            Client.UserUpdated += async (u, unew) =>
+            {
+                await MeruUtils.TryAsync(async () =>
+                {
+                    RuntimeUser userOld = new RuntimeUser(u);
+                    RuntimeUser userNew = new RuntimeUser(unew);
+                    Task.Run(() => UserUpdated.Invoke(userOld, userNew));
+                });    
+            };
+
+            Client.MessageReceived += async (m) =>
+            {
+                Task.Run(async () =>
+                {
+                    await MeruUtils.TryAsync(async () =>
+                    {
+                        RuntimeMessage newMessage = new RuntimeMessage(m);
+                        await MessageReceived(newMessage);
+                    });
+                });
+            };
         }
     }
 }

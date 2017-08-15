@@ -1,5 +1,8 @@
 namespace IA.Migrations
 {
+    using EFCache;
+    using System.Data.Entity;
+    using System.Data.Entity.Core.Common;
     using System.Data.Entity.Migrations;
 
     internal sealed class Configuration : DbMigrationsConfiguration<IA.Models.Context.IAContext>
@@ -23,6 +26,22 @@ namespace IA.Migrations
             //      new Person { FullName = "Rowan Miller" }
             //    );
             //
+        }
+    }
+    internal sealed class CacheConfiguration : DbConfiguration
+    {
+        public CacheConfiguration()
+        {
+            var transactionHandler = new CacheTransactionHandler(new InMemoryCache());
+
+            AddInterceptor(transactionHandler);
+
+            var cachingPolicy = new CachingPolicy();
+
+            Loaded +=
+              (sender, args) => args.ReplaceService<DbProviderServices>(
+                (s, _) => new CachingProviderServices(s, transactionHandler,
+                  cachingPolicy));
         }
     }
 }

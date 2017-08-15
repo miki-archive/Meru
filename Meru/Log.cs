@@ -122,14 +122,7 @@ namespace IA
             }
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            if (client.CanLog(LogLevel.WARNING))
-            {
-                Console.WriteLine("[wrn]: " + message);
-            }
-            if (client.CanFileLog(LogLevel.WARNING))
-            {
-                log?.Write(message);
-            }
+            Console.WriteLine("[wrn]: " + message);
             Console.ForegroundColor = ConsoleColor.White;
         }
 
@@ -145,14 +138,8 @@ namespace IA
             }
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            if (client.CanFileLog(LogLevel.WARNING))
-            {
-                Console.WriteLine("[wrn@" + tag + "]: " + message);
-            }
-            if (client.CanLog(LogLevel.WARNING))
-            {
-                Console.ForegroundColor = ConsoleColor.White;
-            }
+            Console.WriteLine("[wrn@" + tag + "]: " + message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         /// <summary>
@@ -167,14 +154,7 @@ namespace IA
             }
 
             Console.ForegroundColor = ConsoleColor.Green;
-            if (client.CanLog(LogLevel.NOTICE))
-            {
-                Console.WriteLine("[yay]: " + message);
-            }
-            if (client.CanFileLog(LogLevel.NOTICE))
-            {
-                log?.Write(message);
-            }
+            Console.WriteLine("[yay]: " + message);
             Console.ForegroundColor = ConsoleColor.White;
         }
 

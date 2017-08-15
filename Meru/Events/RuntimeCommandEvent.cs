@@ -16,7 +16,6 @@ namespace IA.Events
         public List<DiscordGuildPermission> GuildPermissions { get; set; } = new List<DiscordGuildPermission>();
         public string[] Aliases { get; set; } = new string[] { };
 
-        public CheckCommandDelegate CheckCommand { get; set; } = (e, args, aliases) => true;
         public ProcessCommandDelegate ProcessCommand { get; set; } = async (context) => await Task.Delay(0);
 
         public RuntimeCommandEvent()
@@ -30,7 +29,6 @@ namespace IA.Events
 
         public RuntimeCommandEvent(ICommandEvent commandEvent) : base(commandEvent)
         {
-            CheckCommand = commandEvent?.CheckCommand;
             Aliases = commandEvent.Aliases;
             Cooldown = commandEvent.Cooldown;
             GuildPermissions = commandEvent?.GuildPermissions;
@@ -45,6 +43,7 @@ namespace IA.Events
 
         public async Task Check(IDiscordMessage e, ICommandHandler c, string identifier = "")
         {
+            Log.Message($"Entering {Name}!");
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
             List<string> allAliases = new List<string>();
@@ -70,13 +69,10 @@ namespace IA.Events
                 allAliases.Add(Name);
             }
 
-            if (enabled.ContainsKey(e.Channel.Id))
+            if (!await IsEnabled(e.Channel.Id))
             {
-                if (!enabled[e.Channel.Id])
-                {
-                    Log.WarningAt(Name, " is disabled");
-                    return;
-                }
+                Log.WarningAt(Name, " is disabled");
+                return;
             }
 
             if (IsOnCooldown(e.Author.Id))
@@ -97,35 +93,35 @@ namespace IA.Events
                 }
             }
 
-            if (CheckCommand(e, command, allAliases.ToArray()))
+            ProcessCommandDelegate targetCommand = ProcessCommand;
+
+            if (arguments.Length > 0)
             {
-                ProcessCommandDelegate targetCommand = ProcessCommand;
-
-                if (arguments.Length > 0)
+                if (CommandPool.ContainsKey(arguments[0]))
                 {
-                    if (CommandPool.ContainsKey(arguments[0]))
-                    {
-                        targetCommand = CommandPool[arguments[0]];
-                        args = args.Substring((arguments[0].Length == args.Length) ? arguments[0].Length : arguments[0].Length + 1);
-                    }
+                    targetCommand = CommandPool[arguments[0]];
+                    args = args.Substring((arguments[0].Length == args.Length) ? arguments[0].Length : arguments[0].Length + 1);
                 }
-
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-
-                EventContext context = new EventContext();
-                context.commandHandler = c;
-                context.arguments = args;
-                context.message = e;
-
-                if (await TryProcessCommand(targetCommand, context))
-                {
-                    await eventSystem.OnCommandDone(e, this);
-                    TimesUsed++;
-                    Log.Message($"{Name} called from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
-                }
-                sw.Stop();
             }
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            EventContext context = new EventContext();
+            context.commandHandler = c;
+            context.arguments = args;
+            context.message = e;    
+
+            Log.Message($"Starting Command!!! {Name}");
+
+            if (await TryProcessCommand(targetCommand, context))
+            {
+                await eventSystem.OnCommandDone(e, this);
+                TimesUsed++;
+                Log.Message($"{Name} called from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
+            }
+            sw.Stop();
+            Log.Message($"Leaving {Name}");
         }
 
         private bool IsOnCooldown(ulong id)
@@ -148,16 +144,19 @@ namespace IA.Events
 
         private async Task<bool> TryProcessCommand(ProcessCommandDelegate cmd, EventContext context)
         {
-            try
+            bool success = false;
+            await MeruUtils.TryAsync(async () =>
             {
+                Log.Message($"Do we get here? {Name}");
                 await cmd(context);
-                return true;
-            }
-            catch (Exception ex)
+                success = true;
+            },
+            async (ex) =>
             {
                 Log.ErrorAt(Name, ex.Message + "\n" + ex.StackTrace);
-            }
-            return false;
+                await eventSystem.OnCommandError(ex, this, context.message);
+            });
+            return success;
         }
 
         public ICommandEvent SetCooldown(int seconds)

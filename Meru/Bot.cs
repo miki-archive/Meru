@@ -17,6 +17,8 @@ namespace IA
         public DiscordShardedClient Client { private set; get; }
         public EventSystem Events { internal set; get; }
 
+        public Func<Exception, Task> OnError = null;
+
         public string Name
         {
             get
@@ -90,7 +92,6 @@ namespace IA
             foreach (DiscordSocketClient client in Client.Shards)
             {
                 await client.StartAsync();
-                // 10 seconds wait
                 await Task.Delay(10000);
             }
 
@@ -169,7 +170,9 @@ namespace IA
             Client = new DiscordShardedClient(new DiscordSocketConfig()
             {
                 TotalShards = clientInformation.ShardCount,
-                LogLevel = LogSeverity.Info
+                LogLevel = LogSeverity.Info,
+                HandlerTimeout = 10000,
+                ConnectionTimeout = 300000,
             });
 
             LoadEvents();
@@ -190,6 +193,8 @@ namespace IA
             {
                 await clientInformation.EventLoaderMethod(this);
             }
+
+            //MessageReceived += async (m) => Log.Message("message received");
 
             foreach (DiscordSocketClient c in Client.Shards)
             {

@@ -1,5 +1,6 @@
 ﻿using IA.Events;
 using IA.SDK;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -51,9 +52,9 @@ namespace IA.Addons
                         Log.Done($"loaded Add-On {newS} successfully");
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
-                    Log.Warning($"Module {newS} is not compatible with this version (v{Bot.VersionNumber})");
+                    await MeruUtils.ReportErrorAsync(ex);
                 }
             }
         }

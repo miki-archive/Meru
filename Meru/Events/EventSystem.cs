@@ -355,14 +355,14 @@ namespace IA.Events
         {
             foreach (CommandDoneEvent ev in Events.CommandDoneEvents.Values)
             {
-                try
+                MeruUtils.TryAsync(async () =>
                 {
                     await ev.processEvent(e, commandEvent, success);
-                }
-                catch (Exception ex)
+                },
+                async (ex) =>
                 {
                     Log.ErrorAt($"commanddone@{ev.Name}", ex.Message);
-                }
+                });
             }
         }
 
@@ -406,11 +406,6 @@ namespace IA.Events
             if (_message.Author.IsBot)
             {
                 return;
-            }
-
-            if (registeredUsers.ContainsKey(_message.Author.Id))
-            {
-                registeredUsers[_message.Author.Id].Invoke(_message);
             }
 
             await CommandHandler.CheckAsync(_message);
@@ -463,19 +458,19 @@ namespace IA.Events
 
         private async Task InternalMessageReceived(IDiscordMessage message)
         {
-            try
+            await MeruUtils.TryAsync(async () =>
             {
-                await OnMessageRecieved(message);
+                await Task.Run(() => OnMessageRecieved(message));
 
                 if (message.MentionedUserIds.Contains(Bot.instance.Client.CurrentUser.Id))
                 {
                     await OnMention(message);
                 }
-            }
-            catch (Exception e)
+            },
+            async (e) =>
             {
                 Log.ErrorAt("messagerecieved", e.ToString());
-            }
+            });
         }
 
         private async Task InternalJoinedGuild(IDiscordGuild g)
