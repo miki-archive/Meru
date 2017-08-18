@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IA.Models
 {
-    internal class Identifier
+    public class Identifier
     {
         [Key]
         [Column("GuildId", Order = 0)]

@@ -76,6 +76,11 @@ namespace IA.Events
             Events.CommandDoneEvents.Add(newEvent.Name.ToLower(), newEvent);
         }
 
+        public void Ignore(ulong id)
+        {
+            ignore.Add(id);
+        }
+
         public void AddContinuousEvent(Action<ContinuousEvent> info)
         {
             ContinuousEvent newEvent = new ContinuousEvent();
@@ -267,7 +272,12 @@ namespace IA.Events
 
             foreach (KeyValuePair<string, List<string>> items in moduleEvents)
             {
-                embed.AddInlineField(items.Key, "```" + string.Join(", ", items.Value) + "```");
+                for(int i = 0; i < items.Value.Count; i ++)
+                {
+                    items.Value[i] = $"`{items.Value[i]}`";
+                }        
+
+                embed.AddField(items.Key, string.Join(", ",items.Value));
             }
             return embed;
         }
@@ -403,7 +413,7 @@ namespace IA.Events
 
         private async Task OnMessageRecieved(IDiscordMessage _message)
         {
-            if (_message.Author.IsBot)
+            if (_message.Author.IsBot || ignore.Contains(_message.Author.Id))
             {
                 return;
             }

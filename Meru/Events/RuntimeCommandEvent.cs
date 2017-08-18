@@ -43,7 +43,6 @@ namespace IA.Events
 
         public async Task Check(IDiscordMessage e, ICommandHandler c, string identifier = "")
         {
-            Log.Message($"Entering {Name}!");
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
             List<string> allAliases = new List<string>();
@@ -112,16 +111,13 @@ namespace IA.Events
             context.arguments = args;
             context.message = e;    
 
-            Log.Message($"Starting Command!!! {Name}");
-
             if (await TryProcessCommand(targetCommand, context))
             {
                 await eventSystem.OnCommandDone(e, this);
                 TimesUsed++;
-                Log.Message($"{Name} called from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
+                Log.Message($"{Name} called by {e.Author.Username}#{e.Author.Discriminator} [{e.Author.Id}] from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
             }
             sw.Stop();
-            Log.Message($"Leaving {Name}");
         }
 
         private bool IsOnCooldown(ulong id)
@@ -147,7 +143,6 @@ namespace IA.Events
             bool success = false;
             await MeruUtils.TryAsync(async () =>
             {
-                Log.Message($"Do we get here? {Name}");
                 await cmd(context);
                 success = true;
             },

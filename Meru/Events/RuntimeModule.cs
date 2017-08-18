@@ -4,6 +4,7 @@ using IA.SDK;
 using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,7 +30,7 @@ namespace IA.Events
         public List<ICommandEvent> Events { get; set; } = new List<ICommandEvent>();
         public List<IService> Services { get; set; } = new List<IService>();
 
-        private Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
+        private ConcurrentDictionary<ulong, bool> cache = new ConcurrentDictionary<ulong, bool>();
 
         internal EventSystem EventSystem;
 
@@ -258,6 +259,12 @@ namespace IA.Events
                     state = context.ModuleStates.Add(new ModuleState() { ChannelId = serverId.ToDbLong(), ModuleName = SqlName, State = Enabled });
                 }
                 state.State = enabled;
+
+                cache.AddOrUpdate(serverId, enabled, (x, y) =>
+                {
+                    return enabled;
+                });
+
                 await context.SaveChangesAsync();
             }
         }
@@ -266,18 +273,25 @@ namespace IA.Events
         {
             ModuleState state = null;
 
-            using (var context = new IAContext())
+            if (cache.ContainsKey(id))
             {
-                long guildId = id.ToDbLong();
-                state = await context.ModuleStates.FindAsync(SqlName, guildId);
+                return cache.GetOrAdd(id, Enabled);
             }
-
-            if (state == null)
+            else
             {
-                return Enabled;
-            }
+                using (var context = new IAContext())
+                {
+                    long guildId = id.ToDbLong();
+                    state = await context.ModuleStates.FindAsync(SqlName, guildId);
+                }
 
-            return state.State;
+                if (state == null)
+                {
+                    return cache.GetOrAdd(id, Enabled);
+                }
+
+                return cache.GetOrAdd(id, state.State);
+            }
         }
 
         internal RuntimeModule Add(RuntimeModule module)

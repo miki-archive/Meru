@@ -1,9 +1,26 @@
 ﻿using IA.Models;
 using IA.Models.Context;
+using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace IA.Events
 {
+    public static class ConcurrentUtils
+    {
+        public static async Task<TValue> GetOrAddAsync<TKey, TValue>(
+    this ConcurrentDictionary<TKey, TValue> dictionary,
+    TKey key, Func<TKey, Task<TValue>> valueFactory)
+        {
+            TValue resultingValue;
+            if (dictionary.TryGetValue(key, out resultingValue))
+            {
+                return resultingValue;
+            }
+            return dictionary.GetOrAdd(key, await valueFactory(key));
+        }
+    }
+
     public class PrefixInstance
     {
         public static PrefixInstance Default = null;
@@ -16,6 +33,8 @@ namespace IA.Events
         public bool ForceCommandExecution { internal set; get; }
 
         public bool IsDefault => this == Default;
+
+        private ConcurrentDictionary<ulong, string> cache = new ConcurrentDictionary<ulong, string>();
 
         internal PrefixInstance(string value, bool changable, bool forceExec)
         {
@@ -59,22 +78,39 @@ namespace IA.Events
             }
         }
 
+        async Task<Identifier> CreateNewAsync(long id)
+        {
+            Identifier i = null;
+
+            using (var context = new IAContext())
+            {
+                i = context.Identifiers.Add(new Identifier() { GuildId = id, DefaultValue = DefaultValue, Value = DefaultValue });
+                await context.SaveChangesAsync();
+            }
+
+            return i;
+        }
+
         public async Task<string> GetForGuildAsync(ulong id)
         {
             if (Changable)
             {
-                long guildId = id.ToDbLong();
-
-                using (var context = new IAContext())
+                return await cache.GetOrAddAsync(id, async (x) =>
                 {
-                    Identifier identifier = await context.Identifiers.FindAsync(guildId, DefaultValue);
-                    if (identifier == null)
+                    long guildId = id.ToDbLong();
+                    Identifier identifier = null;
+
+                    using (var context = new IAContext())
                     {
-                        identifier = context.Identifiers.Add(new Identifier() { GuildId = guildId, DefaultValue = DefaultValue, Value = DefaultValue });
-                        await context.SaveChangesAsync();
+                        identifier = await context.Identifiers.FindAsync(guildId, DefaultValue);
+                        if (identifier == null)
+                        {
+                            identifier = await CreateNewAsync(guildId);
+                        }
                     }
+
                     return identifier.Value;
-                }
+                });
             }
             return DefaultValue;
         }

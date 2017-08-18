@@ -1,7 +1,9 @@
-﻿using System.Data.Entity;
+﻿using IA.Migrations;
+using System.Data.Entity;
 
 namespace IA.Models.Context
 {
+    [DbConfigurationType(typeof(Configuration))]
     internal class IAContext : DbContext
     {
         public DbSet<Identifier> Identifiers { get; set; }
@@ -10,13 +12,6 @@ namespace IA.Models.Context
 
         public IAContext() : base("PostgreSql")
         {
-        }
-
-        internal static IAContext CreateNoCache()
-        {
-            IAContext m = new IAContext();
-            m.Configuration.LazyLoadingEnabled = false;
-            return m;
         }
     }
 }

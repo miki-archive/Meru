@@ -165,8 +165,8 @@
     <Reference Include="EFCache, Version=1.1.0.0, Culture=neutral, PublicKeyToken=46c4868af4307d2c, processorArchitecture=MSIL">
       <HintPath>..\..\miki\packages\EntityFramework.Cache.1.1.0\lib\net45\EFCache.dll</HintPath>
     </Reference>
-    <Reference Include="EFCache.Redis, Version=2016.5.24.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\miki\packages\EFCache.Redis.2016.5.24.1\lib\net461\EFCache.Redis.dll</HintPath>
+    <Reference Include="EFCache.RedisCache, Version=1.0.5567.18895, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\miki\packages\EFCache.RedisCache.0.0.2\lib\EFCache.RedisCache.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
@@ -205,9 +205,6 @@
     </Reference>
     <Reference Include="StackExchange.Redis, Version=1.2.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\miki\packages\StackExchange.Redis.1.2.6\lib\net46\StackExchange.Redis.dll</HintPath>
-    </Reference>
-    <Reference Include="StackExchange.Redis.StrongName, Version=1.2.6.0, Culture=neutral, PublicKeyToken=c219ff1ca8c2ce46, processorArchitecture=MSIL">
-      <HintPath>..\..\miki\packages\StackExchange.Redis.StrongName.1.2.6\lib\net46\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -288,6 +285,7 @@
       <HintPath>..\..\miki-sourcecode\packages\System.Runtime.Serialization.Primitives.4.3.0\lib\net46\System.Runtime.Serialization.Primitives.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\miki-sourcecode\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net461\System.Security.Cryptography.Algorithms.dll</HintPath>
       <Private>True</Private>

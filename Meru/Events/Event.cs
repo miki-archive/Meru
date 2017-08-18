@@ -4,6 +4,7 @@ using IA.SDK;
 using IA.SDK.Events;
 using IA.SDK.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace IA.Events
 
         internal EventSystem eventSystem;
 
-        public Dictionary<ulong, bool> enabled = new Dictionary<ulong, bool>();
+        public ConcurrentDictionary<ulong, bool> cache = new ConcurrentDictionary<ulong, bool>();
         protected Dictionary<ulong, EventCooldownObject> lastTimeUsed = new Dictionary<ulong, EventCooldownObject>();
 
         public Event()
@@ -57,6 +58,12 @@ namespace IA.Events
                     state = context.CommandStates.Add(new CommandState() { ChannelId = channelId.ToDbLong(), CommandName = Name, State = DefaultEnabled });
                 }
                 state.State = enabled;
+
+                cache.AddOrUpdate(channelId, enabled, (x, y) =>
+                {
+                    return enabled;
+                });
+
                 await context.SaveChangesAsync();
             }
         }
@@ -79,23 +86,27 @@ namespace IA.Events
                 if (!await Module.IsEnabled(id)) return false;
             }
 
-            CommandState state = null;
-
-            using (var context = new IAContext())
+            if (cache.ContainsKey(id))
             {
-                state = await context.CommandStates.FindAsync(Name, id.ToDbLong());
-            }
-
-            if (state == null)
-            {
-                isEnabled = DefaultEnabled;
+                return cache.GetOrAdd(id, DefaultEnabled);
             }
             else
             {
-                isEnabled = state.State;
-            }
+                CommandState state;
 
-            return isEnabled;
+                using (var context = new IAContext())
+                {
+                    long guildId = id.ToDbLong();
+                    state = await context.CommandStates.FindAsync(Name, guildId);
+                }
+
+                if (state == null)
+                {
+                    return cache.GetOrAdd(id, DefaultEnabled);
+                }
+
+                return cache.GetOrAdd(id, state.State);
+            }
         }
 
         public IEvent SetName(string name)
