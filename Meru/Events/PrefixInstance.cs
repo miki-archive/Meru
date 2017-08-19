@@ -6,31 +6,16 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public static class ConcurrentUtils
-    {
-        public static async Task<TValue> GetOrAddAsync<TKey, TValue>(
-    this ConcurrentDictionary<TKey, TValue> dictionary,
-    TKey key, Func<TKey, Task<TValue>> valueFactory)
-        {
-            TValue resultingValue;
-            if (dictionary.TryGetValue(key, out resultingValue))
-            {
-                return resultingValue;
-            }
-            return dictionary.GetOrAdd(key, await valueFactory(key));
-        }
-    }
-
     public class PrefixInstance
     {
         public static PrefixInstance Default = null;
 
-        public short Id { internal set; get; }
-        public string Value { internal set; get; }
-        public string DefaultValue { internal set; get; }
+        public short Id { get; internal set; }
+        public string Value { get; internal set; }
+        public string DefaultValue { get; internal set; }
 
-        public bool Changable { internal set; get; }
-        public bool ForceCommandExecution { internal set; get; }
+        public bool Changable { get; internal set; }
+        public bool ForceCommandExecution { get; internal set; }
 
         public bool IsDefault => this == Default;
 
