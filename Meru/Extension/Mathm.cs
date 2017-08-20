@@ -20,10 +20,5 @@ namespace IA
         {
             return (value & 1) == 0;
         }
-
-        public static int Roll(int max = 100, int min = 0)
-        {
-            return random.Next(min, max) + 1;
-        }
     }
 }
