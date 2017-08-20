@@ -12,11 +12,11 @@ namespace IA
         {
             try
             {
-                await a().ConfigureAwait(false);
+                await a();
             }
             catch(Exception ex)
             {
-                await Bot.instance.OnError(ex).ConfigureAwait(false);
+                await Bot.instance.OnError(ex);
                 return false;
             }
             return true;
@@ -24,7 +24,7 @@ namespace IA
 
         public static async Task ReportErrorAsync(Exception ex)
         {
-            await Bot.instance.OnError(ex).ConfigureAwait(false);
+            await Bot.instance.OnError(ex);
         }
     }
 }

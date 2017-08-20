@@ -18,11 +18,4 @@ namespace IA.Migrations
             AutomaticMigrationsEnabled = true;
         }
     }
-
-    public class Configuration : DbConfiguration
-    {
-        public Configuration() : base()
-        {
-        }
-    }
 }

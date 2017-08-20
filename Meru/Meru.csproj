@@ -72,6 +72,10 @@
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
     <Compile Include="Bot.cs" />
+    <Compile Include="Events\ConcurrentUtils.cs" />
+    <Compile Include="FileHandling\Configuration\Configurable.cs" />
+    <Compile Include="FileHandling\Configuration\ConfigurationBase.cs" />
+    <Compile Include="FileHandling\Configuration\ConfigurationsFileLoader.cs" />
     <Compile Include="Events\Attributes\CommandAttribute.cs" />
     <Compile Include="Events\Attributes\ModuleAttribute.cs" />
     <Compile Include="Events\Attributes\ModuleInitAttribute.cs" />
@@ -87,15 +91,16 @@
     <Compile Include="Events\RuntimeCommandEvent.cs" />
     <Compile Include="Events\RuntimeModule.cs" />
     <Compile Include="Events\UserEvent.cs" />
-    <Compile Include="Extension Methods\Mathm.cs" />
+    <Compile Include="Extension\Mathm.cs" />
     <Compile Include="Extension\LongExtensions.cs" />
     <Compile Include="Extension\StringExtension.cs" />
     <Compile Include="Extension\UlongExtensions.cs" />
+    <Compile Include="FileHandling\Configuration\IConfigurable.cs" />
     <Compile Include="Internal\IpcSocket.cs" />
     <Compile Include="Instances\Manager.cs" />
     <Compile Include="Instances\Shard.cs" />
     <Compile Include="ClientInformation.cs" />
-    <Compile Include="Extension Methods\Channel.cs" />
+    <Compile Include="Extension\Channel.cs" />
     <Compile Include="FileHandling\FileReader.cs" />
     <Compile Include="FileHandling\FileWriter.cs" />
     <Compile Include="Log.cs" />
@@ -319,9 +324,7 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Audio\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="Bot.Events.cs" />

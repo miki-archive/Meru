@@ -4,6 +4,7 @@ using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -145,6 +146,8 @@ namespace IA.Events
 
             if (msg.Content.StartsWith(identifier))
             {
+                message = Regex.Replace(message, @"\r\n?|\n", "");
+
                 string command = message
                     .Substring(identifier.Length)
                     .Split(' ')

@@ -1,5 +1,6 @@
 ﻿using IA.SDK.Interfaces;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace IA.SDK.Extensions
 {
@@ -69,6 +70,9 @@ namespace IA.SDK.Extensions
         {
             int shouldCut = 0;
             int lastCutPosition = 0;
+
+            embed = embed.Replace(" ", "");
+
             List<string> cutEmbed = new List<string>();
 
             for (int i = 0; i < embed.Length; i++)

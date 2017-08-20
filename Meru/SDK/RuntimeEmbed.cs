@@ -380,22 +380,22 @@ namespace IA.SDK
 
             if (Author != null)
             {
-                b.AppendText(Author.Name, MessageFormatting.BOLD);
+                b.AppendText(Author.Name, MessageFormatting.Bold);
             }
 
-            b.AppendText(Title, MessageFormatting.BOLD)
+            b.AppendText(Title, MessageFormatting.Bold)
              .AppendText(Description);
 
             foreach (IEmbedField f in Fields)
             {
-                b.AppendText(f.Name, MessageFormatting.UNDERLINED)
+                b.AppendText(f.Name, MessageFormatting.Underlined)
                  .AppendText(f.Value)
                  .NewLine();
             }
 
             if (Footer != null)
             {
-                b.AppendText(Footer.Text, MessageFormatting.ITALIC);
+                b.AppendText(Footer.Text, MessageFormatting.Italic);
             }
 
             return b;

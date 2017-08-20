@@ -60,6 +60,8 @@ namespace IA.Events
                     }
                     await context.SaveChangesAsync();
                 }
+
+                cache.AddOrUpdate(id, (x) => prefix, (x, y) => prefix);
             }
         }
 
