@@ -19,6 +19,9 @@ namespace IA
 
         public LogLevel ConsoleLogLevel = LogLevel.NOTICE;
 
+        public string DatabaseProvider = "";
+        public string DatabaseConnectionString = "";
+
         /// <summary>
         /// Saves logs to ./logs/xxxxx.log
         /// </summary>
