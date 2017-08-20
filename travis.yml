@@ -1,0 +1,5 @@
+language: csharp
+solution: IA.sln
+install:
+  - sudo apt-get install -y gtk-sharp2
+  - nuget restore IA.sln
