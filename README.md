@@ -18,14 +18,15 @@ Plain: planned<br>
 	* **Plugin support**
 - Multiplatform
 	- **Windows**
-	- Linux
-	- OSX
+	- **Linux**
+	- **OSX**
 - Multiplatform
 	- **Discord**
-	- Slack
+	- **Slack**
 	- Twitch
 - Built in systems
 	- **Command handling**
 	- Context creation
+	- Database friendly
 	- GUI friendly
 	- Permissions per entity
