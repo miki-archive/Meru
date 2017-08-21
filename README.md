@@ -18,7 +18,7 @@ Strike through: done
 	* **Plugin support**
 - Multiplatform
 	- **Windows**
-  - Linux
+	- Linux
 	- OSX
 - Multiplatform
 	- **Discord**
