@@ -8,10 +8,10 @@
 ## Roadmap
 As for a new version I have a new roadmap!
 
-Legend: 
-Plain: planned
-Bold: happening soon
-Strike through: done
+###Legend: 
+Plain: planned<br>
+**Bold**: happening soon<br>
+~~Strike~~ through: done<br>
 
 - Fully modular
 	* Backend interfacing
