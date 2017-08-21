@@ -8,7 +8,7 @@
 ## Roadmap
 As for a new version I have a new roadmap!
 
-###Legend: 
+### Legend: 
 Plain: planned<br>
 **Bold**: happening soon<br>
 ~~Strike~~ through: done<br>
