@@ -1,5 +1,6 @@
 language: csharp
-solution: IA.sln
-install:
-  - sudo apt-get install -y gtk-sharp2
-  - nuget restore IA.sln
+mono: none
+dotnet: 1.0.3
+dist: trusty
+script:
+ - dotnet restore
