@@ -14,12 +14,12 @@ Bold: happening soon
 Strike through: done
 
 - Fully modular
- - Backend interfacing
- - **Plugin support**
+	* Backend interfacing
+	* **Plugin support**
 - Multiplatform
- - **Windows**
- - Linux
- - OSX
+  - **Windows**
+  - Linux
+- OSX
 - Multiplatform
  - **Discord**
  - Slack
