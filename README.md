@@ -17,15 +17,15 @@ Strike through: done
 	* Backend interfacing
 	* **Plugin support**
 - Multiplatform
-  - **Windows**
+	- **Windows**
   - Linux
-- OSX
+	- OSX
 - Multiplatform
- - **Discord**
- - Slack
- - Twitch
+	- **Discord**
+	- Slack
+	- Twitch
 - Built in systems
- - **Command handling**
- - Context creation
- - GUI friendly
- - Permissions per entity
+	- **Command handling**
+	- Context creation
+	- GUI friendly
+	- Permissions per entity
