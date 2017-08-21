@@ -4,8 +4,4 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Meru.Common\Meru.Common.csproj" />
-  </ItemGroup>
-
 </Project>

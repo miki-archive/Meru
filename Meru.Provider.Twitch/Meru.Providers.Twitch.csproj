@@ -3,7 +3,10 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="1.0.1" />
+    <None Include="TwitchBotProvider.Events.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NTwitch" Version="0.2.0-build-00016" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Meru.Common\Meru.Common.csproj" />

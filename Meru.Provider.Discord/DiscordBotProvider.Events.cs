@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Meru.Common;
+using Meru.Common.Providers;
 
-namespace Meru
+namespace Meru.Providers.Discord
 {
-    public partial class Bot
+    public partial class DiscordBotProvider
     {
         public event Func<IMessageObject, Task> OnMessageReceived;
     }
