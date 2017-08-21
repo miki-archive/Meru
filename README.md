@@ -4,3 +4,28 @@
 <br>
 
 **New version in development, for a working version of Meru, pull v1**
+
+## Roadmap
+As for a new version I have a new roadmap!
+
+Legend: 
+Plain: planned
+Bold: happening soon
+Strike through: done
+
+- Fully modular
+ - Backend interfacing
+ - **Plugin support**
+- Multiplatform
+ - **Windows**
+ - Linux
+ - OSX
+- Multiplatform
+ - **Discord**
+ - Slack
+ - Twitch
+- Built in systems
+ - **Command handling**
+ - Context creation
+ - GUI friendly
+ - Permissions per entity
