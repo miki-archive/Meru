@@ -11,21 +11,21 @@ namespace Meru.Commands
 {
     public class CommandProcessor
     {
-        public Prefix DefaultPrefix => prefixes[0];
+        public Prefix DefaultPrefix => _prefixes[0];
 
         public event Func<Command, Task<bool>> OnPreCommandExecute;
         public event Func<Command, Task> OnPreCommandFailure; 
 
         public event Func<Command, long, bool, Task> OnPostCommandExecute; 
 
-        private readonly CommandEntity hierarchyRoot = new CommandEntity();
-        private readonly Dictionary<string, Command> cachedCommands = new Dictionary<string, Command>();
+        protected readonly CommandEntity hierarchyRoot = new CommandEntity();
+        protected readonly Dictionary<string, Command> cachedCommands = new Dictionary<string, Command>();
 
-        private readonly List<Prefix> prefixes = new List<Prefix>();
+        private readonly List<Prefix> _prefixes = new List<Prefix>();
 
         public CommandProcessor(CommandProcessorConfiguration config)
         {
-            prefixes.Add(new Prefix(config.DefaultPrefix));
+            _prefixes.Add(new Prefix(config.DefaultPrefix));
 
             if (config.AutoSearchForCommands)
             {
@@ -37,7 +37,7 @@ namespace Meru.Commands
 
         public async Task MessageReceived(IMessageObject message)
         {
-            foreach (Prefix p in prefixes)
+            foreach (Prefix p in _prefixes)
             {
                 if (message.Content.StartsWith(p.Value))
                 {

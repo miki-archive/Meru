@@ -8,6 +8,8 @@ namespace Meru.Providers.Slack
 {
     public partial class SlackBotProvider
     {
-        public event Func<IMessageObject, Task> OnMessageReceived;
+        public event Func<IMessageObject, Task> OnMessageReceive;
+        public event Func<IMessageObject, Task> OnMessageEdit;
+        public event Func<IMessageObject, Task> OnMessageDelete;
     }
 }

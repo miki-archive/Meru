@@ -6,7 +6,7 @@ namespace Meru.Commands
 {
     public class Module : CommandEntity
     {
-        public Module() : base()
+        public Module()
         {          
         }
 

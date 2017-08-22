@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Meru.Common.Plugins;
 using Meru.Common.Providers;
 using Meru.Providers.Slack.Objects;
 using SlackConnector;
 
 namespace Meru.Providers.Slack
 {
-    public partial class SlackBotProvider : IBotProvider
+    public partial class SlackBotProvider : BaseExtendablePlugin, IBotProvider
     {
-        internal static ISlackConnector client;
+        internal static readonly ISlackConnector client = new SlackConnector.SlackConnector();
         internal static ISlackConnection connection;
 
         private string key = "";
 
         public SlackBotProvider(string key)
         {
-            this.key = key;
-            client = new SlackConnector.SlackConnector();
+            this.key = key; 
         }
 
         public async Task StartAsync()
@@ -27,7 +27,7 @@ namespace Meru.Providers.Slack
 
             connection.OnMessageReceived += async message =>
             {
-                await OnMessageReceived.Invoke(new SlackMessageObject(message));
+                await OnMessageReceive.Invoke(new SlackMessageObject(message));
             };
         }
 
