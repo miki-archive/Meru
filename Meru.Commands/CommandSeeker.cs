@@ -34,11 +34,6 @@ namespace Meru.Commands
                 subModulesLoaded += entity.Children.Count(x => (x as Module) != null);
                 commandsLoaded += entity.GetAllEntitiesOf<Command>().Count;
             }
-
-            Console.WriteLine($"Loaded {modulesLoaded} modules");
-            Console.WriteLine($"Loaded {subModulesLoaded} sub-modules");
-            Console.WriteLine($"Loaded {commandsLoaded} commands");
-
             return commandHierarchyList;
         }
 

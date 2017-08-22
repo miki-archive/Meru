@@ -43,7 +43,6 @@ namespace Meru
             };
 
             providers.Add(provider);
-            Console.WriteLine($"Added provider {provider.GetType().Name}");
         }
 
         public override async Task StartAsync()

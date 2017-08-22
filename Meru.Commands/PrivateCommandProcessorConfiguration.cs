@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Meru.Commands
 {
-    class PrivateCommandProcessorConfiguration : CommandProcessorConfiguration
+    public class PrivateCommandProcessorConfiguration : CommandProcessorConfiguration
     {
-        public TimeSpan ExpirationSpan = new TimeSpan(0);
-        public bool Expires = false;
+        public TimeSpan ExpirationSpan { get; set; } = new TimeSpan(0);
+        public bool Expires { get; set; } = false;
     }
 }
