@@ -12,7 +12,5 @@ namespace Meru.Commands
         {
             this.config = config;
         }
-
-
     }
 }

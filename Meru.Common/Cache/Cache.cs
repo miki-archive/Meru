@@ -23,7 +23,7 @@ namespace Meru.Common.Cache
             {
                 V newData = await cacheContextBuilder(key);
 
-                if (TryAdd(key, new CacheContext<V>(newData, _defaultCacheContext)));
+                if (TryAdd(key, new CacheContext<V>(newData, _defaultCacheContext)))
                 {
                     return newData;
                 }

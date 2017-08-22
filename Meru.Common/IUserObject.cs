@@ -6,6 +6,5 @@ namespace Meru.Common
 {
     public interface IUserObject : IEntityObject
     {
-
     }
 }

@@ -11,7 +11,6 @@ namespace Meru.Providers.Discord
     {
         public event Func<IMessageObject, Task> OnMessageDelete; 
         public event Func<IMessageObject, Task> OnMessageEdit; 
-        public event Func<IMessageObject, Task> OnMessageReceive;
-       
+        public event Func<IMessageObject, Task> OnMessageReceive;      
     }
 }
