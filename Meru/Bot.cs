@@ -52,7 +52,6 @@ namespace Meru
             {
                 await runnable.StartAsync();
             }
-
         }
 
         public async Task StopAsync()

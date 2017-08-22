@@ -11,18 +11,15 @@ namespace Meru.Commands
         public Func<IMessageObject, Task> ProcessCommand;
 
         public Command()
-        {
-            
+        {            
         }
 
         public Command(CommandEntity cmd) : base(cmd)
-        {
-            
+        {           
         }
 
         public Command(Command cmd) : base(cmd)
         {
-
         }
     }
 }
