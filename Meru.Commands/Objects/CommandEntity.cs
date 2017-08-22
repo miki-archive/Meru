@@ -6,11 +6,11 @@ namespace Meru.Commands
 {
     public class CommandEntity
     {
-        public List<CommandEntity> Children = new List<CommandEntity>();
+        public List<CommandEntity> Children { get; set; } = new List<CommandEntity>();
 
-        public string Id = "";
+        public string Id { get; set; }
 
-        public CommandEntity Parent = null;
+        public CommandEntity Parent { get; set; }
 
         public CommandEntity()
         {

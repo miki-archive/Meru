@@ -6,9 +6,9 @@ namespace Meru.Common.Cache
 {
     public class CacheContext<V>
     {
-        public V Data;
+        public V Data { get; set; }
 
-        public TimeSpan ExpirationSpan;
+        public TimeSpan ExpirationSpan { get; set; }
 
         public bool Valid => DateTime.Now > TimeInstantiated + ExpirationSpan;
 
