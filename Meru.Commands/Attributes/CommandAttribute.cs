@@ -6,9 +6,9 @@ namespace Meru.Commands
 {
     public class CommandAttribute : CommandEntityAttribute
     {
-        public CommandAttribute() : base()
+        public CommandAttribute()
         {
-            entity = new Command(entity);
+            Entity = new Command(Entity);
         }
     }
 }

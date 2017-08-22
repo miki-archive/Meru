@@ -47,7 +47,7 @@ namespace Meru.Commands
             CommandEntity module = new CommandEntity();
             ModuleAttribute moduleAttribute = attribute.GetTypeInfo().GetCustomAttribute<ModuleAttribute>();
 
-            module = new Module(moduleAttribute.entity as Module);
+            module = new Module(moduleAttribute.Entity as Module);
 
             object constructedInstance = null;
 
@@ -72,7 +72,7 @@ namespace Meru.Commands
                 {
                     CommandEntity entity = GetChildrenFromModule(t);
 
-                    module = new Module(mAttribute.entity as Module);
+                    module = new Module(mAttribute.Entity as Module);
 
                     entity.Parent = module;
                     module.Children.Add(entity);
@@ -86,7 +86,7 @@ namespace Meru.Commands
             foreach (MethodInfo m in methods)
             {
                 CommandAttribute commandAttribute = m.GetCustomAttribute<CommandAttribute>();
-                Command newEvent = new Command(commandAttribute.entity as Command);
+                Command newEvent = new Command(commandAttribute.Entity as Command);
 
                 newEvent.ProcessCommand =
                     async (context) => await (Task)m.Invoke(constructedInstance, new object[] { context });
