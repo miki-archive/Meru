@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,6 +12,11 @@ namespace Meru.Commands
     public class CommandProcessor
     {
         public Prefix DefaultPrefix => prefixes[0];
+
+        public event Func<Command, Task<bool>> OnPreCommandExecute;
+        public event Func<Command, Task> OnPreCommandFailure; 
+
+        public event Func<Command, long, bool, Task> OnPostCommandExecute; 
 
         private readonly CommandEntity hierarchyRoot = new CommandEntity();
         private readonly Dictionary<string, Command> cachedCommands = new Dictionary<string, Command>();
@@ -40,7 +46,42 @@ namespace Meru.Commands
                         .Split(' ')[0]
                         .ToLower();
 
-                    await cachedCommands[command].ProcessCommand(message);
+                    if (cachedCommands.ContainsKey(command))
+                    {
+                        Command commandObject = cachedCommands[command];
+
+                        if (OnPreCommandExecute != null)
+                        {
+                            if (!await OnPreCommandExecute.Invoke(commandObject))
+                            {
+                                if (OnPostCommandExecute != null)
+                                {
+                                    await OnPreCommandFailure.Invoke(commandObject);
+                                }
+                                return;
+                            }
+                        }
+
+                        Stopwatch timeTaken = Stopwatch.StartNew();
+                        try
+                        {
+                            await cachedCommands[command].ProcessCommand(message);
+                            timeTaken.Stop();
+
+                            if (OnPostCommandExecute != null)
+                            {
+                                await OnPostCommandExecute(commandObject, timeTaken.ElapsedMilliseconds, true);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            timeTaken.Stop();
+                            if (OnPostCommandExecute != null)
+                            {
+                                await OnPostCommandExecute(commandObject, timeTaken.ElapsedMilliseconds, false);
+                            }
+                        }
+                    }
                 }
             }
         }

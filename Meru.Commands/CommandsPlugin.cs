@@ -6,10 +6,8 @@ using Meru.Common;
 
 namespace Meru.Commands
 {
-    public class CommandsPlugin : IPlugin
+    public class CommandsPlugin : BaseExtendablePlugin
     {
-        public IBot AttachedBot { get; set; }
-
         public List<CommandProcessor> Processors = new List<CommandProcessor>();
 
         public CommandsPlugin(IBot bot)
@@ -25,20 +23,24 @@ namespace Meru.Commands
             Processors.Add(processor);
         }
 
-        public async Task StartAsync()
+        public override async Task StartAsync()
         {
             foreach (CommandProcessor p in Processors)
             {
-                AttachedBot.OnMessageReceived += p.MessageReceived;
+                AttachedBot.OnMessageReceive += p.MessageReceived;
             }
+
+            await base.StartAsync();
         }
 
-        public async Task StopAsync()
+        public override async Task StopAsync()
         {
             foreach (CommandProcessor p in Processors)
             {
-                AttachedBot.OnMessageReceived -= p.MessageReceived;
+                AttachedBot.OnMessageReceive -= p.MessageReceived;
             }
+
+            await base.StopAsync();
         }
     }
 }
