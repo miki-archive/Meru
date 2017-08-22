@@ -7,6 +7,8 @@ namespace Meru.Common
 {
     public interface IRunnable
     {
+        bool IsRunning { get; }
+
         Task StartAsync();
         Task StopAsync();
     }

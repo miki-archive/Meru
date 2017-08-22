@@ -9,6 +9,9 @@ namespace Meru.Providers.Discord
 {
     public partial class DiscordBotProvider
     {
-        public event Func<IMessageObject, Task> OnMessageReceived;
+        public event Func<IMessageObject, Task> OnMessageDelete; 
+        public event Func<IMessageObject, Task> OnMessageEdit; 
+        public event Func<IMessageObject, Task> OnMessageReceive;
+       
     }
 }

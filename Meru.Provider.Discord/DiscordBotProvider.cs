@@ -3,12 +3,13 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Meru.Common;
+using Meru.Common.Plugins;
 using Meru.Common.Providers;
 using Meru.Providers.Discord.Objects;
 
 namespace Meru.Providers.Discord
 {
-    public partial class DiscordBotProvider : IBotProvider
+    public partial class DiscordBotProvider : BaseExtendablePlugin, IBotProvider
     {
         private DiscordShardedClient client;
         private DiscordProviderConfigurations config;
@@ -25,19 +26,21 @@ namespace Meru.Providers.Discord
 
             client.MessageReceived += async message =>
             {
-                await OnMessageReceived.Invoke(new DiscordMessageObject(message));
+                await OnMessageReceive.Invoke(new DiscordMessageObject(message));
             };
         }
 
-        public async Task StartAsync()
+        public override async Task StartAsync()
         {
             await client.LoginAsync(TokenType.Bot, config.Token);
             await client.StartAsync();
+            await base.StartAsync();
         }
 
-        public async Task StopAsync()
+        public override async Task StopAsync()
         {
             await client.StopAsync();
+            await base.StopAsync();
         }
     }
 }

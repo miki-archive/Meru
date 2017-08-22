@@ -7,6 +7,8 @@ namespace Meru.Common.Providers
 {
     public interface IBotProvider : IRunnable
     {
-        event Func<IMessageObject, Task> OnMessageReceived;
+        event Func<IMessageObject, Task> OnMessageDelete;
+        event Func<IMessageObject, Task> OnMessageEdit;
+        event Func<IMessageObject, Task> OnMessageReceive;
     }
 }

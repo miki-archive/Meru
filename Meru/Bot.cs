@@ -7,10 +7,11 @@ using Meru.Common.Providers;
 
 namespace Meru
 {
-    public partial class Bot : IBot
+    public partial class Bot : BaseExtendablePlugin, IBot
     {
+        public bool IsRunning { get; private set; } = false;
+
         private readonly List<IBotProvider> providers = new List<IBotProvider>();
-        private readonly List<IPlugin> plugins = new List<IPlugin>();
 
         private List<IRunnable> allRunnables
         { 
@@ -24,29 +25,34 @@ namespace Meru
             }
         }
 
-        public void AddPlugin(IPlugin plugin)
-        {
-            plugins.Add(plugin);
-            Console.WriteLine($"Added plugin {plugin.GetType().Name}");
-        }
-
         public void AddProvider(IBotProvider provider)
         {
-            provider.OnMessageReceived += async (m) =>
+            provider.OnMessageReceive += async (m) =>
             {
-                await OnMessageReceived.Invoke(m);
+                await OnMessageReceive.Invoke(m);
+            };
+
+            provider.OnMessageEdit += async (m) =>
+            {
+                await OnMessageEdit.Invoke(m);
+            };
+
+            provider.OnMessageDelete += async (m) =>
+            {
+                await OnMessageDelete.Invoke(m);
             };
 
             providers.Add(provider);
             Console.WriteLine($"Added provider {provider.GetType().Name}");
         }
 
-        public async Task StartAsync()
+        public override async Task StartAsync()
         {
             foreach (IRunnable runnable in allRunnables)
             {
                 await runnable.StartAsync();
             }
+
         }
 
         public async Task StopAsync()
