@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Meru.Commands;
 using Meru.Common;
+using Meru.Common.Cache;
 using Meru.Providers.Discord;
 
 namespace Meru.Example.DiscordBot
@@ -18,7 +19,7 @@ namespace Meru.Example.DiscordBot
                 new DiscordBotProvider(
                     new DiscordProviderConfigurations()
                     {
-                        Token = "MzQ5MjA1MjEyMTU5ODAzMzky.DHyGNQ.cns1SIH2yV6OxZhWFGiPq8blTPk",
+                        Token = "",
                         ShardCount = 1
                     }));
 
@@ -26,7 +27,7 @@ namespace Meru.Example.DiscordBot
                 new CommandsPlugin(bot, new CommandProcessorConfiguration()
                 {
                    AutoSearchForCommands  = true,
-                   DefaultPrefix = ">"
+                   DefaultPrefix = "!"
                 }));
 
             await bot.StartAsync();
