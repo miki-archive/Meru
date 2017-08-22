@@ -10,30 +10,31 @@ namespace Meru.Providers.Slack
 {
     public partial class SlackBotProvider : BaseExtendablePlugin, IBotProvider
     {
-        internal static readonly ISlackConnector client = new SlackConnector.SlackConnector();
-        internal static ISlackConnection connection;
+        internal static readonly ISlackConnector Client = new SlackConnector.SlackConnector();
+        internal static ISlackConnection Connection;
 
-        private string key = "";
+        private readonly string _key;
 
         public SlackBotProvider(string key)
         {
-            this.key = key; 
+            _key = key; 
         }
 
-        public async Task StartAsync()
+        public override async Task StartAsync()
         {
-            ManualResetEventSlim clientReady = new ManualResetEventSlim(false);
-            connection = await client.Connect(key);
+            Connection = await Client.Connect(_key);
 
-            connection.OnMessageReceived += async message =>
+            Connection.OnMessageReceived += async message =>
             {
                 await OnMessageReceive.Invoke(new SlackMessageObject(message));
             };
+            await base.StartAsync();
         }
 
-        public async Task StopAsync()
+        public override async Task StopAsync()
         {
-            await connection.Close();
+            await Connection.Close();
+            await base.StopAsync();
         }
     }
 }
