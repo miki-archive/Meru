@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SlackConnector" Version="4.1.13" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Meru.Common\Meru.Common.csproj" />
+  </ItemGroup>
+</Project>
