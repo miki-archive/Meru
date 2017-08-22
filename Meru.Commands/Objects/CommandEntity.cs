@@ -13,8 +13,7 @@ namespace Meru.Commands
         public CommandEntity Parent { get; set; }
 
         public CommandEntity()
-        {
-            
+        {            
         }
         public CommandEntity(CommandEntity entity)
         {
