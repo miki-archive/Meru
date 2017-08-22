@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meru.Example.DiscordBot", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meru.Providers.Twitch", "Meru.Provider.Twitch\Meru.Providers.Twitch.csproj", "{B8D5BD87-704D-4CEB-96DF-1B9ED4E37824}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meru.Commands", "Meru.Commands\Meru.Commands.csproj", "{1B123670-87CE-4824-8C31-1E7B48E3EA07}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meru.Commands", "Meru.Commands\Meru.Commands.csproj", "{1B123670-87CE-4824-8C31-1E7B48E3EA07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
