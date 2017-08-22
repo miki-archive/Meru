@@ -8,5 +8,7 @@ namespace Meru.Common.Plugins
     public interface IPlugin : IRunnable
     {
         IBot AttachedBot { get; set; }
+
+        
     }
 }
