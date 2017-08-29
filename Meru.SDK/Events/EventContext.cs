@@ -13,6 +13,7 @@ namespace IA.SDK.Events
 
         public IDiscordUser Author => message.Author;
         public IDiscordMessageChannel Channel => message.Channel;
+        public IDiscordUser CurrentUser => message.Guild.CurrentUser;
         public IDiscordGuild Guild => message.Guild;
     }
 }
