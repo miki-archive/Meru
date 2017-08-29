@@ -7,7 +7,7 @@ using Meru.Common;
 
 namespace Meru.Providers.Discord.Objects
 {
-    class DiscordUserObject : DiscordEntityObject, IUserObject
+    public class DiscordUserObject : DiscordEntityObject, IUserObject
     {
         private readonly IUser user;
 
