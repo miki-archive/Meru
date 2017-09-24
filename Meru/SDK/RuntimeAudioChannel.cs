@@ -44,7 +44,7 @@ namespace IA.SDK
             return new RuntimeAudioClient(await audio.ConnectAsync());
         }
 
-        public Task<IEnumerable<IDiscordUser>> GetUsersAsync()
+        public Task<List<IDiscordUser>> GetUsersAsync()
         {
             throw new NotImplementedException();
         }
