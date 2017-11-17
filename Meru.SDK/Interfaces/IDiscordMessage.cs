@@ -21,6 +21,8 @@ namespace IA.SDK.Interfaces
         Dictionary<DiscordEmoji, DiscordReactionMetadata> Reactions { get; }
 
         string Content { get; }
+		string ResolvedContent { get; }
+
         DateTimeOffset Timestamp { get; }
 
         IReadOnlyCollection<ulong> MentionedUserIds { get; }

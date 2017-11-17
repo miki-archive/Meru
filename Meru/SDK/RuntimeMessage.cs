@@ -130,7 +130,15 @@ namespace IA.SDK
 
         public IReadOnlyCollection<ulong> MentionedChannelIds => messageData.MentionedChannelIds;
 
-        public RuntimeMessage(IMessage msg)
+		public string ResolvedContent => (messageData as IUserMessage).Resolve(
+					TagHandling.NameNoPrefix,
+					TagHandling.NameNoPrefix,
+					TagHandling.NameNoPrefix,
+					TagHandling.NameNoPrefix,
+					TagHandling.NameNoPrefix
+					);
+
+		public RuntimeMessage(IMessage msg)
         {
             messageData = msg;
 

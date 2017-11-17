@@ -14,9 +14,9 @@ namespace IA.SDK.Extensions
             }
 
             foreach (ulong id in message.MentionedUserIds)
-            {
-                content = content.Replace($"<@{id.ToString()}>", message.Guild.GetUserAsync(id).GetAwaiter().GetResult().Username);
-                content = content.Replace($"<@!{id.ToString()}>", message.Guild.GetUserAsync(id).GetAwaiter().GetResult().Nickname);
+			{
+				content = content.Replace($"<@!{id.ToString()}>", message.Guild.GetUserAsync(id).GetAwaiter().GetResult().Nickname);
+				content = content.Replace($"<@{id.ToString()}>", message.Guild.GetUserAsync(id).GetAwaiter().GetResult().Username);
             }
             foreach (ulong id in message.MentionedRoleIds)
             {

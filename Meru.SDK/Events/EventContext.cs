@@ -16,6 +16,7 @@ namespace IA.SDK.Events
         public async Task<IDiscordUser> GetCurrentUserAsync() => await Guild.GetCurrentUserAsync();
 
         public IDiscordMessageChannel Channel => message.Channel;
+        public IDiscordUser CurrentUser => message.Guild.CurrentUser;
         public IDiscordGuild Guild => message.Guild;
     }
 }
