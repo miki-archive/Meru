@@ -9,6 +9,6 @@ namespace IA.SDK.Interfaces
 
         IDiscordGuild Guild { get; }
 
-        Task<IEnumerable<IDiscordUser>> GetUsersAsync();
+        Task<List<IDiscordUser>> GetUsersAsync();
     }
 }

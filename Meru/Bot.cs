@@ -87,6 +87,11 @@ namespace IA
 
         public async Task ConnectAsync()
         {
+			if(clientInformation.Token == "")
+			{
+				Log.Error("Token wasn't defined.");
+			}
+
             await Client.LoginAsync(TokenType.Bot, clientInformation.Token);
 
             foreach (DiscordSocketClient client in Client.Shards)
@@ -171,9 +176,10 @@ namespace IA
             {
                 TotalShards = clientInformation.ShardCount,
                 LogLevel = LogSeverity.Info,
-                HandlerTimeout = 10000,
-                ConnectionTimeout = 300000,
-            });
+                HandlerTimeout = null,
+				AlwaysDownloadUsers = true,
+				ConnectionTimeout = 20000
+			});
 
             LoadEvents();
 
@@ -193,8 +199,6 @@ namespace IA
             {
                 await clientInformation.EventLoaderMethod(this);
             }
-
-            //MessageReceived += async (m) => Log.Message("message received");
 
             foreach (DiscordSocketClient c in Client.Shards)
             {

@@ -4,6 +4,7 @@ using IA.SDK.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IA.Events
@@ -46,12 +47,15 @@ namespace IA.Events
             string command = e.Content.Substring(identifier.Length).Split(' ')[0];
             string args = "";
             List<string> allAliases = new List<string>();
-            string[] arguments = new string[0];
+            List<string> arguments = new List<string>();
 
             if (e.Content.Split(' ').Length > 1)
             {
                 args = e.Content.Substring(e.Content.Split(' ')[0].Length + 1);
-                arguments = args.Split(' ');
+                arguments.AddRange(args.Split(' '));
+				arguments = arguments
+					.Where(x => !string.IsNullOrWhiteSpace(x))
+					.ToList();
             }
 
             if (Module != null)
@@ -94,7 +98,7 @@ namespace IA.Events
 
             ProcessCommandDelegate targetCommand = ProcessCommand;
 
-            if (arguments.Length > 0)
+            if (arguments.Count > 0)
             {
                 if (CommandPool.ContainsKey(arguments[0]))
                 {

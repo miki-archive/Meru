@@ -57,6 +57,30 @@ namespace IA
                     });
                 });
             };
+
+            Client.JoinedGuild += async (g) =>
+            {
+                Task.Run(async () =>
+                {
+                    await MeruUtils.TryAsync(async () =>
+                    {
+                        RuntimeGuild guild = new RuntimeGuild(g);
+                        await GuildJoin?.Invoke(guild);
+                    });
+                });
+            };
+
+            Client.LeftGuild += async (g) =>
+            {
+                Task.Run(async () =>
+                {
+                    await MeruUtils.TryAsync(async () =>
+                    {
+                        RuntimeGuild guild = new RuntimeGuild(g);
+                        await GuildLeave?.Invoke(guild);
+                    });
+                });
+            };
         }
     }
 }

@@ -8,12 +8,12 @@ namespace IA.SDK.Interfaces
         string AvatarUrl { get; }
         string Name { get; }
 
-        int ChannelCount { get; }
-        int VoiceChannelCount { get; }
-        int UserCount { get; }
+		Task<int> GetChannelCountAsync();
+		Task<int> GetVoiceChannelCountAsync();
+		Task<int> GetUserCountAsync();
 
-        IDiscordUser Owner { get; }
-        IDiscordUser CurrentUser { get; }
+		Task<IDiscordUser> GetOwnerAsync();
+		Task<IDiscordUser> GetCurrentUserAsync();
 
         List<IDiscordRole> Roles { get; }
 

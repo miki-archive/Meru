@@ -68,17 +68,17 @@ namespace IA.SDK
             return outputUsers;
         }
 
-        public async Task<IEnumerable<IDiscordUser>> GetUsersAsync()
+        public async Task<List<IDiscordUser>> GetUsersAsync()
         {
             IEnumerable<IUser> users = await channel.GetUsersAsync().Flatten();
-            List<RuntimeUser> outputUsers = new List<RuntimeUser>();
+            List<IDiscordUser> outputUsers = new List<IDiscordUser>();
 
             foreach (IUser u in users)
             {
                 outputUsers.Add(new RuntimeUser(u));
             }
 
-            return outputUsers;
+            return outputUsers; 
         }
 
         public async Task<IDiscordMessage> SendFileAsync(string path)

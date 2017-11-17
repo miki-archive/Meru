@@ -466,23 +466,19 @@ namespace IA.Events
             AddPrivateCommandHandler(new Tuple<ulong, ulong>(msg.Author.Id, msg.Channel.Id), cHandler);
         }
 
-        private async Task InternalMessageReceived(IDiscordMessage message)
-        {
-            await MeruUtils.TryAsync(async () =>
-            {
-                await Task.Run(() => OnMessageRecieved(message));
-
-                if (message.MentionedUserIds.Contains(Bot.instance.Client.CurrentUser.Id))
-                {
-                    await OnMention(message);
-                }
-            },
-            async (e) =>
-            {
-                Log.ErrorAt("messagerecieved", e.ToString());
-            });
-        }
-
+		private async Task InternalMessageReceived(IDiscordMessage message)
+		{
+			await Task.Yield();
+			try
+			{
+				await OnMessageRecieved(message);
+			}
+			catch (Exception e)
+			{
+				Log.ErrorAt("messagerecieved", e.ToString());
+			};
+		}
+		
         private async Task InternalJoinedGuild(IDiscordGuild g)
         {
             await OnGuildJoin(g);

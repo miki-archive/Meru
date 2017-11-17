@@ -32,7 +32,7 @@ namespace IA.SDK
             }
         }
 
-        public virtual async Task<IEnumerable<IDiscordUser>> GetUsersAsync()
+        public virtual async Task<List<IDiscordUser>> GetUsersAsync()
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

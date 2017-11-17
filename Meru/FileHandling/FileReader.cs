@@ -61,6 +61,28 @@ namespace IA.FileHandling
             }
         }
 
+		public string ReadAll()
+		{
+			string o = "";
+			string temp = "";
+
+			while (temp != null)
+			{
+				temp = file.ReadLine();
+				if (temp == null)
+				{
+					break;
+				}
+				else
+				{
+					if (!temp.StartsWith("#"))
+					{
+						o += temp;
+					}
+				}
+			}
+			return o;
+		}
         public string ReadLine()
         {
             while (true)

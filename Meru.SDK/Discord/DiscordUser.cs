@@ -125,6 +125,11 @@ namespace IA.SDK
             throw new NotImplementedException();
         }
 
+        public string GetName()
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual bool HasPermissions(IDiscordChannel channel, params DiscordGuildPermission[] permissions)
         {
             throw new NotImplementedException();

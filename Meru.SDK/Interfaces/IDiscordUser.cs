@@ -37,6 +37,7 @@ namespace IA.SDK.Interfaces
         Task Kick(string reason = "");
 
         string GetAvatarUrl(DiscordAvatarType type = DiscordAvatarType.PNG, ushort size = 128);
+        string GetName();
 
         Task RemoveRoleAsync(IDiscordRole role);
 

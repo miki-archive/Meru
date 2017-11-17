@@ -155,6 +155,15 @@ namespace IA.SDK
 
             return user.GetAvatarUrl(i, size);
         }
+        
+        public string GetName()
+        {
+            if(string.IsNullOrWhiteSpace(Nickname))
+            {
+                return Username;
+            }
+            return Nickname;
+        }
 
         public bool HasPermissions(IDiscordChannel channel, params DiscordGuildPermission[] permissions)
         {

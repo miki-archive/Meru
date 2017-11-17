@@ -148,9 +148,9 @@ namespace IA.Events
             {
                 message = Regex.Replace(message, @"\r\n?|\n", "");
 
-                string command = message
-                    .Substring(identifier.Length)
-                    .Split(' ')
+				string command = message
+					.Substring(identifier.Length)
+					.Split(' ')
                     .First();
 
                 command = (aliases.ContainsKey(command)) ? aliases[command] : command;
@@ -189,9 +189,16 @@ namespace IA.Events
 
         public ICommandEvent GetCommandEvent(string value)
         {
-            if (Commands.ContainsKey(value))
+            string newVal = value.ToLower();
+
+            if(aliases.ContainsKey(newVal))
             {
-                return Commands[value];
+                return Commands[aliases[newVal]];
+            }
+
+            if (Commands.ContainsKey(newVal))
+            {
+                return Commands[newVal];
             }
             return null;
         }

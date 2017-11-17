@@ -16,15 +16,13 @@ namespace IA.SDK
 
         public string Name => guild.Name;
 
-        public int ChannelCount => guild.GetChannelsAsync().GetAwaiter().GetResult().Count;
+        public async Task<int> GetChannelCountAsync() => (await guild.GetChannelsAsync()).Count;
+        public async Task<int> GetVoiceChannelCountAsync() => (await guild.GetVoiceChannelsAsync()).Count;
+		public async Task<int> GetUserCountAsync() => (await guild.GetUsersAsync()).Count;
+        public async Task<IDiscordUser> GetOwnerAsync() => new RuntimeUser(await guild.GetOwnerAsync());
+		public async Task<IDiscordUser> GetCurrentUserAsync() => new RuntimeUser(await guild.GetCurrentUserAsync());
 
-        public int VoiceChannelCount => guild.GetVoiceChannelsAsync().GetAwaiter().GetResult().Count;
-
-        public int UserCount => guild.GetUsersAsync().GetAwaiter().GetResult().Count;
-
-        public IDiscordUser Owner => new RuntimeUser(guild.GetOwnerAsync().GetAwaiter().GetResult());
-
-        public List<IDiscordRole> Roles
+		public List<IDiscordRole> Roles
         {
             get
             {
@@ -39,7 +37,6 @@ namespace IA.SDK
             }
         }
 
-        public IDiscordUser CurrentUser => new RuntimeUser(guild.GetCurrentUserAsync().GetAwaiter().GetResult());
 
         public RuntimeGuild(IGuild g)
         {

@@ -165,7 +165,7 @@ namespace IA.SDK
 
         public async Task DeleteAsync()
         {
-            if (Guild.CurrentUser.HasPermissions(Channel, DiscordGuildPermission.ManageMessages))
+            if ((await Guild.GetCurrentUserAsync()).HasPermissions(Channel, DiscordGuildPermission.ManageMessages))
             {
                 await messageData.DeleteAsync();
             }
