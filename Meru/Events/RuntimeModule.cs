@@ -178,10 +178,11 @@ namespace IA.Events
         {
             if (await IsEnabled(arg.Id))
             {
-                await MeruUtils.TryAsync(async () => 
-                {
-                    await JoinedGuild(arg);
-                });
+				try
+				{
+					await JoinedGuild(arg);
+				}
+				catch { }
             }
         }
 
@@ -193,23 +194,25 @@ namespace IA.Events
 
         private async Task Module_LeftGuild(IDiscordGuild arg)
         {
-            if (await IsEnabled(arg.Id))
-            {
-                await MeruUtils.TryAsync(async () =>
-                {
-                    await LeftGuild(arg);
-                });
-            }
-        }
+			if (await IsEnabled(arg.Id))
+			{
+				try
+				{
+					await LeftGuild(arg);
+				}
+				catch { }
+			}
+		}
 
         private async Task Module_UserJoined(IDiscordUser arg)
         {
             if (await IsEnabled(arg.Guild.Id))
             {
-                await MeruUtils.TryAsync(async () =>
-                {
-                    await UserJoinGuild(arg.Guild, arg);
-                });
+				try
+				{
+					await UserJoinGuild(arg.Guild, arg);
+				}
+				catch { }
             }
         }
 
@@ -217,10 +220,11 @@ namespace IA.Events
         {
             if (await IsEnabled(arg.Guild.Id))
             {
-                await MeruUtils.TryAsync(async () =>
-                {
-                    await UserLeaveGuild(arg.Guild, arg);
-                });
+				try
+				{
+					await UserLeaveGuild(arg.Guild, arg);
+				}
+				catch { }
             }
         }
 
@@ -230,10 +234,10 @@ namespace IA.Events
             {
                 if (await IsEnabled(arg1.Guild.Id))
                 {
-                    await MeruUtils.TryAsync(async () =>
-                    {
-                        await UserUpdated(arg1, arg2);
-                    });
+					try {
+						await UserUpdated(arg1, arg2);
+					}
+					catch { }
                 }
             }
         }
@@ -242,10 +246,10 @@ namespace IA.Events
         {
             if (await IsEnabled(message.Guild.Id))
             {
-                await MeruUtils.TryAsync(async () =>
-                {
-                    Task.Run(() => MessageRecieved(message));
-                });
+				try {
+					Task.Run(() => MessageRecieved(message));
+				}
+				catch { }
             }
         }
 

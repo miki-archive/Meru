@@ -145,16 +145,16 @@ namespace IA.Events
         private async Task<bool> TryProcessCommand(ProcessCommandDelegate cmd, EventContext context)
         {
             bool success = false;
-            await MeruUtils.TryAsync(async () =>
+            try
             {
                 await cmd(context);
                 success = true;
-            },
-            async (ex) =>
+            }
+            catch (Exception ex)
             {
                 Log.ErrorAt(Name, ex.Message + "\n" + ex.StackTrace);
                 await eventSystem.OnCommandError(ex, this, context.message);
-            });
+            }
             return success;
         }
 

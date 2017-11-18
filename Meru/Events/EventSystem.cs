@@ -365,14 +365,14 @@ namespace IA.Events
         {
             foreach (CommandDoneEvent ev in Events.CommandDoneEvents.Values)
             {
-                MeruUtils.TryAsync(async () =>
-                {
+				try
+				{
                     await ev.processEvent(e, commandEvent, success);
-                },
-                async (ex) =>
+                }
+                catch (Exception ex)
                 {
                     Log.ErrorAt($"commanddone@{ev.Name}", ex.Message);
-                });
+                }
             }
         }
 

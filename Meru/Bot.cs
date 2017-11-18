@@ -19,23 +19,10 @@ namespace IA
 
         public Func<Exception, Task> OnError = null;
 
-        public string Name
-        {
-            get
-            {
-                return clientInformation.Name;
-            }
-        }
+        public string Name => clientInformation.Name;
+		public string Version => clientInformation.Version;
 
-        public string Version
-        {
-            get
-            {
-                return clientInformation.Version;
-            }
-        }
-
-        public const string VersionNumber = "1.6";
+		public const string VersionNumber = "1.6";
         public const string VersionText = "IA v" + VersionNumber;
 
         public static Bot instance;

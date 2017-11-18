@@ -54,7 +54,6 @@ namespace IA.Addons
                 }
                 catch(Exception ex)
                 {
-                    await MeruUtils.ReportErrorAsync(ex);
                 }
             }
         }
