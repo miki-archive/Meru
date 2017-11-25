@@ -9,7 +9,7 @@ namespace Meru
 {
     public partial class Bot : BaseExtendablePlugin, IBot
     {
-        public bool IsRunning { get; private set; } = false;
+        public bool IsRunning { get; private set; }
 
         private readonly List<IBotProvider> providers = new List<IBotProvider>();
 
