@@ -82,7 +82,7 @@ namespace Meru.Commands
 						}
 						catch (Exception e)
 						{
-							Log.PrintLine(e.Message);
+							Log.PrintLine(e.Message + "\n" + e.StackTrace);
 						}
 						finally
 						{
