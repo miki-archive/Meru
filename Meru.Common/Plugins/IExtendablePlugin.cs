@@ -8,5 +8,7 @@ namespace Meru.Common.Plugins
     {
         void AddPlugin(IPlugin plugin);
         void RemovePlugin(IPlugin plugin);
+
+		T GetPluginOfType<T>() where T : IPlugin;
     }
 }

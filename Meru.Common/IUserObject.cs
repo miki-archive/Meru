@@ -4,7 +4,14 @@ using System.Text;
 
 namespace Meru.Common
 {
-    public interface IUserObject : IEntityObject
+    public interface IUser : IEntity
     {
+		string Name { get; }
+		string AvatarUrl { get; }
+
+		bool IsBot { get; }
+		bool IsSelf { get; }
+
+
     }
 }

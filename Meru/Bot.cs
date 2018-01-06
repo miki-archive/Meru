@@ -20,26 +20,20 @@ namespace Meru
                 List<IRunnable> runnables = new List<IRunnable>();
                 runnables.AddRange(providers);
                 runnables.AddRange(plugins);
-
                 return runnables;
             }
         }
 
         public void AddProvider(IBotProvider provider)
         {
-            provider.OnMessageReceive += async (m) =>
-            {
-                await OnMessageReceive.Invoke(m);
-            };
-
+			provider.OnMessageReceive += MessageReceive;
             provider.OnMessageEdit += async (m) =>
             {
-                await OnMessageEdit.Invoke(m);
+                await OnMessageEdit?.Invoke(m);
             };
-
             provider.OnMessageDelete += async (m) =>
             {
-                await OnMessageDelete.Invoke(m);
+                await OnMessageDelete?.Invoke(m);
             };
 
             providers.Add(provider);
@@ -53,12 +47,24 @@ namespace Meru
             }
         }
 
-        public async Task StopAsync()
+        public override async Task StopAsync()
         {
             foreach (IRunnable runnable in allRunnables)
             {
                 await runnable.StopAsync();
             }
         }
-    }
+
+		private async Task MessageReceive(IMessage msg)
+		{
+			try
+			{
+				await OnMessageReceive.Invoke(msg);
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine(e.Message);
+			}
+		}
+	}
 }

@@ -7,6 +7,8 @@ namespace Meru.Commands
     public class CommandProcessorConfiguration
     {
         public bool AutoSearchForCommands { get; set; } = false;
+		public bool IgnoreSelf { get; set; } = true;
+		public bool IgnoreBots { get; set; } = false;
         public string DefaultPrefix { get; set; } = "";
     }
 }

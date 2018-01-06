@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Meru.Common;
+using Miki.Common.Log;
 
 namespace Meru.Commands
 {
@@ -22,10 +23,12 @@ namespace Meru.Commands
         protected readonly Dictionary<string, Command> cachedCommands = new Dictionary<string, Command>();
 
         private readonly List<Prefix> _prefixes = new List<Prefix>();
+		private CommandProcessorConfiguration config;
 
         public CommandProcessor(CommandProcessorConfiguration config)
         {
             _prefixes.Add(new Prefix(config.DefaultPrefix));
+			this.config = config;
 
             if (config.AutoSearchForCommands)
             {
@@ -35,8 +38,14 @@ namespace Meru.Commands
             }
         }
 
-        public async Task MessageReceived(IMessageObject message)
+        public async Task MessageReceived(IMessage message)
         {
+			if (message.Author.IsBot && config.IgnoreBots && !message.Author.IsSelf)
+				return;
+
+			if (message.Author.IsSelf && config.IgnoreSelf)
+				return;
+
             foreach (Prefix p in _prefixes)
             {
                 if (message.Content.StartsWith(p.Value))
@@ -63,24 +72,23 @@ namespace Meru.Commands
                         }
 
                         Stopwatch timeTaken = Stopwatch.StartNew();
-                        try
-                        {
-                            await cachedCommands[command].ProcessCommand(message);
-                            timeTaken.Stop();
+						bool success = false;
 
-                            if (OnPostCommandExecute != null)
-                            {
-                                await OnPostCommandExecute(commandObject, timeTaken.ElapsedMilliseconds, true);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            timeTaken.Stop();
-                            if (OnPostCommandExecute != null)
-                            {
-                                await OnPostCommandExecute(commandObject, timeTaken.ElapsedMilliseconds, false);
-                            }
-                        }
+						try
+						{
+							await cachedCommands[command].ProcessCommand(message);
+							success = true;
+							Log.PrintLine($"[{DateTime.Now.ToShortTimeString()}][cmd]: {message.Author.Name.PadRight(10)} called the command {command.PadRight(10)} in {timeTaken.ElapsedMilliseconds}ms");
+						}
+						catch (Exception e)
+						{
+							Log.PrintLine(e.Message);
+						}
+						finally
+						{
+							timeTaken.Stop();
+							await OnPostCommandExecute?.Invoke(commandObject, timeTaken.ElapsedMilliseconds, success);
+						}
                     }
                 }
             }

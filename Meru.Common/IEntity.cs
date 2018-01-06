@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Meru.Common
 {
-    public interface IGuildObject : IEntityObject
+    public interface IEntity
     {
-        string Name { get; }
+        ulong Id { get; }
     }
 }

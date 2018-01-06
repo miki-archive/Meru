@@ -12,9 +12,9 @@ namespace Meru
         public event Func<Task> OnBotStart;
         public event Func<Task> OnBotStop;
 
-        public event Func<IMessageObject, Task> OnMessageDelete;
-        public event Func<IMessageObject, Task> OnMessageEdit; 
-        public event Func<IMessageObject, Task> OnMessageReceive;
+        public event Func<IMessage, Task> OnMessageDelete;
+        public event Func<IMessage, Task> OnMessageEdit; 
+        public event Func<IMessage, Task> OnMessageReceive;
 
         public event Func<IBotProvider, Task> OnProviderConnect;
         public event Func<IBotProvider, Task> OnProviderDisconnect;

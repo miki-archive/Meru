@@ -22,29 +22,29 @@ namespace Meru.Commands
             Children = entity.Children;
         }
 
-        public Dictionary<string, T> GetAllEntitiesOf<T>(bool includeSubmodules = true) where T : CommandEntity
+        public Dictionary<string, T> GetAllEntitiesOf<T>(bool recursive = true) where T : CommandEntity
         {
             Dictionary<string, T> allEntities = new Dictionary<string, T>();
 
             foreach (CommandEntity entity in Children)
             {
-                if (includeSubmodules)
+                if (recursive)
                 {
                     if (entity is Module m)
                     {
-                        Dictionary<string, T> tempDictionary = m.GetAllEntitiesOf<T>(includeSubmodules);
+                        Dictionary<string, T> tempDictionary = m.GetAllEntitiesOf<T>(recursive);
                         foreach (var kv in tempDictionary)
                         {
                             allEntities.Add(kv.Key.ToLower(), kv.Value);
                         }
                     }
-
-                    if (entity is T t)
-                    {
-                        allEntities.Add(entity.Id, t);
-                    }
                 }
-            }
+
+				if (entity is T t)
+				{
+					allEntities.Add(entity.Id, t);
+				}
+			}
 
             return allEntities;
         }

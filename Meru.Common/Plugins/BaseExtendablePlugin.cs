@@ -11,6 +11,7 @@ namespace Meru.Common.Plugins
 
         public IBot AttachedBot { get; set; }
 
+		// TODO: change to map?
         protected List<IPlugin> plugins { get; set; } = new List<IPlugin>();
 
         public void AddPlugin(IPlugin plugin)
@@ -45,5 +46,18 @@ namespace Meru.Common.Plugins
             }
             IsRunning = false;
         }
+
+		public virtual T GetPluginOfType<T>() where T : IPlugin
+		{
+			foreach(var plugin in plugins)
+			{
+				T t = (T)plugin;
+				if(t != null)
+				{
+					return t;
+				}
+			}
+			return default(T);
+		}
     }
 }
