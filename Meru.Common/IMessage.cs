@@ -14,5 +14,6 @@ namespace Meru.Common
 		DateTimeOffset Timestamp { get; }
 
 		Task<IMessage> ModifyAsync(string message, object embed = null);
+		Task<IUser> GetSelfAsync();
     }
 }

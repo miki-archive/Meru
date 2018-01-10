@@ -12,6 +12,6 @@ namespace Meru.Common
 		bool IsBot { get; }
 		bool IsSelf { get; }
 
-
+		string Mention { get; }
     }
 }

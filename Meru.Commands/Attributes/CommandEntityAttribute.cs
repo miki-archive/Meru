@@ -6,7 +6,7 @@ namespace Meru.Commands
 {
     public class CommandEntityAttribute : Attribute
     {
-        internal CommandEntity Entity = new CommandEntity();
+        internal virtual CommandEntity Entity { get; set; } = new CommandEntity();
 
         public string Name { get => Entity.Id; set => Entity.Id = value; }
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Meru.Commands.Attributes;
+using Meru.Commands.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -46,7 +48,7 @@ namespace Meru.Commands
 
             object constructedInstance = null;
 
-            List<Type> allChildren = attribute.GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
+           List<Type> allChildren = attribute.GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
                 .Where((x) => x.GetTypeInfo().GetCustomAttributes<CommandEntityAttribute>().Any())
                 .ToList();
 
@@ -62,17 +64,23 @@ namespace Meru.Commands
             foreach (Type t in allChildren)
             {
                 CommandEntityAttribute entityAttribute = t.GetTypeInfo().GetCustomAttribute<CommandEntityAttribute>();
+				CommandEntity entity = null;
 
-                if(entityAttribute is ModuleAttribute mAttribute)
+				if (entityAttribute is ModuleAttribute mAttribute)
                 {
-                    CommandEntity entity = GetChildrenFromModule(t);
-
-                    module = new Module(mAttribute.Entity as Module);
-
-                    entity.Parent = module;
-                    module.Children.Add(entity);
+                    entity = GetChildrenFromModule(t);
                 }
-            }
+				else if(entityAttribute is MultiCommandAttribute cAttribute)
+				{
+					entity = ParseMultiCommand(t);
+				}
+
+				if (entity == null)
+					continue;
+
+				entity.Parent = module;
+				module.Children.Add(entity);
+			}
 
             List<MethodInfo> methods = attribute.GetMethods()
                 .Where((x) => x.GetCustomAttributes<CommandAttribute>().Any())
@@ -80,15 +88,77 @@ namespace Meru.Commands
 
             foreach (MethodInfo m in methods)
             {
-                CommandAttribute commandAttribute = m.GetCustomAttribute<CommandAttribute>();
-                Command newEvent = new Command(commandAttribute.Entity as Command);
-
-                newEvent.ProcessCommand =
-                    async (context) => await (Task)m.Invoke(constructedInstance, new object[] { context });
-                newEvent.Parent = module;
-                module.Children.Add(newEvent);
+                module.Children.Add(CreateCommand(m, module, constructedInstance));
             }
             return module;
         }
-    }
+
+		public CommandEntity ParseMultiCommand(Type attribute)
+		{
+			CommandEntity command = new CommandEntity();
+			MultiCommandAttribute moduleAttribute = attribute.GetTypeInfo().GetCustomAttribute<MultiCommandAttribute>();
+
+			command = new MultiCommand(moduleAttribute.Entity as MultiCommand);
+
+			object constructedInstance = null;
+
+			try
+			{
+				constructedInstance = Activator.CreateInstance(Type.GetType(attribute.AssemblyQualifiedName), command);
+			}
+			catch
+			{
+				constructedInstance = Activator.CreateInstance(Type.GetType(attribute.AssemblyQualifiedName));
+			}
+
+			List<Type> allChildren = attribute.GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Public)
+				.Where((x) => x.GetTypeInfo().GetCustomAttributes<CommandEntityAttribute>().Any())
+				.ToList();
+
+			foreach (Type t in allChildren)
+			{
+				CommandEntityAttribute entityAttribute = t.GetTypeInfo().GetCustomAttribute<CommandEntityAttribute>();
+				CommandEntity entity = null;
+
+				if (entityAttribute is MultiCommandAttribute cAttribute)
+				{
+					entity = ParseMultiCommand(t);
+				}
+
+				if (entity == null)
+					continue;
+
+				entity.Parent = command;
+				command.Children.Add(entity);
+			}
+
+			List<MethodInfo> methods = attribute.GetMethods()
+				.Where((x) => x.GetCustomAttributes<CommandAttribute>().Any())
+				.ToList();
+
+			foreach (MethodInfo m in methods)
+			{
+				Command newEvent = CreateCommand(m, command, constructedInstance);
+
+				if (newEvent.IsDefault && (command as MultiCommand).defaultCommand == null)
+				{
+					(command as MultiCommand).defaultCommand = newEvent;
+				}
+
+				command.Children.Add(newEvent);
+			}
+			return command;
+		}
+
+		public Command CreateCommand(MethodInfo m, CommandEntity parent, object constructedInstance)
+		{
+			CommandAttribute commandAttribute = m.GetCustomAttribute<CommandAttribute>();
+			Command newEvent = new Command(commandAttribute.Entity as Command);
+
+			newEvent.ProcessCommand =
+				async (context) => await (Task)m.Invoke(constructedInstance, new object[] { context });
+			newEvent.Parent = parent;
+			return newEvent;
+		}
+	}
 }

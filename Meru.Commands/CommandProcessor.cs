@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Meru.Commands.Objects;
 using Meru.Common;
 using Miki.Common.Log;
 
@@ -19,7 +20,7 @@ namespace Meru.Commands
 
         public event Func<Command, long, bool, Task> OnPostCommandExecute; 
 
-        protected readonly CommandEntity hierarchyRoot = new CommandEntity();
+        public readonly CommandEntity hierarchyRoot = new CommandEntity();
         protected readonly Dictionary<string, Command> cachedCommands = new Dictionary<string, Command>();
 
         private readonly List<Prefix> _prefixes = new List<Prefix>();
@@ -27,8 +28,7 @@ namespace Meru.Commands
 
         public CommandProcessor(CommandProcessorConfiguration config)
         {
-            _prefixes.Add(new Prefix(config.DefaultPrefix));
-			this.config = config;
+        	this.config = config;
 
             if (config.AutoSearchForCommands)
             {
@@ -36,9 +36,53 @@ namespace Meru.Commands
                 hierarchyRoot = s.GetCommandsFromAttributeAsync();
                 cachedCommands = hierarchyRoot.GetAllEntitiesOf<Command>();
             }
-        }
 
-        public async Task MessageReceived(IMessage message)
+			if(config.MentionAsPrefix)
+			{
+				if(config.DefaultPrefix != "")
+				{
+					_prefixes.Add(new Prefix(config.DefaultPrefix)
+					{
+						Configurable = config.DefaultConfigurable
+					});
+				}
+				_prefixes.Add(new MentionPrefix());
+			}
+			else
+			{
+				_prefixes.Add(new Prefix(config.DefaultPrefix)
+				{
+					Configurable = config.DefaultConfigurable
+				});
+			}
+		}
+
+		public Command GetCommand(string query)
+		{
+			return GetCommand(hierarchyRoot, query) as Command;
+		}
+		private CommandEntity GetCommand(CommandEntity root, string query)
+		{
+			CommandEntity entity = root.Children
+				.FirstOrDefault(x => query.StartsWith(x.Id));
+
+			if(entity is Command command)
+			{
+				return command;
+			}
+
+			int dot = query.IndexOf('.');
+			string newQuery = query.Substring(dot == -1 ? 0 : dot)
+				.TrimStart('.');
+
+			if(entity == null)
+			{
+				return null;
+			}
+			return GetCommand(entity, newQuery);
+		}
+
+		public async Task MessageReceived(IMessage message)
         {
 			if (message.Author.IsBot && config.IgnoreBots && !message.Author.IsSelf)
 				return;
@@ -48,37 +92,57 @@ namespace Meru.Commands
 
             foreach (Prefix p in _prefixes)
             {
-                if (message.Content.StartsWith(p.Value))
+                if (await p.MatchesAsync(message))
                 {
-                    string command = message.Content
-                        .Substring(p.Value.Length)
+					string prefix = await p.GetPrefixAsync(message);
+
+					string content = message.Content
+						.Substring(prefix.Length)
+						.TrimStart(' ');
+
+					string command = content
                         .Split(' ')[0]
                         .ToLower();
 
-                    if (cachedCommands.ContainsKey(command))
-                    {
-                        Command commandObject = cachedCommands[command];
+					string arguments = content
+						.Substring(command.Length)
+						.TrimStart(' ');
 
-                        if (OnPreCommandExecute != null)
-                        {
-                            if (!await OnPreCommandExecute.Invoke(commandObject))
-                            {
-                                if (OnPostCommandExecute != null)
-                                {
-                                    await OnPreCommandFailure.Invoke(commandObject);
-                                }
-                                return;
-                            }
-                        }
+					if (cachedCommands.ContainsKey(command))
+					{
+						Command commandObject = cachedCommands[command];
 
-                        Stopwatch timeTaken = Stopwatch.StartNew();
+						if (OnPreCommandExecute != null)
+						{
+							if (!await OnPreCommandExecute.Invoke(commandObject))
+							{
+								if (OnPostCommandExecute != null)
+								{
+									await OnPreCommandFailure.Invoke(commandObject);
+								}
+								return;
+							}
+						}
+
+						Stopwatch timeTaken = Stopwatch.StartNew();
 						bool success = false;
+
+						CommandEventArgs args = new CommandEventArgs()
+						{
+							Message = message,
+							Arguments = arguments.ToLower(),
+							Processor = this,
+							PrefixUsed = p
+						};
 
 						try
 						{
-							await cachedCommands[command].ProcessCommand(message);
-							success = true;
-							Log.PrintLine($"[{DateTime.Now.ToShortTimeString()}][cmd]: {message.Author.Name.PadRight(10)} called the command {command.PadRight(10)} in {timeTaken.ElapsedMilliseconds}ms");
+							if (await cachedCommands[command].CanBeUsedAsync(message))
+							{
+								await cachedCommands[command].ProcessAsync(args);
+								success = true;
+								Log.PrintLine($"[{DateTime.Now.ToShortTimeString()}][cmd]: {message.Author.Name.PadRight(10)} called the command {command.PadRight(10)} in {timeTaken.ElapsedMilliseconds}ms");
+							}
 						}
 						catch (Exception e)
 						{
@@ -89,7 +153,7 @@ namespace Meru.Commands
 							timeTaken.Stop();
 							await OnPostCommandExecute?.Invoke(commandObject, timeTaken.ElapsedMilliseconds, success);
 						}
-                    }
+					}
                 }
             }
         }

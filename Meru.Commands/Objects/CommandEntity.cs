@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Meru.Commands.Objects;
+using Meru.Common;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Meru.Commands
 {
@@ -48,5 +52,17 @@ namespace Meru.Commands
 
             return allEntities;
         }
-    }
+		public int GetDepth()
+		{
+			return Parent?.GetDepth() + 1 ?? 0;
+		}
+		public string GetFullId()
+		{
+			if(Parent != null)
+			{
+				return Parent.GetFullId() + "." + Id.ToLower();
+			}
+			return Id.ToLower();
+		}
+	}
 }

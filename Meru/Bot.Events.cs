@@ -16,7 +16,14 @@ namespace Meru
         public event Func<IMessage, Task> OnMessageEdit; 
         public event Func<IMessage, Task> OnMessageReceive;
 
-        public event Func<IBotProvider, Task> OnProviderConnect;
+		public event Func<IGuild, Task> OnGuildCreate;
+		public event Func<IGuild, Task> OnGuildUpdate;
+		public event Func<IUser, Task> OnGuildMemberAdd;
+		public event Func<IUser, Task> OnGuildMemberRemove;
+		public event Func<IUser, Task> OnGuildMemberUpdate;
+		public event Func<IUser, Task> OnUserUpdate;
+
+		public event Func<IBotProvider, Task> OnProviderConnect;
         public event Func<IBotProvider, Task> OnProviderDisconnect;
     }
 }

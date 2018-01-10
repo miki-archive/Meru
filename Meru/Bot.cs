@@ -13,7 +13,7 @@ namespace Meru
 
         private readonly List<IBotProvider> providers = new List<IBotProvider>();
 
-        private List<IRunnable> allRunnables
+		private List<IRunnable> allRunnables
         { 
             get
             {
