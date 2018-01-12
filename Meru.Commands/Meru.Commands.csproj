@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\miki-preview\Miki.Common\Miki.Common.csproj" />
+    <ProjectReference Include="..\Meru.Common\Meru.Common.csproj" />
+    <ProjectReference Include="..\Meru\Meru.csproj" />
   </ItemGroup>
 
 </Project>
