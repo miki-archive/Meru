@@ -38,7 +38,15 @@ namespace Meru.Commands
 				{
 					using (var context = DbClient.Create())
 					{
-						prefix = await context.QueryFirstOrDefaultAsync<string>("SELECT value FROM public.prefixes WHERE guild_id = @id", new { id = (long)msg.Channel.Guild.Id });
+						try
+						{
+							prefix = await context.QueryFirstOrDefaultAsync<string>("SELECT value FROM public.prefixes WHERE guild_id = @id", new { id = (long)msg.Channel.Guild.Id });
+						}
+						catch(Exception e)
+						{
+							Log.PrintLine(e.Message);
+						}
+
 						await DbClient.Cache.AddAsync($"meru:commands:prefix:{msg.Channel.Guild.Id}", prefix ?? Value);
 
 						if (prefix != null)
