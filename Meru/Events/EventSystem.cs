@@ -297,11 +297,11 @@ namespace IA.Events
 
                 try
                 {
-                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName), newModule);
+                    instance = Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName), newModule);
                 }
                 catch
                 {
-                    instance = (object)Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName));
+                    instance = Activator.CreateInstance(Type.GetType(m.AssemblyQualifiedName));
                 }
 
                 newModule.EventSystem = this;
@@ -361,13 +361,13 @@ namespace IA.Events
 
         #region events
 
-        internal async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true)
+        internal async Task OnCommandDone(IDiscordMessage e, ICommandEvent commandEvent, bool success = true, float time = 0.0f)
         {
             foreach (CommandDoneEvent ev in Events.CommandDoneEvents.Values)
             {
 				try
 				{
-                    await ev.processEvent(e, commandEvent, success);
+                    await ev.processEvent(e, commandEvent, success, time);
                 }
                 catch (Exception ex)
                 {
@@ -471,7 +471,7 @@ namespace IA.Events
 			await Task.Yield();
 			try
 			{
-				await OnMessageRecieved(message);
+				Task.Run(() => OnMessageRecieved(message));
 			}
 			catch (Exception e)
 			{

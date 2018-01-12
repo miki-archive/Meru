@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace IA.Events
 {
-    public delegate Task ProcessCommandDoneEvent(IDiscordMessage m, ICommandEvent e, bool success);
+    public delegate Task ProcessCommandDoneEvent(IDiscordMessage m, ICommandEvent e, bool success, float time = 0.0f);
 
     public class CommandDoneEvent : RuntimeCommandEvent
     {

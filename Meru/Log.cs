@@ -12,11 +12,6 @@ namespace IA
         public static void InitializeLogging(ClientInformation c)
         {
             client = c;
-            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/logs");
-            if (client.CanFileLog(LogLevel.ERROR))
-            {
-                log = new FileWriter($"log_{DateTime.Now.ToFileTime()}.log", "/logs");
-            }
         }
 
         /// <summary>
@@ -31,14 +26,10 @@ namespace IA
             }
 
             Console.ForegroundColor = ConsoleColor.White;
-            if (client.CanLog(LogLevel.MESSAGE))
-            {
-                Console.WriteLine("[msg]: " + message);
-            }
-            if (client.CanFileLog(LogLevel.MESSAGE))
-            {
-                log?.Write(message);
-            }
+			if (client.CanLog(LogLevel.MESSAGE))
+			{
+				Console.WriteLine("[msg]: " + message);
+			}
         }
 
         /// <summary>
@@ -56,10 +47,6 @@ namespace IA
             if (client.CanLog(LogLevel.NOTICE))
             {
                 Console.WriteLine("[!!!]: " + message);
-            }
-            if (client.CanFileLog(LogLevel.NOTICE))
-            {
-                log?.Write(message);
             }
             Console.ForegroundColor = ConsoleColor.White;
         }
@@ -80,10 +67,6 @@ namespace IA
             {
                 Console.WriteLine("[err]: " + message);
             }
-            if (client.CanFileLog(LogLevel.ERROR))
-            {
-                log?.Write(message);
-            }
             Console.ForegroundColor = ConsoleColor.White;
         }
 
@@ -102,10 +85,6 @@ namespace IA
             if (client.CanLog(LogLevel.ERROR))
             {
                 Console.WriteLine("[err@{0}]: {1}", target, message);
-            }
-            if (client.CanFileLog(LogLevel.ERROR))
-            {
-                log?.Write(message);
             }
             Console.ForegroundColor = ConsoleColor.White;
         }
@@ -175,10 +154,6 @@ namespace IA
                 Console.WriteLine("[yay@{0}]: {1}", target, message);
             }
             Console.ForegroundColor = ConsoleColor.White;
-            if (client.CanFileLog(LogLevel.NOTICE))
-            {
-                log?.Write(message);
-            }
         }
 
         /// <summary>
@@ -198,11 +173,6 @@ namespace IA
             if (client.CanLog(logLevel))
             {
                 Console.WriteLine(message);
-            }
-            Console.ForegroundColor = ConsoleColor.White;
-            if (client.CanFileLog(logLevel))
-            {
-                log?.Write(message);
             }
         }
     }

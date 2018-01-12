@@ -79,33 +79,25 @@ namespace IA.Events
 
         public async Task<bool> IsEnabled(ulong id)
         {
-            bool isEnabled = false;
-
             if (Module != null)
             {
                 if (!await Module.IsEnabled(id)) return false;
             }
 
-            if (cache.ContainsKey(id))
+            if (cache.TryGetValue(id, out bool value))
             {
-                return cache.GetOrAdd(id, DefaultEnabled);
+				return value;
             }
             else
             {
-                CommandState state;
+                CommandState state = null;
 
-                using (var context = new IAContext())
-                {
-                    long guildId = id.ToDbLong();
-                    state = await context.CommandStates.FindAsync(Name, guildId);
-                }
-
-                if (state == null)
-                {
-                    return cache.GetOrAdd(id, DefaultEnabled);
-                }
-
-                return cache.GetOrAdd(id, state.State);
+				using (var context = new IAContext())
+				{
+					long guildId = id.ToDbLong();
+					state = await context.CommandStates.FindAsync(Name, guildId);
+				}
+                return cache.GetOrAdd(id, state?.State ?? DefaultEnabled);
             }
         }
 

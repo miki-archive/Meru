@@ -21,6 +21,9 @@ namespace IA
 
 		public event Func<IDiscordUser, IDiscordUser, Task> UserUpdated;
 
+		public event Func<int, Task> OnShardConnect;
+		public event Func<Exception, int, Task> OnShardDisconnect;
+
 		public void LoadEvents()
 		{
 			Client.UserJoined += async (u) =>
@@ -42,11 +45,11 @@ namespace IA
 
 			Client.MessageReceived += async (m) =>
 			{
-				Task.Run(async () =>
+				RuntimeMessage newMessage = new RuntimeMessage(m);
+				if (MessageReceived != null)
 				{
-					RuntimeMessage newMessage = new RuntimeMessage(m);
-					await MessageReceived?.Invoke(newMessage);
-				});
+					await MessageReceived.Invoke(newMessage);
+				}
 			};
 
 			Client.JoinedGuild += async (g) =>
@@ -60,12 +63,24 @@ namespace IA
 
 			Client.LeftGuild += async (g) =>
 			{
-				Task.Run(async () =>
-				{
-					RuntimeGuild guild = new RuntimeGuild(g);
-					await GuildLeave?.Invoke(guild);
-				});
+				RuntimeGuild guild = new RuntimeGuild(g);
+				await GuildLeave?.Invoke(guild);
 			};
+
+			foreach(var shard in Client.Shards)
+			{
+				shard.Disconnected += async (ex) =>
+				{
+					await OnShardDisconnect?.Invoke(ex, shard.ShardId);
+				};
+				shard.Connected += async () =>
+				{
+					if (OnShardConnect != null)
+					{
+						await OnShardConnect.Invoke(shard.ShardId);
+					}
+				};
+			}
 		}
 	}
 }

@@ -72,12 +72,6 @@ namespace IA.Events
                 allAliases.Add(Name);
             }
 
-            if (!await IsEnabled(e.Channel.Id))
-            {
-                Log.WarningAt(Name, " is disabled");
-                return;
-            }
-
             if (IsOnCooldown(e.Author.Id))
             {
                 Log.WarningAt(Name, " is on cooldown");
@@ -117,11 +111,15 @@ namespace IA.Events
 
             if (await TryProcessCommand(targetCommand, context))
             {
-                await eventSystem.OnCommandDone(e, this);
+                await eventSystem.OnCommandDone(e, this, true, sw.ElapsedMilliseconds);
                 TimesUsed++;
                 Log.Message($"{Name} called by {e.Author.Username}#{e.Author.Discriminator} [{e.Author.Id}] from {e.Guild.Name} in {sw.ElapsedMilliseconds}ms");
             }
-            sw.Stop();
+			else
+			{
+				await eventSystem.OnCommandDone(e, this, false, sw.ElapsedMilliseconds);
+			}
+			sw.Stop();
         }
 
         private bool IsOnCooldown(ulong id)
@@ -194,7 +192,7 @@ namespace IA.Events
             return this;
         }
 
-        new public ICommandEvent SetAliases(params string[] aliases)
+        public ICommandEvent SetAliases(params string[] aliases)
         {
             Aliases = aliases;
             return this;

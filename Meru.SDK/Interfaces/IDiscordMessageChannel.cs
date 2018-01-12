@@ -17,10 +17,6 @@ namespace IA.SDK.Interfaces
 
         Task<IDiscordMessage> SendFileAsync(MemoryStream stream, string extension);
 
-        Task SendOption(string message, IDiscordUser user, params Option[] reactionEmoji);
-
-        Task SendOption(IDiscordEmbed embed, IDiscordUser user, params Option[] reactionEmoji);
-
         Task<IDiscordMessage> SendMessage(string message);
 
         [Obsolete("Use 'IDiscordEmbed.SendToChannel' instead")]

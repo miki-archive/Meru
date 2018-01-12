@@ -72,7 +72,6 @@
   <ItemGroup>
     <Compile Include="Addons\AddonManager.cs" />
     <Compile Include="Bot.cs" />
-    <Compile Include="Events\ConcurrentUtils.cs" />
     <Compile Include="FileHandling\Configuration\Configurable.cs" />
     <Compile Include="FileHandling\Configuration\ConfigurationBase.cs" />
     <Compile Include="FileHandling\Configuration\ConfigurationsFileLoader.cs" />

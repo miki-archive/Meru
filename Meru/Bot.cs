@@ -22,12 +22,12 @@ namespace IA
         public string Name => clientInformation.Name;
 		public string Version => clientInformation.Version;
 
-		public const string VersionNumber = "1.6";
+		public const string VersionNumber = "1.7";
         public const string VersionText = "IA v" + VersionNumber;
 
         public static Bot instance;
 
-        private ClientInformation clientInformation;
+        internal ClientInformation clientInformation;
 
         private string currentPath = Directory.GetCurrentDirectory();
 
@@ -155,7 +155,7 @@ namespace IA
         {
             instance = this;
 
-            Log.InitializeLogging(clientInformation);
+			Log.InitializeLogging(clientInformation);
 
             Log.Message(VersionText);
 
@@ -163,9 +163,8 @@ namespace IA
             {
                 TotalShards = clientInformation.ShardCount,
                 LogLevel = LogSeverity.Info,
-                HandlerTimeout = null,
-				AlwaysDownloadUsers = true,
-				ConnectionTimeout = 20000
+				ConnectionTimeout = 50000,
+				LargeThreshold = 250,
 			});
 
             LoadEvents();
@@ -176,8 +175,6 @@ namespace IA
 
             // fallback prefix
             Events.RegisterPrefixInstance("miki.", false);
-            // debug prefix
-            Events.RegisterPrefixInstance("fmiki.", false, true);
 
             Addons = new AddonManager();
             await Addons.Load(this);
@@ -213,11 +210,17 @@ namespace IA
 
         private async Task Client_Log(LogMessage arg)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(arg.Message);
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(arg.Exception);
-            await Task.CompletedTask;
+			await Task.Yield();
+			if (!string.IsNullOrEmpty(arg.Message))
+			{
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.WriteLine(arg.Message);
+			}
+			if (arg.Exception != null)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(arg.Exception);
+			}
         }
     }
 }

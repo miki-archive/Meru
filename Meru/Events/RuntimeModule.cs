@@ -246,10 +246,7 @@ namespace IA.Events
         {
             if (await IsEnabled(message.Guild.Id))
             {
-				try {
-					Task.Run(() => MessageRecieved(message));
-				}
-				catch { }
+				await MessageRecieved(message);
             }
         }
 
@@ -283,11 +280,11 @@ namespace IA.Events
             }
             else
             {
-                using (var context = new IAContext())
-                {
-                    long guildId = id.ToDbLong();
-                    state = await context.ModuleStates.FindAsync(SqlName, guildId);
-                }
+				using (var context = new IAContext())
+				{
+					long guildId = id.ToDbLong();
+					state = await context.ModuleStates.FindAsync(SqlName, guildId);
+				}
 
                 if (state == null)
                 {
@@ -296,11 +293,6 @@ namespace IA.Events
 
                 return cache.GetOrAdd(id, state.State);
             }
-        }
-
-        internal RuntimeModule Add(RuntimeModule module)
-        {
-            throw new NotImplementedException();
         }
     }
 }

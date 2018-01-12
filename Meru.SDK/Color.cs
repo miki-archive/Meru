@@ -2,7 +2,7 @@
 
 namespace IA.SDK
 {
-    public class Color
+    public struct Color
     {
         public float R;
         public float G;

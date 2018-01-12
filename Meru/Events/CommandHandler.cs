@@ -166,7 +166,7 @@ namespace IA.Events
                 {
                     if (await eventInstance.IsEnabled(msg.Channel.Id) || prefix.ForceCommandExecution && GetUserAccessibility(msg) >= EventAccessibility.DEVELOPERONLY)
                     {
-                        Task.Run(() => eventInstance.Check(msg, this, identifier));
+                        await eventInstance.Check(msg, this, identifier);
                         return true;
                     }
                 }
