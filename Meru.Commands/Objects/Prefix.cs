@@ -22,39 +22,39 @@ namespace Meru.Commands
 
 		public virtual async Task<string> GetPrefixAsync(IMessage msg)
 		{
-			if (Configurable)
+			try
 			{
-				string prefix = null;
-
-				IGuild guild = msg.Channel.Guild;
-
-				if (await DbClient.Cache.ExistsAsync($"meru:commands:prefix:{msg.Channel.Guild.Id}"))
+				if (Configurable)
 				{
-					prefix = await DbClient.Cache.GetAsync<string>($"meru:commands:prefix:{msg.Channel.Guild.Id}");
-					return prefix;
-				}
+					string prefix = null;
 
-				if (prefix == null)
-				{
-					using (var context = DbClient.Create())
+					IGuild guild = msg.Channel.Guild;
+
+					if (await DbClient.Cache.ExistsAsync($"meru:commands:prefix:{msg.Channel.Guild.Id}"))
 					{
-						try
+						prefix = await DbClient.Cache.GetAsync<string>($"meru:commands:prefix:{msg.Channel.Guild.Id}");
+						return prefix;
+					}
+
+					if (prefix == null)
+					{
+						using (var context = DbClient.Create())
 						{
 							prefix = await context.QueryFirstOrDefaultAsync<string>("SELECT value FROM public.prefixes WHERE guild_id = @id", new { id = (long)msg.Channel.Guild.Id });
-						}
-						catch(Exception e)
-						{
-							Log.PrintLine(e.Message);
-						}
 
-						await DbClient.Cache.AddAsync($"meru:commands:prefix:{msg.Channel.Guild.Id}", prefix ?? Value);
+							await DbClient.Cache.AddAsync($"meru:commands:prefix:{msg.Channel.Guild.Id}", prefix ?? Value);
 
-						if (prefix != null)
-						{
-							return prefix;
+							if (prefix != null)
+							{
+								return prefix;
+							}
 						}
 					}
 				}
+			}
+			catch (Exception e)
+			{
+				Log.PrintLine(e.Message + e.StackTrace);
 			}
 			return Value;
 		}

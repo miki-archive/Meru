@@ -84,78 +84,85 @@ namespace Meru.Commands
 
 		public async Task MessageReceived(IMessage message)
         {
-			if (message.Author.IsBot && config.IgnoreBots && !message.Author.IsSelf)
-				return;
+			try
+			{
+				if (message.Author.IsBot && config.IgnoreBots && !message.Author.IsSelf)
+					return;
 
-			if (message.Author.IsSelf && config.IgnoreSelf)
-				return;
+				if (message.Author.IsSelf && config.IgnoreSelf)
+					return;
 
-            foreach (Prefix p in _prefixes)
-            {
-                if (await p.MatchesAsync(message))
-                {
-					string prefix = await p.GetPrefixAsync(message);
-
-					string content = message.Content
-						.Substring(prefix.Length)
-						.TrimStart(' ');
-
-					string command = content
-                        .Split(' ')[0]
-                        .ToLower();
-
-					string arguments = content
-						.Substring(command.Length)
-						.TrimStart(' ');
-
-					if (cachedCommands.ContainsKey(command))
+				foreach (Prefix p in _prefixes)
+				{
+					if (await p.MatchesAsync(message))
 					{
-						Command commandObject = cachedCommands[command];
+						string prefix = await p.GetPrefixAsync(message);
 
-						if (OnPreCommandExecute != null)
+						string content = message.Content
+							.Substring(prefix.Length)
+							.TrimStart(' ');
+
+						string command = content
+							.Split(' ')[0]
+							.ToLower();
+
+						string arguments = content
+							.Substring(command.Length)
+							.TrimStart(' ');
+
+						if (cachedCommands.ContainsKey(command))
 						{
-							if (!await OnPreCommandExecute.Invoke(commandObject))
+							Command commandObject = cachedCommands[command];
+
+							if (OnPreCommandExecute != null)
 							{
-								if (OnPostCommandExecute != null)
+								if (!await OnPreCommandExecute.Invoke(commandObject))
 								{
-									await OnPreCommandFailure.Invoke(commandObject);
+									if (OnPostCommandExecute != null)
+									{
+										await OnPreCommandFailure.Invoke(commandObject);
+									}
+									return;
 								}
-								return;
 							}
-						}
 
-						Stopwatch timeTaken = Stopwatch.StartNew();
-						bool success = false;
+							Stopwatch timeTaken = Stopwatch.StartNew();
+							bool success = false;
 
-						CommandEventArgs args = new CommandEventArgs()
-						{
-							Message = message,
-							Arguments = arguments.ToLower(),
-							Processor = this,
-							PrefixUsed = p
-						};
-
-						try
-						{
-							if (await cachedCommands[command].CanBeUsedAsync(message))
+							CommandEventArgs args = new CommandEventArgs()
 							{
-								await cachedCommands[command].ProcessAsync(args);
-								success = true;
-								Log.PrintLine($"[{DateTime.Now.ToShortTimeString()}][cmd]: {message.Author.Name.PadRight(10)} called the command {command.PadRight(10)} in {timeTaken.ElapsedMilliseconds}ms");
+								Message = message,
+								Arguments = arguments.ToLower(),
+								Processor = this,
+								PrefixUsed = p
+							};
+
+							try
+							{
+								if (await cachedCommands[command].CanBeUsedAsync(message))
+								{
+									await cachedCommands[command].ProcessAsync(args);
+									success = true;
+									Log.PrintLine($"[{DateTime.Now.ToShortTimeString()}][cmd]: {message.Author.Name.PadRight(10)} called the command {command.PadRight(10)} in {timeTaken.ElapsedMilliseconds}ms");
+								}
 							}
-						}
-						catch (Exception e)
-						{
-							Log.PrintLine(e.Message + "\n" + e.StackTrace);
-						}
-						finally
-						{
-							timeTaken.Stop();
-							await OnPostCommandExecute?.Invoke(commandObject, timeTaken.ElapsedMilliseconds, success);
+							catch (Exception e)
+							{
+								Log.PrintLine(e.Message + "\n" + e.StackTrace);
+							}
+							finally
+							{
+								timeTaken.Stop();
+								await OnPostCommandExecute?.Invoke(commandObject, timeTaken.ElapsedMilliseconds, success);
+							}
 						}
 					}
-                }
-            }
-        }
+				}
+			}
+			catch (Exception e)
+			{
+				Log.PrintLine(e.Message + e.StackTrace);
+			}
+		}
     }
 }
