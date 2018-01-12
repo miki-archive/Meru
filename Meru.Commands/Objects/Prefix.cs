@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Meru.Common;
 using Meru.Database;
+using Miki.Common.Log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,11 +38,11 @@ namespace Meru.Commands
 				{
 					using (var context = DbClient.Create())
 					{
-						prefix = await context.QueryFirstAsync<string>("SELECT value FROM public.prefixes WHERE guild_id = @id", new { id = (long)msg.Channel.Guild.Id });
+						prefix = await context.QueryFirstOrDefaultAsync<string>("SELECT value FROM public.prefixes WHERE guild_id = @id", new { id = (long)msg.Channel.Guild.Id });
+						await DbClient.Cache.AddAsync($"meru:commands:prefix:{msg.Channel.Guild.Id}", prefix ?? Value);
 
 						if (prefix != null)
 						{
-							await DbClient.Cache.AddAsync($"meru:commands:prefix:{msg.Channel.Guild.Id}", prefix);
 							return prefix;
 						}
 					}
