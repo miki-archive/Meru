@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\miki-preview\Miki.Common\Miki.Common.csproj" />
-    <ProjectReference Include="..\Meru.Common\Meru.Common.csproj" />
   </ItemGroup>
 
 </Project>
