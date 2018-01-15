@@ -28,12 +28,12 @@ namespace IA.FileHandling
             Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);
             if (!fileName.Contains("."))
             {
-                filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
+                filePath = Directory.GetCurrentDirectory() + "/" + relativePath + "/" + fileName;
                 file = new StreamReader(new FileStream(filePath + ".config", FileMode.Open));
             }
             else
             {
-                filePath = Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName;
+                filePath = Directory.GetCurrentDirectory() + "/" + relativePath + "/" + fileName;
                 file = new StreamReader(new FileStream(filePath, FileMode.Open));
             }
         }
@@ -45,7 +45,7 @@ namespace IA.FileHandling
 
         public static bool FileExist(string fileName)
         {
-            return File.Exists(Directory.GetCurrentDirectory() + "\\" + fileName);
+            return File.Exists(Directory.GetCurrentDirectory() + "/" + fileName);
         }
 
         public static bool FileExist(string fileName, string relativePath)
@@ -53,11 +53,11 @@ namespace IA.FileHandling
             Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/" + relativePath);
             if (!fileName.Contains("."))
             {
-                return File.Exists(Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName + ".config");
+                return File.Exists(Directory.GetCurrentDirectory() + "/" + relativePath + "/" + fileName + ".config");
             }
             else
             {
-                return File.Exists(Directory.GetCurrentDirectory() + "\\" + relativePath + "\\" + fileName);
+                return File.Exists(Directory.GetCurrentDirectory() + "/" + relativePath + "/" + fileName);
             }
         }
 
