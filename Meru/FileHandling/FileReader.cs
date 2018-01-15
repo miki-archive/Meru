@@ -13,12 +13,12 @@ namespace IA.FileHandling
         {
             if (!fileName.Contains("."))
             {
-                filePath = Directory.GetCurrentDirectory() + "\\" + fileName + ".config";
+                filePath = Directory.GetCurrentDirectory() + "/" + fileName + ".config";
                 file = new StreamReader(new FileStream(filePath + ".config", FileMode.Create));
             }
             else
             {
-                filePath = Directory.GetCurrentDirectory() + "\\" + fileName;
+                filePath = Directory.GetCurrentDirectory() + "/" + fileName;
                 file = new StreamReader(new FileStream(filePath, FileMode.Create));
             }
         }
