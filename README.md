@@ -14,7 +14,7 @@ Plain: planned<br>
 ~~Strike~~ through: done<br>
 
 - Fully modular
-	* Backend interfacing
+	* **Backend interfacing**
 	* ~~Plugin support~~
 - Multiplatform
 	- ~~Windows~~
@@ -26,7 +26,7 @@ Plain: planned<br>
 	- Twitch
 - Built in systems
 	- ~~Command handling~~
-	- Context creation
+	- **Context creation**
 	- ~~Database friendly~~
-	- GUI friendly
+	- **GUI friendly**
 	- ~~Permissions per entity~~
