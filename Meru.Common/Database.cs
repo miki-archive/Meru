@@ -8,11 +8,15 @@ namespace Meru.Database
 {
 	public class DbClient
 	{
-		private static DbClient _client = null;
+		// TODO: remove somehow.
+		private static DbClient client = null;
 
-		public ICacheClient cache = null;
+		public static ICacheClient Cache => client.cache;
+		private ICacheClient cache;
+
 		NpgsqlConnectionStringBuilder database = null;
-		public ISerializer serializer = null;
+		ISerializer serializer = null;
+
 
 		public DbClient(DbClientConfiguration config)
 		{
@@ -23,14 +27,18 @@ namespace Meru.Database
 
 			database = new NpgsqlConnectionStringBuilder(config.postgresAddress);
 
-			if(_client == null)
+			if(client == null)
 			{
-				_client = this;
+				client = this;
 			}
 		}
 
+		/// <summary>
+		/// Creates a new connection to the database
+		/// </summary>
 		public IDbConnection CreateNew()
 		{
+			// TODO: abstractify this
 			return new NpgsqlConnection(database.ConnectionString);
 		}
 
@@ -40,14 +48,14 @@ namespace Meru.Database
 		/// <returns></returns>
 		public static IDbConnection Create()
 		{
-			if (_client == null)
+			if (client == null)
 				return null;
 
-			return _client.CreateNew();
+			return client.CreateNew();
 		}
-		public static ICacheClient Cache => _client.cache;
 	}
 
+	// TODO: abstractify this
 	public class DbClientConfiguration
 	{
 		public string redisAddress = "127.0.0.1";
@@ -56,6 +64,7 @@ namespace Meru.Database
 		[NonSerialized]
 		public ISerializer serializer = null;
 	}
+
 	public class DbConfiguration
 	{
 		public string HostName;

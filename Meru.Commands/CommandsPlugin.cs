@@ -8,38 +8,41 @@ namespace Meru.Commands
 {
     public class CommandsPlugin : BaseExtendablePlugin
     {
-        public List<CommandProcessor> Processors = new List<CommandProcessor>();
+        private List<CommandProcessor> processors = new List<CommandProcessor>();
 
         public CommandsPlugin(IBot bot)
         {
             AttachedBot = bot;
         }
-
         public CommandsPlugin(IBot bot, CommandProcessorConfiguration config)
         {
             AttachedBot = bot;
 
             CommandProcessor processor = new CommandProcessor(config);
-            Processors.Add(processor);
+            processors.Add(processor);
         }
 
-        public override async Task StartAsync()
+		/// <summary>
+		/// Starts all instances of the Plugin
+		/// </summary>
+		public override async Task StartAsync()
         {
-            foreach (CommandProcessor p in Processors)
+            foreach (CommandProcessor p in processors)
             {
                 AttachedBot.OnMessageReceive += p.MessageReceived;
             }
-
             await base.StartAsync();
         }
 
+		/// <summary>
+		/// Stops all instances of the Plugin
+		/// </summary>
         public override async Task StopAsync()
         {
-            foreach (CommandProcessor p in Processors)
+            foreach (CommandProcessor p in processors)
             {
                 AttachedBot.OnMessageReceive -= p.MessageReceived;
             }
-
             await base.StopAsync();
         }
     }

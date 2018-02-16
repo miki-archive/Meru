@@ -13,7 +13,7 @@ namespace Meru.Commands
 {
     public class CommandProcessor
     {
-        public Prefix DefaultPrefix => _prefixes[0];
+        public Prefix DefaultPrefix => prefixes[0];
 
         public event Func<Command, Task<bool>> OnPreCommandExecute;
         public event Func<Command, Task> OnPreCommandFailure; 
@@ -23,7 +23,7 @@ namespace Meru.Commands
         public readonly CommandEntity hierarchyRoot = new CommandEntity();
         protected readonly Dictionary<string, Command> cachedCommands = new Dictionary<string, Command>();
 
-        private readonly List<Prefix> _prefixes = new List<Prefix>();
+        private readonly List<Prefix> prefixes = new List<Prefix>();
 		private CommandProcessorConfiguration config;
 
         public CommandProcessor(CommandProcessorConfiguration config)
@@ -41,22 +41,27 @@ namespace Meru.Commands
 			{
 				if(config.DefaultPrefix != "")
 				{
-					_prefixes.Add(new Prefix(config.DefaultPrefix)
+					prefixes.Add(new Prefix(config.DefaultPrefix)
 					{
 						Configurable = config.DefaultConfigurable
 					});
 				}
-				_prefixes.Add(new MentionPrefix());
+				prefixes.Add(new MentionPrefix());
 			}
 			else
 			{
-				_prefixes.Add(new Prefix(config.DefaultPrefix)
+				prefixes.Add(new Prefix(config.DefaultPrefix)
 				{
 					Configurable = config.DefaultConfigurable
 				});
 			}
 		}
 
+		/// <summary>
+		/// Gets your command by querying it through modules.
+		/// </summary>
+		/// <param name="query">Query, e.g. "moderation.kick" leads to a kick command in the moderation module.</param>
+		/// <returns></returns>
 		public Command GetCommand(string query)
 		{
 			return GetCommand(hierarchyRoot, query) as Command;
@@ -82,6 +87,10 @@ namespace Meru.Commands
 			return GetCommand(entity, newQuery);
 		}
 
+		/// <summary>
+		/// Message receive event, handles commands
+		/// </summary>
+		/// <param name="message">IMessage object from any IBotProvider</param>
 		public async Task MessageReceived(IMessage message)
         {
 			try
@@ -92,7 +101,7 @@ namespace Meru.Commands
 				if (message.Author.IsSelf && config.IgnoreSelf)
 					return;
 
-				foreach (Prefix p in _prefixes)
+				foreach (Prefix p in prefixes)
 				{
 					if (await p.MatchesAsync(message))
 					{
@@ -104,7 +113,7 @@ namespace Meru.Commands
 
 						string command = content
 							.Split(' ')[0]
-							.ToLower();
+							.ToLowerInvariant();
 
 						string arguments = content
 							.Substring(command.Length)
@@ -129,10 +138,10 @@ namespace Meru.Commands
 							Stopwatch timeTaken = Stopwatch.StartNew();
 							bool success = false;
 
-							CommandEventArgs args = new CommandEventArgs()
+							CommandEventArgs args = new CommandEventArgs
 							{
 								Message = message,
-								Arguments = arguments.ToLower(),
+								Arguments = arguments,
 								Processor = this,
 								PrefixUsed = p
 							};
