@@ -9,8 +9,6 @@ namespace Meru
 {
     public partial class Bot : BaseExtendablePlugin, IBot
     {
-        public bool IsRunning { get; private set; }
-
         private readonly List<IBotProvider> providers = new List<IBotProvider>();
 
 		private List<IRunnable> allRunnables
@@ -24,47 +22,66 @@ namespace Meru
             }
         }
 
+		/// <summary>
+		/// Add a provider for the bot to listen to
+		/// </summary>
+		/// <param name="provider">a provider wrapped into IBotProvider</param>
         public void AddProvider(IBotProvider provider)
         {
-			provider.OnMessageReceive += MessageReceive;
-            provider.OnMessageEdit += async (m) =>
-            {
-                await OnMessageEdit?.Invoke(m);
-            };
-            provider.OnMessageDelete += async (m) =>
-            {
-                await OnMessageDelete?.Invoke(m);
-            };
+			provider.OnMessageReceive += OnMessageReceive;
+			provider.OnMessageEdit += OnMessageEdit;
+			provider.OnMessageDelete += OnMessageDelete;
 
             providers.Add(provider);
         }
 
+		/// <summary>
+		/// Starts the bot and all modules
+		/// </summary>
         public override async Task StartAsync()
         {
             foreach (IRunnable runnable in allRunnables)
             {
                 await runnable.StartAsync();
             }
-        }
 
+			await base.StartAsync();
+		}
+
+		/// <summary>
+		/// Stops the bot and all modules
+		/// </summary>
         public override async Task StopAsync()
         {
             foreach (IRunnable runnable in allRunnables)
             {
                 await runnable.StopAsync();
             }
-        }
 
-		private async Task MessageReceive(IMessage msg)
-		{
-			try
-			{
-				await OnMessageReceive.Invoke(msg);
-			}
-			catch(Exception e)
-			{
-				Console.WriteLine(e.Message);
-			}
-		}
+			await base.StopAsync();
+        }
+	}
+
+	/// <summary>
+	/// Events
+	/// </summary>
+	public partial class Bot
+	{
+		public event Func<Task> OnBotStart;
+		public event Func<Task> OnBotStop;
+
+		public event Func<IMessage, Task> OnMessageDelete;
+		public event Func<IMessage, Task> OnMessageEdit;
+		public event Func<IMessage, Task> OnMessageReceive;
+
+		public event Func<IGuild, Task> OnGuildCreate;
+		public event Func<IGuild, Task> OnGuildUpdate;
+		public event Func<IUser, Task> OnGuildMemberAdd;
+		public event Func<IUser, Task> OnGuildMemberRemove;
+		public event Func<IUser, Task> OnGuildMemberUpdate;
+		public event Func<IUser, Task> OnUserUpdate;
+
+		public event Func<IBotProvider, Task> OnProviderConnect;
+		public event Func<IBotProvider, Task> OnProviderDisconnect;
 	}
 }
