@@ -15,18 +15,18 @@ Plain: planned<br>
 
 - Fully modular
 	* Backend interfacing
-	* **Plugin support**
+	* ~~Plugin support~~
 - Multiplatform
-	- **Windows**
-	- **Linux**
-	- **OSX**
+	- ~~Windows~~
+	- ~~Linux~~
+	- ~~OSX~~
 - Multiplatform
-	- **Discord**
+	- ~~Discord~~
 	- **Slack**
 	- Twitch
 - Built in systems
-	- **Command handling**
+	- ~~Command handling~~
 	- Context creation
-	- Database friendly
+	- ~~Database friendly~~
 	- GUI friendly
-	- Permissions per entity
+	- ~~Permissions per entity~~
